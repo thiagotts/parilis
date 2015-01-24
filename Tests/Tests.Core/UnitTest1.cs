@@ -8,6 +8,6 @@ namespace Tests.Core {
         public void T() {
             Assert.Inconclusive("Escrever teste.");
         }
-      
+
     }
 }

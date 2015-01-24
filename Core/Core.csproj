@@ -39,7 +39,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Descriptions\TableDescription.cs" />
+    <Compile Include="Descriptions\ColumnDescription.cs" />
+    <Compile Include="Interfaces\IColumn.cs" />
+    <Compile Include="Interfaces\IConstraint.cs" />
+    <Compile Include="Interfaces\ISchema.cs" />
+    <Compile Include="Interfaces\ITable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
