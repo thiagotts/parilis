@@ -13,13 +13,13 @@ namespace Tests.Core {
         protected Database Database;
 
         [TestFixtureSetUp]
-        public void IniciarClasse() {
+        public void InitializeClass() {
             InitializeServer();
             Database = CreateDatabase();
         }
 
         [TestFixtureTearDown]
-        public void FinalizarClasse() {
+        public void FinishClass() {
             if (Database != null && server.Databases.Contains(DatabaseName)) {
                 Database.Drop();
             }

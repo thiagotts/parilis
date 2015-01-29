@@ -1,5 +1,6 @@
 ﻿using System;
 using Core.Descriptions;
+using Core.Exceptions;
 using Core.Interfaces;
 using Microsoft.SqlServer.Management.Smo;
 
@@ -12,7 +13,18 @@ namespace SqlServer {
         }
 
         public void CreatePrimaryKey(PrimaryKeyDescription primaryKeyDescription) {
-            throw new NotImplementedException();
+            var sqlServerDatabase = new SqlServerDatabase(database);
+            var primaryKey = sqlServerDatabase.GetPrimaryKey(new TableDescription {
+                                                                                      Schema = primaryKeyDescription.Schema,
+                                                                                      Name = primaryKeyDescription.TableName
+                                                                                  });
+
+            if (primaryKey != null) throw new MultiplePrimaryKeysException();
+
+            database.ExecuteNonQuery(string.Format(@"
+                ALTER TABLE {0}
+                ADD CONSTRAINT {1} PRIMARY KEY ({2})",
+                primaryKeyDescription.TableName, primaryKeyDescription.Name, string.Join(",", primaryKeyDescription.ColumnNames)));
         }
 
         public void RemovePrimaryKey(ConstraintDescription primaryKeyDescription) {

@@ -9,7 +9,7 @@ namespace Tests.SqlServer {
     public class SqlServerDatabaseTests : DatabaseTest {
 
         [TearDown]
-        public void FinalizarTeste() {
+        public void FinishTest() {
             var table = Database.Tables["TEST_TABLE"];
             if(table != null) table.Drop();
         }
