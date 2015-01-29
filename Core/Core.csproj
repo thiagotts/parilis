@@ -39,11 +39,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Descriptions\ConstraintDescription.cs" />
+    <Compile Include="Descriptions\DefaultDescription.cs" />
+    <Compile Include="Descriptions\ForeignKeyDescription.cs" />
+    <Compile Include="Descriptions\IndexDescription.cs" />
+    <Compile Include="Descriptions\PrimaryKeyDescription.cs" />
     <Compile Include="Descriptions\TableDescription.cs" />
     <Compile Include="Descriptions\ColumnDescription.cs" />
+    <Compile Include="Descriptions\UniqueDescription.cs" />
     <Compile Include="Interfaces\IColumn.cs" />
     <Compile Include="Interfaces\IConstraint.cs" />
+    <Compile Include="Interfaces\IIndex.cs" />
     <Compile Include="Interfaces\ISchema.cs" />
+    <Compile Include="Interfaces\IDatabase.cs" />
     <Compile Include="Interfaces\ITable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

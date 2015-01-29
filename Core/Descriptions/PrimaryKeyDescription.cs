@@ -2,6 +2,6 @@
 
 namespace Core.Descriptions {
     public class PrimaryKeyDescription : ConstraintDescription {
-        public IEnumerable<string> ColumnNames { get; set; }
+        public IList<string> ColumnNames { get; set; }
     }
 }
