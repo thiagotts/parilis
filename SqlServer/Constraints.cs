@@ -31,7 +31,7 @@ namespace SqlServer {
                 primaryKeyDescription.TableName, primaryKeyDescription.Name, string.Join(",", primaryKeyDescription.ColumnNames)));
         }
 
-        public void RemovePrimaryKey(ConstraintDescription primaryKeyDescription) {
+        public void RemovePrimaryKey(PrimaryKeyDescription primaryKeyDescription) {
             var sqlServerDatabase = new SqlServerDatabase(database);
             var primaryKey = sqlServerDatabase.GetPrimaryKey(primaryKeyDescription.Name, primaryKeyDescription.Schema);
             if (primaryKey == null) throw new ConstraintNotFoundException();

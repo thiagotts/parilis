@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Core.Descriptions;
 using Core.Exceptions;
 using NUnit.Framework;
@@ -174,5 +175,57 @@ namespace Tests.SqlServer {
             var constraints = new Constraints(Database);
             Assert.Throws<ReferencedConstraintException>(() => constraints.RemovePrimaryKey(primaryKey));
         }
+
+        [Test]
+        public void WhenTargetTableDoesNotHaveAForeignKeyWithTheSameName_CreateMethodMustCreateTheForeignKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
+
+            var constraints = new Constraints(Database);
+            constraints.CreateForeignKey(new ForeignKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "FK_TEST",
+                ColumnName = "id_fk",
+                ReferenceColumn = new ColumnDescription {
+                    Schema = "dbo",
+                    TableName = "TEST_TABLE",
+                    Name = "id"
+                }
+            });
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2"});
+
+            Assert.AreEqual(1, foreignKeys.Count);
+            Assert.AreEqual("FK_TEST", foreignKeys.Single().Name);
+        }
+
+        [Test]
+        public void WhenTargetTableAlreadyHasAForeignKeyWithTheSameName_CreateMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void WhenForeignKeysReferencesAnInvalidColumn_CreateMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void WhenForeignKeysReferencesAColumnThatDoesNotExist_CreateMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void WhenForeignKeysReferencesATableThatDoesNotExist_CreateMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
     }
 }

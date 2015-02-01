@@ -3,7 +3,7 @@
 namespace Core.Interfaces {
     public interface IConstraint {
         void CreatePrimaryKey(PrimaryKeyDescription primaryKeyDescription);
-        void RemovePrimaryKey(ConstraintDescription primaryKeyDescription);
+        void RemovePrimaryKey(PrimaryKeyDescription primaryKeyDescription);
         void CreateForeignKey(ForeignKeyDescription foreignKeyDescription);
         void RemoveForeignKey(ConstraintDescription foreignKeyDescription);
         void CreateUnique(UniqueDescription uniqueDescription);

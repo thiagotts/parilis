@@ -61,8 +61,73 @@ namespace SqlServer {
             return primaryKey;
         }
 
-        public IList<ForeignKeyDescription> GetForeignKeysReferencing(ConstraintDescription primaryKeyDescription) {
-            var dataSet = RunSpFKeys(primaryKeyDescription);
+        public IList<ForeignKeyDescription> GetForeignKeys(TableDescription tableDescription) {
+            var dataSet = database.ExecuteWithResults(string.Format(@"
+                CREATE TABLE #TempTable (
+                 PKTABLE_QUALIFIER nvarchar(max),
+                 PKTABLE_OWNER nvarchar(max),
+                 PKTABLE_NAME nvarchar(max),
+                 PKCOLUMN_NAME nvarchar(max),
+                 FKTABLE_QUALIFIER nvarchar(max),
+                 FKTABLE_OWNER nvarchar(max),
+                 FKTABLE_NAME nvarchar(max),
+                 FKCOLUMN_NAME nvarchar(max),
+                 KEY_SEQ nvarchar(max),
+                 UPDATE_RULE nvarchar(max),
+                 DELETE_RULE nvarchar(max),  
+                 FK_NAME nvarchar(max),
+                 PK_NAME nvarchar(max),
+                 DEFERRABILITY nvarchar(max))                 
+                INSERT INTO #TempTable
+                EXEC sp_fkeys @fktable_name = N'{0}', @fktable_owner = N'{1}'                
+                SELECT FK_NAME, FKCOLUMN_NAME, PKCOLUMN_NAME, FKTABLE_OWNER, FKTABLE_NAME
+                FROM #TempTable
+                DROP TABLE #TempTable
+                ",
+                tableDescription.Name, tableDescription.Schema));
+
+            var foreignKeys = new List<ForeignKeyDescription>();
+            var results = GetResults(dataSet);
+            if (!results.Any()) return foreignKeys;
+
+            foreach (var result in results) {
+                foreignKeys.Add(new ForeignKeyDescription {
+                    Name = result[0],
+                    ColumnName = result[1],
+                    Schema = tableDescription.Schema,
+                    TableName = tableDescription.Name
+                });
+            }
+
+            return foreignKeys;
+        }
+
+        public IList<ForeignKeyDescription> GetForeignKeysReferencing(PrimaryKeyDescription primaryKeyDescription) {
+            var dataSet = database.ExecuteWithResults(string.Format(@"
+                CREATE TABLE #TempTable (
+                 PKTABLE_QUALIFIER nvarchar(max),
+                 PKTABLE_OWNER nvarchar(max),
+                 PKTABLE_NAME nvarchar(max),
+                 PKCOLUMN_NAME nvarchar(max),
+                 FKTABLE_QUALIFIER nvarchar(max),
+                 FKTABLE_OWNER nvarchar(max),
+                 FKTABLE_NAME nvarchar(max),
+                 FKCOLUMN_NAME nvarchar(max),
+                 KEY_SEQ nvarchar(max),
+                 UPDATE_RULE nvarchar(max),
+                 DELETE_RULE nvarchar(max),  
+                 FK_NAME nvarchar(max),
+                 PK_NAME nvarchar(max),
+                 DEFERRABILITY nvarchar(max))                 
+                INSERT INTO #TempTable
+                EXEC sp_fkeys @pktable_name = N'{0}', @pktable_owner = N'{1}'                
+                SELECT FKTABLE_OWNER, FKTABLE_NAME, FK_NAME, FKCOLUMN_NAME, PKCOLUMN_NAME
+                FROM #TempTable
+                WHERE PK_NAME = '{2}'
+                DROP TABLE #TempTable
+                ",
+                primaryKeyDescription.TableName, primaryKeyDescription.Schema, primaryKeyDescription.Name));
+
             var foreignKeys = new List<ForeignKeyDescription>();
 
             var results = GetResults(dataSet);
@@ -107,33 +172,6 @@ namespace SqlServer {
             }
 
             return results;
-        }
-
-        private DataSet RunSpFKeys(ConstraintDescription primeKeyDescription) {
-            return database.ExecuteWithResults(string.Format(@"
-                CREATE TABLE #TempTable (
-                 PKTABLE_QUALIFIER nvarchar(max),
-                 PKTABLE_OWNER nvarchar(max),
-                 PKTABLE_NAME nvarchar(max),
-                 PKCOLUMN_NAME nvarchar(max),
-                 FKTABLE_QUALIFIER nvarchar(max),
-                 FKTABLE_OWNER nvarchar(max),
-                 FKTABLE_NAME nvarchar(max),
-                 FKCOLUMN_NAME nvarchar(max),
-                 KEY_SEQ nvarchar(max),
-                 UPDATE_RULE nvarchar(max),
-                 DELETE_RULE nvarchar(max),  
-                 FK_NAME nvarchar(max),
-                 PK_NAME nvarchar(max),
-                 DEFERRABILITY nvarchar(max))                 
-                INSERT INTO #TempTable
-                EXEC sp_fkeys @pktable_name = N'{0}', @pktable_owner = N'{1}'                
-                SELECT FKTABLE_OWNER, FKTABLE_NAME, FK_NAME, FKCOLUMN_NAME, PKCOLUMN_NAME
-                FROM #TempTable
-                WHERE PK_NAME = '{2}'
-                DROP TABLE #TempTable
-                ",
-                primeKeyDescription.TableName, primeKeyDescription.Schema, primeKeyDescription.Name));
         }
     }
 }
