@@ -16,10 +16,10 @@ namespace Tests.SqlServer {
 
         [TearDown]
         public void FinishTest() {
-            var table = Database.Tables["TEST_TABLE"];
+            var table = Database.Tables["TEST_TABLE_2"];
             if (table != null) table.Drop();
 
-            table = Database.Tables["TEST_TABLE_2"];
+            table = Database.Tables["TEST_TABLE"];
             if (table != null) table.Drop();
         }
 
@@ -109,6 +109,70 @@ namespace Tests.SqlServer {
             Assert.IsNotNull(result);
             Assert.AreEqual("PK_dbo_TEST_TABLE_id", result.Name);
             Assert.AreEqual("dbo", result.Schema);
+        }
+
+        [Test]
+        public void WhenPrimaryKeyDoesNotExist_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            var primaryKey = new PrimaryKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "PK_TEST",
+                ColumnNames = new List<string> {"id"}
+            };
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<ConstraintNotFoundException>(() => constraints.RemovePrimaryKey(primaryKey));
+        }
+
+        [Test]
+        public void WhenPrimaryKeyExistsAndNoOtherKeyReferencesIt_RemoveMethodMustRemoveThePrimaryKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            var primaryKey = new PrimaryKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "PK_dbo_TEST_TABLE_id",
+                ColumnNames = new List<string> { "id" }
+            };
+
+            var constraints = new Constraints(Database);
+            constraints.RemovePrimaryKey(primaryKey);
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            Assert.IsNull(sqlServerDatabase.GetPrimaryKey(primaryKey.Name, primaryKey.Schema));
+        }
+
+        [Test]
+        public void WhenPrimaryKeyExistsAndOtherKeyReferencesIt_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_dbo_TEST_TABLE_id FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+            var primaryKey = new PrimaryKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "PK_dbo_TEST_TABLE_id",
+                ColumnNames = new List<string> { "id" }
+            };
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<ReferencedConstraintException>(() => constraints.RemovePrimaryKey(primaryKey));
         }
     }
 }

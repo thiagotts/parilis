@@ -15,7 +15,13 @@ namespace Tests.SqlServer {
 
         [TearDown]
         public void FinishTest() {
-            var table = Database.Tables["TEST_TABLE"];
+            var table = Database.Tables["TEST_TABLE_3"];
+            if (table != null) table.Drop();
+
+            table = Database.Tables["TEST_TABLE_2"];
+            if (table != null) table.Drop();
+
+            table = Database.Tables["TEST_TABLE"];
             if (table != null) table.Drop();
         }
 
@@ -103,5 +109,49 @@ namespace Tests.SqlServer {
             Assert.AreEqual("PK_TEST", result.Name);
             Assert.AreEqual("testschema", result.Schema);
         }
+
+        [Test]
+        public void WhenThereIsNoForeignKeysReferencingTheTable_GetForeignKeysReferencingTheTableMustReturnAnEmptyList() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST PRIMARY KEY (id))");
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetForeignKeysReferencing(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Any());
+        }
+
+        [Test]
+        public void WhenThereAreForeignKeysReferencingTheTable_GetForeignKeysReferencingTheTableMustReturnAListWithTheCorrespondingItens() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST_1 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_3](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_3_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST_2 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetForeignKeysReferencing(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2 , result.Count);
+            Assert.IsTrue(result.Any(key => key.Name.Equals("FK_TEST_1")));
+            Assert.IsTrue(result.Any(key => key.Name.Equals("FK_TEST_2")));
+        }
+      
     }
 }

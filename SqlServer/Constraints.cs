@@ -31,7 +31,12 @@ namespace SqlServer {
         }
 
         public void RemovePrimaryKey(ConstraintDescription primaryKeyDescription) {
-            throw new NotImplementedException();
+            var sqlServerDatabase = new SqlServerDatabase(database);
+            var primaryKey = sqlServerDatabase.GetPrimaryKey(primaryKeyDescription.Name, primaryKeyDescription.Schema);
+            if (primaryKey == null) throw new ConstraintNotFoundException();
+
+            database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
+                primaryKeyDescription.Schema, primaryKeyDescription.TableName, primaryKeyDescription.Name));
         }
 
         public void CreateForeignKey(ForeignKeyDescription foreignKeyDescription) {
