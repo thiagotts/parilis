@@ -61,8 +61,8 @@ namespace SqlServer {
             return primaryKey;
         }
 
-        public IList<ForeignKeyDescription> GetForeignKeysReferencing(TableDescription tableDescription) {
-            var dataSet = RunSpFKeys(tableDescription.Name, tableDescription.Schema);
+        public IList<ForeignKeyDescription> GetForeignKeysReferencing(ConstraintDescription primaryKeyDescription) {
+            var dataSet = RunSpFKeys(primaryKeyDescription);
             var foreignKeys = new List<ForeignKeyDescription>();
 
             var results = GetResults(dataSet);
@@ -77,8 +77,8 @@ namespace SqlServer {
                     ReferenceColumn = new ColumnDescription {
                         Name = result[4],
                         AllowsNull = false,
-                        Schema = tableDescription.Schema,
-                        TableName = tableDescription.Name
+                        Schema = primaryKeyDescription.Schema,
+                        TableName = primaryKeyDescription.TableName
                     }
                 });
             }
@@ -109,7 +109,7 @@ namespace SqlServer {
             return results;
         }
 
-        private DataSet RunSpFKeys(string tableName, string schema) {
+        private DataSet RunSpFKeys(ConstraintDescription primeKeyDescription) {
             return database.ExecuteWithResults(string.Format(@"
                 CREATE TABLE #TempTable (
                  PKTABLE_QUALIFIER nvarchar(max),
@@ -129,10 +129,11 @@ namespace SqlServer {
                 INSERT INTO #TempTable
                 EXEC sp_fkeys @pktable_name = N'{0}', @pktable_owner = N'{1}'                
                 SELECT FKTABLE_OWNER, FKTABLE_NAME, FK_NAME, FKCOLUMN_NAME, PKCOLUMN_NAME
-                FROM #TempTable                
+                FROM #TempTable
+                WHERE PK_NAME = '{2}'
                 DROP TABLE #TempTable
                 ",
-                tableName, schema));
+                primeKeyDescription.TableName, primeKeyDescription.Schema, primeKeyDescription.Name));
         }
     }
 }

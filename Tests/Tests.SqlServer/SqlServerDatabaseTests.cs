@@ -111,24 +111,28 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void WhenThereIsNoForeignKeysReferencingTheTable_GetForeignKeysReferencingTheTableMustReturnAnEmptyList() {
+        public void WhenThereIsNoForeignKeysReferencingThePrimaryKey_GetForeignKeysReferencingThePrimaryKeyMustReturnAnEmptyList() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_TEST PRIMARY KEY (id))");
 
             var sqlServerDatabase = new SqlServerDatabase(Database);
-            var result = sqlServerDatabase.GetForeignKeysReferencing(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
+            var result = sqlServerDatabase.GetForeignKeysReferencing(new PrimaryKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "PK_TEST"
+            });
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Any());
         }
 
         [Test]
-        public void WhenThereAreForeignKeysReferencingTheTable_GetForeignKeysReferencingTheTableMustReturnAListWithTheCorrespondingItens() {
+        public void WhenThereAreForeignKeysReferencingThePrimaryKey_GetForeignKeysReferencingThePrimaryKeyMustReturnAListWithTheCorrespondingItens() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL,
-                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+                CONSTRAINT PK_TEST PRIMARY KEY (id))");
 
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
                 [id] [bigint] NOT NULL,
@@ -145,13 +149,16 @@ namespace Tests.SqlServer {
                 CONSTRAINT FK_TEST_2 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
 
             var sqlServerDatabase = new SqlServerDatabase(Database);
-            var result = sqlServerDatabase.GetForeignKeysReferencing(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            var result = sqlServerDatabase.GetForeignKeysReferencing(new PrimaryKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "PK_TEST"
+            });
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2 , result.Count);
             Assert.IsTrue(result.Any(key => key.Name.Equals("FK_TEST_1")));
             Assert.IsTrue(result.Any(key => key.Name.Equals("FK_TEST_2")));
         }
-      
     }
 }

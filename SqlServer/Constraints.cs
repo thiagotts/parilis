@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
@@ -34,6 +35,9 @@ namespace SqlServer {
             var sqlServerDatabase = new SqlServerDatabase(database);
             var primaryKey = sqlServerDatabase.GetPrimaryKey(primaryKeyDescription.Name, primaryKeyDescription.Schema);
             if (primaryKey == null) throw new ConstraintNotFoundException();
+
+            var foreignKeys = sqlServerDatabase.GetForeignKeysReferencing(primaryKeyDescription);
+            if(foreignKeys.Any()) throw new ReferencedConstraintException();
 
             database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
                 primaryKeyDescription.Schema, primaryKeyDescription.TableName, primaryKeyDescription.Name));
