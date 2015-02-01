@@ -21,6 +21,9 @@ namespace SqlServer {
 
             if (primaryKey != null) throw new MultiplePrimaryKeysException();
 
+            primaryKey = sqlServerDatabase.GetPrimaryKey(primaryKeyDescription.Name, primaryKeyDescription.Schema);
+            if (primaryKey != null) throw new InvalidConstraintNameException();
+
             database.ExecuteNonQuery(string.Format(@"
                 ALTER TABLE {0}
                 ADD CONSTRAINT {1} PRIMARY KEY ({2})",

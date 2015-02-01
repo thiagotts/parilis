@@ -47,6 +47,7 @@
     <Compile Include="Descriptions\TableDescription.cs" />
     <Compile Include="Descriptions\ColumnDescription.cs" />
     <Compile Include="Descriptions\UniqueDescription.cs" />
+    <Compile Include="Exceptions\InvalidConstraintNameException.cs" />
     <Compile Include="Exceptions\MultiplePrimaryKeysException.cs" />
     <Compile Include="Interfaces\IColumn.cs" />
     <Compile Include="Interfaces\IConstraint.cs" />
