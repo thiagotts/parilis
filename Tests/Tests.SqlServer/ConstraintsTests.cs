@@ -12,6 +12,9 @@ namespace Tests.SqlServer {
         public void FinishTest() {
             var table = Database.Tables["TEST_TABLE"];
             if (table != null) table.Drop();
+
+            table = Database.Tables["TEST_TABLE_2"];
+            if (table != null) table.Drop();
         }
 
         [Test]
@@ -21,11 +24,11 @@ namespace Tests.SqlServer {
                 [description] [nvarchar](max) NULL)");
 
             var primaryKey = new PrimaryKeyDescription {
-                                                           Schema = "dbo",
-                                                           TableName = "TEST_TABLE",
-                                                           Name = "PK_dbo_TEST_TABLE",
-                                                           ColumnNames = new List<string> {"id"}
-                                                       };
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "PK_dbo_TEST_TABLE",
+                ColumnNames = new List<string> {"id"}
+            };
 
             var constraints = new Constraints(Database);
             constraints.CreatePrimaryKey(primaryKey);
@@ -43,11 +46,11 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
             var primaryKey = new PrimaryKeyDescription {
-                                                           Schema = "dbo",
-                                                           TableName = "TEST_TABLE",
-                                                           Name = "PK_dbo_TEST_TABLE",
-                                                           ColumnNames = new List<string> {"id"}
-                                                       };
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "PK_dbo_TEST_TABLE",
+                ColumnNames = new List<string> {"id"}
+            };
 
             var constraints = new Constraints(Database);
             Assert.Throws<MultiplePrimaryKeysException>(() => constraints.CreatePrimaryKey(primaryKey));
@@ -55,7 +58,24 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenAnotherTableWithinTheSameSchemaHasAPrimaryKeyWithTheSameName_CreateMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            var primaryKey = new PrimaryKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "PK_dbo_TEST_TABLE_id",
+                ColumnNames = new List<string> {"id"}
+            };
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<MultiplePrimaryKeysException>(() => constraints.CreatePrimaryKey(primaryKey));
         }
 
         [Test]

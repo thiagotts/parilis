@@ -13,7 +13,7 @@ namespace Tests.Core {
         protected Database Database;
 
         [TestFixtureSetUp]
-        public void InitializeClass() {
+        public virtual void InitializeClass() {
             InitializeServer();
             Database = CreateDatabase();
         }

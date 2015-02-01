@@ -7,11 +7,16 @@ using Tests.Core;
 namespace Tests.SqlServer {
     [TestFixture]
     public class SqlServerDatabaseTests : DatabaseTest {
+        [TestFixtureSetUp]
+        public override void InitializeClass() {
+            base.InitializeClass();
+            Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
+        }
 
         [TearDown]
         public void FinishTest() {
             var table = Database.Tables["TEST_TABLE"];
-            if(table != null) table.Drop();
+            if (table != null) table.Drop();
         }
 
         [Test]
@@ -21,8 +26,8 @@ namespace Tests.SqlServer {
                 [description] [nvarchar](max) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-            SqlServerDatabase sqlServerDatabase = new SqlServerDatabase(Database);
-            var result = sqlServerDatabase.GetPrimaryKey(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.IsNotNull(result);
             Assert.AreEqual("dbo", result.Schema);
@@ -40,8 +45,8 @@ namespace Tests.SqlServer {
                 [description] [nvarchar](max) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id, id2))");
 
-            SqlServerDatabase sqlServerDatabase = new SqlServerDatabase(Database);
-            var result = sqlServerDatabase.GetPrimaryKey(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.IsNotNull(result);
             Assert.AreEqual("dbo", result.Schema);
@@ -58,10 +63,45 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL)");
 
-            SqlServerDatabase sqlServerDatabase = new SqlServerDatabase(Database);
+            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.IsNull(result);
+        }
+
+        [Test]
+        public void WhenThereIsNotAPrimaryKeyWithTheSpecifiedName_MustReturnNull() {
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetPrimaryKey("PK_TEST");
+
+            Assert.IsNull(result);
+        }
+
+        [Test]
+        public void WhenThereIsAPrimaryKeyWithTheSpecifiedName_MustReturnThePrimaryKeyDescription() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST PRIMARY KEY (id))");
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetPrimaryKey("PK_TEST");
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("PK_TEST", result.Name);
+        }
+
+        [Test]
+        public void WhenThereIsAPrimaryKeyWithTheSpecifiedNameInAnotherSchema_MustReturnThePrimaryKeyDescription() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST PRIMARY KEY (id))");
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetPrimaryKey("PK_TEST", "testschema");
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("PK_TEST", result.Name);
+            Assert.AreEqual("testschema", result.Schema);
         }
     }
 }

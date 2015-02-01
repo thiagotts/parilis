@@ -15,9 +15,9 @@ namespace SqlServer {
         public void CreatePrimaryKey(PrimaryKeyDescription primaryKeyDescription) {
             var sqlServerDatabase = new SqlServerDatabase(database);
             var primaryKey = sqlServerDatabase.GetPrimaryKey(new TableDescription {
-                                                                                      Schema = primaryKeyDescription.Schema,
-                                                                                      Name = primaryKeyDescription.TableName
-                                                                                  });
+                Schema = primaryKeyDescription.Schema,
+                Name = primaryKeyDescription.TableName
+            });
 
             if (primaryKey != null) throw new MultiplePrimaryKeysException();
 
