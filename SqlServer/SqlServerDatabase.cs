@@ -93,7 +93,7 @@ namespace SqlServer {
             foreach (var result in results) {
                 foreignKeys.Add(new ForeignKeyDescription {
                     Name = result[0],
-                    ColumnName = result[1],
+                    Columns = new Dictionary<string, ColumnDescription> {{result[1], null}},
                     Schema = tableDescription.Schema,
                     TableName = tableDescription.Name
                 });
@@ -138,12 +138,16 @@ namespace SqlServer {
                     Schema = result[0],
                     TableName = result[1],
                     Name = result[2],
-                    ColumnName = result[3],
-                    ReferenceColumn = new ColumnDescription {
-                        Name = result[4],
-                        AllowsNull = false,
-                        Schema = primaryKeyDescription.Schema,
-                        TableName = primaryKeyDescription.TableName
+                    Columns = new Dictionary<string, ColumnDescription> {
+                        {
+                            result[3],
+                            new ColumnDescription {
+                                Name = result[4],
+                                AllowsNull = false,
+                                Schema = primaryKeyDescription.Schema,
+                                TableName = primaryKeyDescription.TableName
+                            }
+                        }
                     }
                 });
             }

@@ -44,7 +44,23 @@ namespace SqlServer {
         }
 
         public void CreateForeignKey(ForeignKeyDescription foreignKeyDescription) {
-            throw new NotImplementedException();
+            var sqlServerDatabase = new SqlServerDatabase(database);
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = foreignKeyDescription.Schema, Name = foreignKeyDescription.TableName});
+            
+            if(foreignKeys.Any(key => key.Name.Equals(foreignKeyDescription.Name, StringComparison.InvariantCultureIgnoreCase)))
+                throw new InvalidConstraintNameException();
+
+            var primaryKey = sqlServerDatabase.GetPrimaryKey(new TableDescription {
+                Schema = foreignKeyDescription.Columns.Values.First().Schema,
+                Name = foreignKeyDescription.Columns.Values.First().TableName
+            });
+
+            if (!primaryKey.ColumnNames.Any(c => c.Equals(foreignKeyDescription.Columns.Values.First().Name, StringComparison.InvariantCultureIgnoreCase)))
+                throw new InvalidReferenceColumnException();
+
+            database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD CONSTRAINT {2} FOREIGN KEY ({3}) REFERENCES {4}.{5}({6})",
+                foreignKeyDescription.Schema, foreignKeyDescription.TableName, foreignKeyDescription.Name, foreignKeyDescription.Columns.Values.First().Name,
+                foreignKeyDescription.Columns.Values.First().Schema, foreignKeyDescription.Columns.Values.First().TableName, foreignKeyDescription.Columns.Values.First().Name));
         }
 
         public void RemoveForeignKey(ConstraintDescription foreignKeyDescription) {

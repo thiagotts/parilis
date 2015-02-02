@@ -192,11 +192,15 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE_2",
                 Name = "FK_TEST",
-                ColumnName = "id_fk",
-                ReferenceColumn = new ColumnDescription {
-                    Schema = "dbo",
-                    TableName = "TEST_TABLE",
-                    Name = "id"
+                Columns = new Dictionary<string, ColumnDescription> {
+                    {
+                        "id_fk",
+                        new ColumnDescription {
+                            Schema = "dbo",
+                            TableName = "TEST_TABLE",
+                            Name = "id"
+                        }
+                    }
                 }
             });
 
@@ -209,11 +213,71 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenTargetTableAlreadyHasAForeignKeyWithTheSameName_CreateMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST FOREIGN KEY (id_fk) REFERENCES TEST_TABLE(id))");
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<InvalidConstraintNameException>(() => constraints.CreateForeignKey(new ForeignKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "FK_TEST",
+                Columns = new Dictionary<string, ColumnDescription> {
+                    {
+                        "id_fk",
+                        new ColumnDescription {
+                            Schema = "dbo",
+                            TableName = "TEST_TABLE",
+                            Name = "id"
+                        }
+                    }
+                }
+            }));
         }
 
         [Test]
         public void WhenForeignKeysReferencesAnInvalidColumn_CreateMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateForeignKey(new ForeignKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "FK_TEST",
+                Columns = new Dictionary<string, ColumnDescription> {
+                    {
+                        "id_fk",
+                        new ColumnDescription {
+                            Schema = "dbo",
+                            TableName = "TEST_TABLE",
+                            Name = "description"
+                        }
+                    }
+                }
+            }));
+        }
+
+        [Test]
+        public void WhenForeignKeyReferencesAComposedPrimaryKey_CreateMethodMustCreateTheForeignKey() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void WhenForeignKeyReferencesAColumnOfAComposedPrimaryKeyTwice_CreateMethodMustThrowException() {
             Assert.Inconclusive("Escrever teste.");
         }
 
