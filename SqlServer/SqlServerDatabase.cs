@@ -80,7 +80,7 @@ namespace SqlServer {
                  DEFERRABILITY nvarchar(max))                 
                 INSERT INTO #TempTable
                 EXEC sp_fkeys @fktable_name = N'{0}', @fktable_owner = N'{1}'                
-                SELECT FK_NAME, FKCOLUMN_NAME, PKCOLUMN_NAME, FKTABLE_OWNER, FKTABLE_NAME
+                SELECT FK_NAME, FKCOLUMN_NAME, PKCOLUMN_NAME, FKTABLE_OWNER, FKTABLE_NAME, PKTABLE_NAME, PKTABLE_OWNER
                 FROM #TempTable
                 DROP TABLE #TempTable
                 ",
@@ -91,12 +91,20 @@ namespace SqlServer {
             if (!results.Any()) return foreignKeys;
 
             foreach (var result in results) {
-                foreignKeys.Add(new ForeignKeyDescription {
-                    Name = result[0],
-                    Columns = new Dictionary<string, ColumnDescription> {{result[1], null}},
-                    Schema = tableDescription.Schema,
-                    TableName = tableDescription.Name
-                });
+                ForeignKeyDescription foreignKey;
+                if (foreignKeys.Any(f => f.Name.Equals(result[0]))) {
+                    foreignKey = foreignKeys.Single(f => f.Name.Equals(result[0]));
+                }
+                else {
+                    foreignKey = new ForeignKeyDescription {Name = result[0], TableName = result[4], Schema = result[3], Columns = new Dictionary<string, ColumnDescription>()};
+                    foreignKeys.Add(foreignKey);
+                }
+
+                foreignKey.Columns.Add(new KeyValuePair<string, ColumnDescription>(result[1], new ColumnDescription {
+                    Name = result[2],
+                    TableName = result[5],
+                    Schema = result[6]
+                }));
             }
 
             return foreignKeys;

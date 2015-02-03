@@ -59,8 +59,9 @@ namespace SqlServer {
                 throw new InvalidReferenceColumnException();
 
             database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD CONSTRAINT {2} FOREIGN KEY ({3}) REFERENCES {4}.{5}({6})",
-                foreignKeyDescription.Schema, foreignKeyDescription.TableName, foreignKeyDescription.Name, foreignKeyDescription.Columns.Values.First().Name,
-                foreignKeyDescription.Columns.Values.First().Schema, foreignKeyDescription.Columns.Values.First().TableName, foreignKeyDescription.Columns.Values.First().Name));
+                foreignKeyDescription.Schema, foreignKeyDescription.TableName, foreignKeyDescription.Name,
+                string.Join(",", foreignKeyDescription.Columns.Keys), foreignKeyDescription.Columns.Values.First().Schema,
+                foreignKeyDescription.Columns.Values.First().TableName, string.Join(",", foreignKeyDescription.Columns.Values.Select(v => v.Name))));
         }
 
         public void RemoveForeignKey(ConstraintDescription foreignKeyDescription) {

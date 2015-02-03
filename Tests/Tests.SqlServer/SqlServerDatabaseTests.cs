@@ -162,7 +162,7 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void WhenTableHasForeignKeys_GetMethodMustReturnTheCorrespondingKeys() {
+        public void WhenTableHasOneForeignKey_GetMethodMustReturnTheCorrespondingKey() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_TEST PRIMARY KEY (id))");
@@ -178,6 +178,34 @@ namespace Tests.SqlServer {
 
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual("FK_TEST", result.Single().Name);
+        }
+
+        [Test]
+        public void WhenTableHasMoreThanOneForeignKeys_GetMethodMustReturnTheCorrespondingKeys() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST_1 PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST_2 PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_3](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                [id3] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST_3 PRIMARY KEY (id),
+                CONSTRAINT FK_TEST_1 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id),
+                CONSTRAINT FK_TEST_2 FOREIGN KEY (id3) REFERENCES TEST_TABLE_2(id))");
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE_3" });
+
+            Assert.AreEqual(2, result.Count);
+            Assert.AreEqual("FK_TEST_1", result.First().Name);
+            Assert.AreEqual("id2", result.First().Columns.Keys.Single());
+            Assert.AreEqual("FK_TEST_2", result.Last().Name);
+            Assert.AreEqual("id3", result.Last().Columns.Keys.Single());
         }
 
         [Test]

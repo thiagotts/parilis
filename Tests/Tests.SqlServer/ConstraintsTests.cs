@@ -141,7 +141,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                ColumnNames = new List<string> { "id" }
+                ColumnNames = new List<string> {"id"}
             };
 
             var constraints = new Constraints(Database);
@@ -169,7 +169,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                ColumnNames = new List<string> { "id" }
+                ColumnNames = new List<string> {"id"}
             };
 
             var constraints = new Constraints(Database);
@@ -273,7 +273,46 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenForeignKeyReferencesAComposedPrimaryKey_CreateMethodMustCreateTheForeignKey() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id, id2))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                [id_fk2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
+
+            var constraints = new Constraints(Database);
+            constraints.CreateForeignKey(new ForeignKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "FK_TEST",
+                Columns = new Dictionary<string, ColumnDescription> {
+                    {
+                        "id_fk",
+                        new ColumnDescription {
+                            Schema = "dbo",
+                            TableName = "TEST_TABLE",
+                            Name = "id"
+                        }
+                    }, {
+                        "id_fk2",
+                        new ColumnDescription {
+                            Schema = "dbo",
+                            TableName = "TEST_TABLE",
+                            Name = "id2"
+                        }
+                    }
+                }
+            });
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE_2" });
+
+            Assert.AreEqual(1, foreignKeys.Count);
+            Assert.AreEqual("FK_TEST", foreignKeys.Single().Name);
         }
 
         [Test]
@@ -290,6 +329,5 @@ namespace Tests.SqlServer {
         public void WhenForeignKeysReferencesATableThatDoesNotExist_CreateMethodMustThrowException() {
             Assert.Inconclusive("Escrever teste.");
         }
-
     }
 }
