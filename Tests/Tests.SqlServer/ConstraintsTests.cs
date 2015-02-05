@@ -309,7 +309,7 @@ namespace Tests.SqlServer {
             });
 
             var sqlServerDatabase = new SqlServerDatabase(Database);
-            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE_2" });
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2"});
 
             Assert.AreEqual(1, foreignKeys.Count);
             Assert.AreEqual("FK_TEST", foreignKeys.Single().Name);
@@ -424,6 +424,61 @@ namespace Tests.SqlServer {
                         }
                     }
                 }
+            }));
+        }
+
+        [Test]
+        public void WhenForeignKeyExists_RemoveMethodMustRemoveTheKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST FOREIGN KEY (id_fk) REFERENCES TEST_TABLE(id))");
+
+            var constraints = new Constraints(Database);
+            constraints.RemoveForeignKey(new ForeignKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "FK_TEST"
+            });
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE_2" });
+
+            Assert.AreEqual(0, foreignKeys.Count);
+        }
+
+        [Test]
+        public void WhenForeignKeysTableDoesNotExist_RemoveMethodMustThrowException() {
+            var constraints = new Constraints(Database);
+            Assert.Throws<ConstraintNotFoundException>(() => constraints.RemoveForeignKey(new ForeignKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "FK_TEST"
+            }));
+        }
+
+        [Test]
+        public void WhenForeignKeyDoesNotExist_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST FOREIGN KEY (id_fk) REFERENCES TEST_TABLE(id))");
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<ConstraintNotFoundException>(() => constraints.RemoveForeignKey(new ForeignKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "FK_TEST_2"
             }));
         }
     }

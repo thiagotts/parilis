@@ -7,14 +7,15 @@ using Microsoft.SqlServer.Management.Smo;
 
 namespace SqlServer {
     public class Constraints : IConstraint {
-        private Database database;
+        private readonly Database database;
+        private readonly SqlServerDatabase sqlServerDatabase;
 
         public Constraints(Database database) {
             this.database = database;
+            sqlServerDatabase = new SqlServerDatabase(database);
         }
 
         public void CreatePrimaryKey(PrimaryKeyDescription primaryKeyDescription) {
-            var sqlServerDatabase = new SqlServerDatabase(database);
             var primaryKey = sqlServerDatabase.GetPrimaryKey(new TableDescription {
                 Schema = primaryKeyDescription.Schema,
                 Name = primaryKeyDescription.TableName
@@ -32,7 +33,6 @@ namespace SqlServer {
         }
 
         public void RemovePrimaryKey(PrimaryKeyDescription primaryKeyDescription) {
-            var sqlServerDatabase = new SqlServerDatabase(database);
             var primaryKey = sqlServerDatabase.GetPrimaryKey(primaryKeyDescription.Name, primaryKeyDescription.Schema);
             if (primaryKey == null) throw new ConstraintNotFoundException();
 
@@ -47,11 +47,10 @@ namespace SqlServer {
             if (!DescriptionIsValid(foreignKeyDescription))
                 throw new InvalidDescriptionException();
 
-            var sqlServerDatabase = new SqlServerDatabase(database);
-            if (ThereIsAnotherForeignKeyWithTheSameName(foreignKeyDescription, sqlServerDatabase))
+            if (ThereIsAnotherForeignKeyWithTheSameName(foreignKeyDescription))
                 throw new InvalidConstraintNameException();
 
-            if (!ReferencedColumnsAreValid(foreignKeyDescription, sqlServerDatabase))
+            if (!ReferencedColumnsAreValid(foreignKeyDescription))
                 throw new InvalidReferenceColumnException();
 
             database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD CONSTRAINT {2} FOREIGN KEY ({3}) REFERENCES {4}.{5}({6})",
@@ -61,7 +60,18 @@ namespace SqlServer {
         }
 
         public void RemoveForeignKey(ConstraintDescription foreignKeyDescription) {
-            throw new NotImplementedException();
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {
+                Schema = foreignKeyDescription.Schema,
+                Name = foreignKeyDescription.TableName
+            });
+
+            if(!foreignKeys.Any(key => key.Schema.Equals(foreignKeyDescription.Schema) &&
+                key.TableName.Equals(foreignKeyDescription.TableName) &&
+                key.Name.Equals(foreignKeyDescription.Name)))
+                throw new ConstraintNotFoundException();
+
+            database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
+                foreignKeyDescription.Schema, foreignKeyDescription.TableName, foreignKeyDescription.Name));
         }
 
         public void CreateUnique(UniqueDescription uniqueDescription) {
@@ -92,7 +102,7 @@ namespace SqlServer {
             return true;
         }
 
-        private bool ThereIsAnotherForeignKeyWithTheSameName(ForeignKeyDescription foreignKeyDescription, SqlServerDatabase sqlServerDatabase) {
+        private bool ThereIsAnotherForeignKeyWithTheSameName(ForeignKeyDescription foreignKeyDescription) {
             var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {
                 Schema = foreignKeyDescription.Schema,
                 Name = foreignKeyDescription.TableName
@@ -101,7 +111,7 @@ namespace SqlServer {
             return foreignKeys.Any(key => key.Name.Equals(foreignKeyDescription.Name, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        private bool ReferencedColumnsAreValid(ForeignKeyDescription foreignKeyDescription, SqlServerDatabase sqlServerDatabase) {
+        private bool ReferencedColumnsAreValid(ForeignKeyDescription foreignKeyDescription) {
             foreach (var column in foreignKeyDescription.Columns.Values) {
                 var primaryKey = sqlServerDatabase.GetPrimaryKey(new TableDescription {
                     Schema = column.Schema,
