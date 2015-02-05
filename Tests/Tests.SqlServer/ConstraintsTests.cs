@@ -316,18 +316,115 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void WhenForeignKeyReferencesAColumnOfAComposedPrimaryKeyTwice_CreateMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+        public void WhenForeignKeyReferencesAColumnOfTheSameTableTwice_CreateMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id, id2))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                [id_fk2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<InvalidDescriptionException>(() => constraints.CreateForeignKey(new ForeignKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "FK_TEST",
+                Columns = new Dictionary<string, ColumnDescription> {
+                    {
+                        "id_fk",
+                        new ColumnDescription {
+                            Schema = "dbo",
+                            TableName = "TEST_TABLE",
+                            Name = "id"
+                        }
+                    }, {
+                        "id_fk2",
+                        new ColumnDescription {
+                            Schema = "dbo",
+                            TableName = "TEST_TABLE",
+                            Name = "id"
+                        }
+                    }
+                }
+            }));
         }
 
         [Test]
         public void WhenForeignKeysReferencesAColumnThatDoesNotExist_CreateMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                [id_fk2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateForeignKey(new ForeignKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "FK_TEST",
+                Columns = new Dictionary<string, ColumnDescription> {
+                    {
+                        "id_fk",
+                        new ColumnDescription {
+                            Schema = "dbo",
+                            TableName = "TEST_TABLE",
+                            Name = "id"
+                        }
+                    }, {
+                        "id_fk2",
+                        new ColumnDescription {
+                            Schema = "dbo",
+                            TableName = "TEST_TABLE",
+                            Name = "id2"
+                        }
+                    }
+                }
+            }));
         }
 
         [Test]
         public void WhenForeignKeysReferencesATableThatDoesNotExist_CreateMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                [id_fk2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateForeignKey(new ForeignKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "FK_TEST",
+                Columns = new Dictionary<string, ColumnDescription> {
+                    {
+                        "id_fk",
+                        new ColumnDescription {
+                            Schema = "dbo",
+                            TableName = "TEST_TABLE",
+                            Name = "id"
+                        }
+                    }, {
+                        "id_fk2",
+                        new ColumnDescription {
+                            Schema = "dbo",
+                            TableName = "TEST_TABLE_3",
+                            Name = "id"
+                        }
+                    }
+                }
+            }));
         }
     }
 }

@@ -37,25 +37,21 @@ namespace SqlServer {
             if (primaryKey == null) throw new ConstraintNotFoundException();
 
             var foreignKeys = sqlServerDatabase.GetForeignKeysReferencing(primaryKeyDescription);
-            if(foreignKeys.Any()) throw new ReferencedConstraintException();
+            if (foreignKeys.Any()) throw new ReferencedConstraintException();
 
             database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
                 primaryKeyDescription.Schema, primaryKeyDescription.TableName, primaryKeyDescription.Name));
         }
 
         public void CreateForeignKey(ForeignKeyDescription foreignKeyDescription) {
+            if (!DescriptionIsValid(foreignKeyDescription))
+                throw new InvalidDescriptionException();
+
             var sqlServerDatabase = new SqlServerDatabase(database);
-            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = foreignKeyDescription.Schema, Name = foreignKeyDescription.TableName});
-            
-            if(foreignKeys.Any(key => key.Name.Equals(foreignKeyDescription.Name, StringComparison.InvariantCultureIgnoreCase)))
+            if (ThereIsAnotherForeignKeyWithTheSameName(foreignKeyDescription, sqlServerDatabase))
                 throw new InvalidConstraintNameException();
 
-            var primaryKey = sqlServerDatabase.GetPrimaryKey(new TableDescription {
-                Schema = foreignKeyDescription.Columns.Values.First().Schema,
-                Name = foreignKeyDescription.Columns.Values.First().TableName
-            });
-
-            if (!primaryKey.ColumnNames.Any(c => c.Equals(foreignKeyDescription.Columns.Values.First().Name, StringComparison.InvariantCultureIgnoreCase)))
+            if (!ReferencedColumnsAreValid(foreignKeyDescription, sqlServerDatabase))
                 throw new InvalidReferenceColumnException();
 
             database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD CONSTRAINT {2} FOREIGN KEY ({3}) REFERENCES {4}.{5}({6})",
@@ -82,6 +78,41 @@ namespace SqlServer {
 
         public void RemoveDefault(ConstraintDescription defaultDescription) {
             throw new NotImplementedException();
+        }
+
+        private bool DescriptionIsValid(ForeignKeyDescription foreignKeyDescription) {
+            foreach (var column in foreignKeyDescription.Columns.Values) {
+                if (foreignKeyDescription.Columns.Values.Count(v =>
+                    v.Name.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase) &&
+                    v.TableName.Equals(column.TableName, StringComparison.InvariantCultureIgnoreCase)) > 1) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool ThereIsAnotherForeignKeyWithTheSameName(ForeignKeyDescription foreignKeyDescription, SqlServerDatabase sqlServerDatabase) {
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {
+                Schema = foreignKeyDescription.Schema,
+                Name = foreignKeyDescription.TableName
+            });
+
+            return foreignKeys.Any(key => key.Name.Equals(foreignKeyDescription.Name, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        private bool ReferencedColumnsAreValid(ForeignKeyDescription foreignKeyDescription, SqlServerDatabase sqlServerDatabase) {
+            foreach (var column in foreignKeyDescription.Columns.Values) {
+                var primaryKey = sqlServerDatabase.GetPrimaryKey(new TableDescription {
+                    Schema = column.Schema,
+                    Name = column.TableName
+                });
+
+                if (primaryKey == null || !primaryKey.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    return false;
+            }
+
+            return true;
         }
     }
 }

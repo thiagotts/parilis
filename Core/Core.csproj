@@ -47,6 +47,7 @@
     <Compile Include="Descriptions\TableDescription.cs" />
     <Compile Include="Descriptions\ColumnDescription.cs" />
     <Compile Include="Descriptions\UniqueDescription.cs" />
+    <Compile Include="Exceptions\InvalidDescriptionException.cs" />
     <Compile Include="Exceptions\InvalidReferenceColumnException.cs" />
     <Compile Include="Exceptions\ReferencedConstraintException.cs" />
     <Compile Include="Exceptions\ConstraintNotFoundException.cs" />
