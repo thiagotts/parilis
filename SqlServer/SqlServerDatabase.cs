@@ -163,6 +163,44 @@ namespace SqlServer {
             return foreignKeys;
         }
 
+        public IList<UniqueDescription> GetUniqueKeys(TableDescription tableDescription) {
+            var dataSet = database.ExecuteWithResults(string.Format(@"
+                SELECT Col.CONSTRAINT_NAME, Col.COLUMN_NAME FROM
+                    INFORMATION_SCHEMA.TABLE_CONSTRAINTS Tab,
+                    INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE Col
+                WHERE
+                    Col.Constraint_Name = Tab.Constraint_Name
+                    AND Col.Table_Name = Tab.Table_Name
+                    AND Constraint_Type = 'UNIQUE'
+                    AND Col.Table_Schema = '{0}'
+                    AND Col.Table_Name = '{1}'", tableDescription.Schema, tableDescription.Name));
+
+            var results = GetResults(dataSet);
+            
+            var uniqueKeys = new List<UniqueDescription>();
+            if (!results.Any()) return uniqueKeys;
+
+            foreach (var result in results) {
+                UniqueDescription uniqueKey;
+                if (uniqueKeys.Any(f => f.Name.Equals(result[0]))) {
+                    uniqueKey = uniqueKeys.Single(f => f.Name.Equals(result[0]));
+                }
+                else {
+                    uniqueKey = new UniqueDescription {
+                        Name = result[0],
+                        TableName = tableDescription.Name,
+                        Schema = tableDescription.Schema,
+                        ColumnNames = new List<string>()
+                    };
+                    uniqueKeys.Add(uniqueKey);
+                }
+
+                uniqueKey.ColumnNames.Add(result[1]);
+            }
+
+            return uniqueKeys;
+        }
+
         private List<List<string>> GetResults(DataSet dataSet) {
             var rowCollection = dataSet.Tables["Table"].Rows;
 

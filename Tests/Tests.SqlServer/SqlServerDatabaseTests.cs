@@ -220,5 +220,65 @@ namespace Tests.SqlServer {
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
         }
+
+        [Test]
+        public void WhenTableHasOneUniqueKey_GetMethodMustReturnTheCorrespondingKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual("UQ_TEST_description", result.Single().Name);
+        }
+
+        [Test]
+        public void WhenTableHasMoreThanOneUniqueKey_GetMethodMustReturnTheCorrespondingKeys() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                [description2] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description),
+                CONSTRAINT UQ_TEST_description2 UNIQUE (description2))");
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+
+            Assert.AreEqual(2, result.Count);
+            Assert.AreEqual("UQ_TEST_description", result.First().Name);
+            Assert.AreEqual("UQ_TEST_description2", result.Last().Name);
+        }
+
+        [Test]
+        public void WhenTableHasAUniqueKeyReferrecingMultipleColumns_GetMethodMustReturnTheCorrespondingKeyWithAllColumnsNames() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                [description2] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description, description2))");
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual("UQ_TEST_description", result.Single().Name);
+            Assert.AreEqual(2, result.Single().ColumnNames.Count());
+            Assert.AreEqual("description", result.Single().ColumnNames.First());
+            Assert.AreEqual("description2", result.Single().ColumnNames.Last());
+        }
+
+        [Test]
+        public void WhenTableDoesNotHaveUniqueKeys_GetMethodMustReturnAnEmptyList() {
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+
+            Assert.AreEqual(0, result.Count);
+        }
     }
 }
