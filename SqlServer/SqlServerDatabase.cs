@@ -283,5 +283,19 @@ namespace SqlServer {
             var coluna = table.Columns[columnName];
             return coluna != null;
         }
+
+        internal bool ColumnHasDuplicatedValues(ColumnDescription column) {
+            if (!ColumnExists(column.Schema, column.TableName, column.Name))
+                throw new ArgumentException();
+
+            var query = string.Format(@"SELECT [{0}], COUNT(*)
+                                        FROM [{1}].[{2}]
+                                        GROUP BY [{0}]
+                                        HAVING COUNT(*) > 1", column.Name, column.Schema, column.TableName);
+
+            var dataSet = database.ExecuteWithResults(query);
+            var results = GetResults(dataSet);
+            return results.Any();
+        }
     }
 }

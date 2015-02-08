@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Core.Descriptions;
 using Core.Exceptions;
 using NUnit.Framework;
 using SqlServer;
-using SqlServer.Enums;
 using Tests.Core;
 
 namespace Tests.SqlServer {
@@ -450,7 +447,7 @@ namespace Tests.SqlServer {
             });
 
             var sqlServerDatabase = new SqlServerDatabase(Database);
-            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE_2" });
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2"});
 
             Assert.AreEqual(0, foreignKeys.Count);
         }
@@ -541,7 +538,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> { "description2" }
+                ColumnNames = new List<string> {"description2"}
             }));
         }
 
@@ -562,7 +559,7 @@ namespace Tests.SqlServer {
             });
 
             var sqlServerDatabase = new SqlServerDatabase(Database);
-            var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.AreEqual(1, uniqueKeys.Count);
             Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
@@ -621,8 +618,25 @@ namespace Tests.SqlServer {
             }));
         }
 
-        //TODO: If a UNIQUE constraint is added to a column that has duplicated values, the Database Engine returns an error and does not add the constraint.
+        [Test]
+        public void IfTargetTableHasDuplicatedValuesForAColumnReferrencedByTheUniqueKey_CreateMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-        //TODO: Testar remoção: A UNIQUE constraint can be referenced by a FOREIGN KEY constraint.
+            Database.ExecuteNonQuery(@"INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description]) VALUES (1, 'test');
+                                       INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description]) VALUES (2, 'test');");
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                ColumnNames = new List<string> {"description"}
+            }));
+        }
+
+        //TODO: Test removal: A UNIQUE constraint can be referenced by a FOREIGN KEY constraint.
     }
 }

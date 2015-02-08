@@ -159,6 +159,9 @@ namespace SqlServer {
 
                 if (invalidTypes.Any(t => t.Equals(description.Type, StringComparison.InvariantCultureIgnoreCase)))
                     return false;
+
+                if (sqlServerDatabase.ColumnHasDuplicatedValues(description))
+                    return false;
             }
 
             return true;
