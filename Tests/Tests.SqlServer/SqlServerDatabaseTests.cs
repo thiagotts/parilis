@@ -280,5 +280,30 @@ namespace Tests.SqlServer {
 
             Assert.AreEqual(0, result.Count);
         }
+
+        [Test]
+        public void WhenUniqueKeyExists_GetMethodMustReturnTheCorrespondingKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetUniqueKey("UQ_TEST_description");
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("UQ_TEST_description", result.Name);
+
+        }
+
+        [Test]
+        public void WhenUniqueKeyDoesNotExist_GetMethodMustReturnNull() {
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var result = sqlServerDatabase.GetUniqueKey("UQ_TEST_description");
+
+            Assert.IsNull(result);
+        }
+      
     }
 }

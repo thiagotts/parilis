@@ -488,8 +488,7 @@ namespace Tests.SqlServer {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](4000) NULL,
-                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
-                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
             var constraints = new Constraints(Database);
             constraints.CreateUnique(new UniqueDescription {
@@ -507,12 +506,29 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void WhenDataTypeOfUniqueKeyIsInvalid_CreateMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+        public void WhenThereIsAnotherUniqueKeyWithTheSameNameInTheSameSchema_CreateMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](4000) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<InvalidConstraintNameException>(() => constraints.CreateUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                ColumnNames = new List<string> {"description"}
+            }));
         }
 
         [Test]
-        public void WhenThereIsAnotherUniqueKeyWithTheSameNameInTheSameSchemaHas_CreateMethodMustThrowException() {
+        public void WhenDataTypeOfUniqueKeyIsInvalid_CreateMethodMustThrowException() {
             Assert.Inconclusive("Escrever teste.");
         }
 

@@ -75,7 +75,12 @@ namespace SqlServer {
         }
 
         public void CreateUnique(UniqueDescription uniqueDescription) {
-            throw new NotImplementedException();
+            var uniqueKey = sqlServerDatabase.GetUniqueKey(uniqueDescription.Name);
+            if (uniqueKey != null) throw new InvalidConstraintNameException();
+
+            database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD CONSTRAINT {2} UNIQUE ({3})",
+                uniqueDescription.Schema, uniqueDescription.TableName, uniqueDescription.Name,
+                string.Join(",", uniqueDescription.ColumnNames)));
         }
 
         public void RemoveUnique(UniqueDescription uniqueDescription) {
