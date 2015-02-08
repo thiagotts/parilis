@@ -9,9 +9,14 @@ using Tests.Core;
 namespace Tests.SqlServer {
     [TestFixture]
     public class ConstraintsTests : DatabaseTest {
+        private Constraints constraints;
+        private SqlServerDatabase sqlServerDatabase;
+
         [TestFixtureSetUp]
         public override void InitializeClass() {
             base.InitializeClass();
+            constraints = new Constraints(Database);
+            sqlServerDatabase = new SqlServerDatabase(Database);
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
         }
 
@@ -37,7 +42,6 @@ namespace Tests.SqlServer {
                 ColumnNames = new List<string> {"id"}
             };
 
-            var constraints = new Constraints(Database);
             constraints.CreatePrimaryKey(primaryKey);
 
             var result = new SqlServerDatabase(Database).GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
@@ -59,7 +63,6 @@ namespace Tests.SqlServer {
                 ColumnNames = new List<string> {"id"}
             };
 
-            var constraints = new Constraints(Database);
             Assert.Throws<MultiplePrimaryKeysException>(() => constraints.CreatePrimaryKey(primaryKey));
         }
 
@@ -81,7 +84,6 @@ namespace Tests.SqlServer {
                 ColumnNames = new List<string> {"id"}
             };
 
-            var constraints = new Constraints(Database);
             Assert.Throws<InvalidConstraintNameException>(() => constraints.CreatePrimaryKey(primaryKey));
         }
 
@@ -103,7 +105,6 @@ namespace Tests.SqlServer {
                 ColumnNames = new List<string> {"id"}
             };
 
-            var constraints = new Constraints(Database);
             constraints.CreatePrimaryKey(primaryKey);
 
             var result = new SqlServerDatabase(Database).GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
@@ -126,7 +127,6 @@ namespace Tests.SqlServer {
                 ColumnNames = new List<string> {"id"}
             };
 
-            var constraints = new Constraints(Database);
             Assert.Throws<ConstraintNotFoundException>(() => constraints.RemovePrimaryKey(primaryKey));
         }
 
@@ -144,10 +144,8 @@ namespace Tests.SqlServer {
                 ColumnNames = new List<string> {"id"}
             };
 
-            var constraints = new Constraints(Database);
             constraints.RemovePrimaryKey(primaryKey);
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             Assert.IsNull(sqlServerDatabase.GetPrimaryKey(primaryKey.Name, primaryKey.Schema));
         }
 
@@ -172,7 +170,6 @@ namespace Tests.SqlServer {
                 ColumnNames = new List<string> {"id"}
             };
 
-            var constraints = new Constraints(Database);
             Assert.Throws<ReferencedConstraintException>(() => constraints.RemovePrimaryKey(primaryKey));
         }
 
@@ -187,7 +184,6 @@ namespace Tests.SqlServer {
                 [id_fk] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
 
-            var constraints = new Constraints(Database);
             constraints.CreateForeignKey(new ForeignKeyDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE_2",
@@ -204,7 +200,6 @@ namespace Tests.SqlServer {
                 }
             });
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2"});
 
             Assert.AreEqual(1, foreignKeys.Count);
@@ -223,7 +218,6 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
                 CONSTRAINT FK_TEST FOREIGN KEY (id_fk) REFERENCES TEST_TABLE(id))");
 
-            var constraints = new Constraints(Database);
             Assert.Throws<InvalidConstraintNameException>(() => constraints.CreateForeignKey(new ForeignKeyDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE_2",
@@ -253,7 +247,6 @@ namespace Tests.SqlServer {
                 [id_fk] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
 
-            var constraints = new Constraints(Database);
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateForeignKey(new ForeignKeyDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE_2",
@@ -284,7 +277,6 @@ namespace Tests.SqlServer {
                 [id_fk2] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
 
-            var constraints = new Constraints(Database);
             constraints.CreateForeignKey(new ForeignKeyDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE_2",
@@ -308,7 +300,6 @@ namespace Tests.SqlServer {
                 }
             });
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2"});
 
             Assert.AreEqual(1, foreignKeys.Count);
@@ -328,7 +319,6 @@ namespace Tests.SqlServer {
                 [id_fk2] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
 
-            var constraints = new Constraints(Database);
             Assert.Throws<InvalidDescriptionException>(() => constraints.CreateForeignKey(new ForeignKeyDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE_2",
@@ -365,7 +355,6 @@ namespace Tests.SqlServer {
                 [id_fk2] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
 
-            var constraints = new Constraints(Database);
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateForeignKey(new ForeignKeyDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE_2",
@@ -402,7 +391,6 @@ namespace Tests.SqlServer {
                 [id_fk2] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
 
-            var constraints = new Constraints(Database);
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateForeignKey(new ForeignKeyDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE_2",
@@ -439,14 +427,12 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
                 CONSTRAINT FK_TEST FOREIGN KEY (id_fk) REFERENCES TEST_TABLE(id))");
 
-            var constraints = new Constraints(Database);
             constraints.RemoveForeignKey(new ForeignKeyDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE_2",
                 Name = "FK_TEST"
             });
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2"});
 
             Assert.AreEqual(0, foreignKeys.Count);
@@ -454,7 +440,6 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenForeignKeysTableDoesNotExist_RemoveMethodMustThrowException() {
-            var constraints = new Constraints(Database);
             Assert.Throws<ConstraintNotFoundException>(() => constraints.RemoveForeignKey(new ForeignKeyDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE_2",
@@ -474,7 +459,6 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
                 CONSTRAINT FK_TEST FOREIGN KEY (id_fk) REFERENCES TEST_TABLE(id))");
 
-            var constraints = new Constraints(Database);
             Assert.Throws<ConstraintNotFoundException>(() => constraints.RemoveForeignKey(new ForeignKeyDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE_2",
@@ -489,7 +473,6 @@ namespace Tests.SqlServer {
                 [description] [nvarchar](400) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-            var constraints = new Constraints(Database);
             constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
@@ -497,7 +480,6 @@ namespace Tests.SqlServer {
                 ColumnNames = new List<string> {"description"}
             });
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.AreEqual(1, uniqueKeys.Count);
@@ -517,7 +499,6 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
                 CONSTRAINT UQ_TEST_description UNIQUE (description))");
 
-            var constraints = new Constraints(Database);
             Assert.Throws<InvalidConstraintNameException>(() => constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
@@ -533,7 +514,6 @@ namespace Tests.SqlServer {
                 [description] [nvarchar](400) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-            var constraints = new Constraints(Database);
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
@@ -550,7 +530,6 @@ namespace Tests.SqlServer {
                 [description2] [nvarchar](400) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-            var constraints = new Constraints(Database);
             constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
@@ -558,7 +537,6 @@ namespace Tests.SqlServer {
                 ColumnNames = new List<string> {"description", "description2"}
             });
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.AreEqual(1, uniqueKeys.Count);
@@ -575,7 +553,6 @@ namespace Tests.SqlServer {
                 [description] [nvarchar](400) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-            var constraints = new Constraints(Database);
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
@@ -586,7 +563,6 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenUniqueKeysReferencesATableThatDoesNotExist_CreateMethodMustThrowException() {
-            var constraints = new Constraints(Database);
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
@@ -609,7 +585,6 @@ namespace Tests.SqlServer {
                 [description] {0} NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))", type));
 
-            var constraints = new Constraints(Database);
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
@@ -628,7 +603,6 @@ namespace Tests.SqlServer {
             Database.ExecuteNonQuery(@"INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description]) VALUES (1, 'test');
                                        INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description]) VALUES (2, 'test');");
 
-            var constraints = new Constraints(Database);
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
@@ -639,7 +613,6 @@ namespace Tests.SqlServer {
 
         [Test]
         public void IfUniqueKeyDoesNotExist_RemoveMethodMustThrowException() {
-            var constraints = new Constraints(Database);
             Assert.Throws<ConstraintNotFoundException>(() => constraints.RemoveUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
@@ -662,7 +635,6 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
                 CONSTRAINT FK_TEST FOREIGN KEY (id_fk) REFERENCES TEST_TABLE(description))");
 
-            var constraints = new Constraints(Database);
             Assert.Throws<ReferencedConstraintException>(() => constraints.RemoveUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
@@ -679,7 +651,6 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
                 CONSTRAINT UQ_TEST_description UNIQUE (description))");
 
-            var constraints = new Constraints(Database);
             constraints.RemoveUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
@@ -687,10 +658,118 @@ namespace Tests.SqlServer {
                 ColumnNames = new List<string> { "description" }
             });
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var uniqueKey = sqlServerDatabase.GetUniqueKey("UQ_TEST_description");
 
             Assert.IsNull(uniqueKey);
         }
+
+        [Test]
+        public void WhenDefaultValueDoesNotExist_CreateMethodMustCreateTheDefaultValue() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));");
+
+            constraints.CreateDefault(new DefaultDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "DEFAULT_TEST_TABLE_description",
+                ColumnName = "description",
+                DefaultValue = "'test'"
+            });
+
+            var defaultValue = sqlServerDatabase.GetDefault("DEFAULT_TEST_TABLE_description", "dbo");
+
+            Assert.IsNotNull(defaultValue);
+        }
+
+        [Test]
+        public void WhenTargetTableAlreadyHasADefaultValueSetForTheColumn_CreateMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));
+                ALTER TABLE [dbo].[TEST_TABLE] ADD CONSTRAINT [DEFAULT_TEST_TABLE_description] DEFAULT 'test' FOR [description]");
+
+            Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateDefault(new DefaultDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "DEFAULT_TEST_TABLE_description_2",
+                ColumnName = "description",
+                DefaultValue = "'test'"
+            }));
+        }
+
+        [Test]
+        public void WhenThereIsAnotherDefaultValueWithTheSameNameInTheSameSchema_CreateMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));
+                ALTER TABLE [dbo].[TEST_TABLE] ADD CONSTRAINT [DEFAULT_TEST_TABLE_description] DEFAULT 'test' FOR [description]");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id));");
+
+            Assert.Throws<InvalidConstraintNameException>(() => constraints.CreateDefault(new DefaultDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "DEFAULT_TEST_TABLE_description",
+                ColumnName = "description",
+                DefaultValue = "'test'"
+            }));
+        }
+
+        [Test]
+        public void WhenThereIsAnotherDefaultValueWithTheSameNameInAnotherSchema_CreateMethodMustCreateTheDefaultValue() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));
+                ALTER TABLE [dbo].[TEST_TABLE] ADD CONSTRAINT [DEFAULT_TEST_TABLE_description] DEFAULT 'test' FOR [description]");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id));");
+
+            constraints.CreateDefault(new DefaultDescription {
+                Schema = "testschema",
+                TableName = "TEST_TABLE_2",
+                Name = "DEFAULT_TEST_TABLE_description",
+                ColumnName = "description",
+                DefaultValue = "'test'"
+            });
+
+            var defaultValue = sqlServerDatabase.GetDefault("DEFAULT_TEST_TABLE_description", "testschema");
+
+            Assert.IsNotNull(defaultValue);
+        }
+
+        [Test]
+        public void IfTargetColumnAreadyHasValues_CreateMethodMustCreateTheDefaultValue() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));");
+
+            Database.ExecuteNonQuery(@"INSERT INTO [dbo].[TEST_TABLE] ([id], [description]) VALUES (1, 'test 1')");
+            Database.ExecuteNonQuery(@"INSERT INTO [dbo].[TEST_TABLE] ([id], [description]) VALUES (2, 'test 2')");
+
+            constraints.CreateDefault(new DefaultDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "DEFAULT_TEST_TABLE_description",
+                ColumnName = "description",
+                DefaultValue = "'test 3'"
+            });
+
+            var defaultValue = sqlServerDatabase.GetDefault("DEFAULT_TEST_TABLE_description", "dbo");
+
+            Assert.IsNotNull(defaultValue);
+        }
+      
     }
 }

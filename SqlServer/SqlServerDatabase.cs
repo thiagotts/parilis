@@ -230,6 +230,54 @@ namespace SqlServer {
             return uniqueKeys;
         }
 
+        public DefaultDescription GetDefault(string defaultName, string schema) {
+            var query = string.Format(@"SELECT tables.name, all_columns.name, default_constraints.definition
+                                        FROM sys.all_columns
+                                        INNER JOIN sys.tables ON all_columns.object_id = tables.object_id
+                                        INNER JOIN sys.schemas ON tables.schema_id = schemas.schema_id
+                                        INNER JOIN sys.default_constraints ON all_columns.default_object_id = default_constraints.object_id
+                                        WHERE default_constraints.name LIKE '{0}'
+                                        AND schemas.name LIKE '{1}'", defaultName, schema);
+
+            var dataSet = database.ExecuteWithResults(query);
+            var results = GetResults(dataSet);
+            if (!results.Any()) return null;
+
+            return new DefaultDescription {
+                Schema = schema,
+                TableName = results[0][0],
+                ColumnName = results[0][1],
+                DefaultValue = results[0][2],
+                Name = defaultName
+            };
+        }
+
+        public IList<DefaultDescription> GetDefaults() {
+            const string query = @"SELECT schemas.name, tables.name, all_columns.name, default_constraints.name, default_constraints.definition
+                                   FROM sys.all_columns
+                                   INNER JOIN sys.tables ON all_columns.object_id = tables.object_id
+                                   INNER JOIN sys.schemas ON tables.schema_id = schemas.schema_id
+                                   INNER JOIN sys.default_constraints ON all_columns.default_object_id = default_constraints.object_id";
+
+            var dataSet = database.ExecuteWithResults(query);
+            var results = GetResults(dataSet);
+            
+            var defaults = new List<DefaultDescription>();
+            if (!results.Any()) return defaults;
+
+            foreach (var result in results) {
+                defaults.Add(new DefaultDescription {
+                    Schema = result[0],
+                    TableName = result[1],
+                    ColumnName = result[2],
+                    Name = result[3],
+                    DefaultValue = result[4]
+                });
+            }
+
+            return defaults;
+        }
+
         internal ColumnDescription GetFullDescription(string schema, string tableName, string columnName) {
             if (!ColumnExists(schema, tableName, columnName)) throw new ArgumentException();
 
@@ -238,7 +286,7 @@ namespace SqlServer {
                                         WHERE TABLE_NAME = '{0}'
                                         AND TABLE_SCHEMA = '{1}'
                                         AND COLUMN_NAME = '{2}'", tableName, schema, columnName);
-            
+
             var dataSet = database.ExecuteWithResults(query);
             var results = GetResults(dataSet);
             if (!results.Any()) return null;

@@ -99,7 +99,20 @@ namespace SqlServer {
         }
 
         public void CreateDefault(DefaultDescription defaultDescription) {
-            throw new NotImplementedException();
+            var defaults = sqlServerDatabase.GetDefaults();
+
+            if (defaults.Any(d => d.Name.Equals(defaultDescription.Name, StringComparison.InvariantCultureIgnoreCase) &&
+                                  d.Schema.Equals(defaultDescription.Schema, StringComparison.InvariantCultureIgnoreCase)))
+                throw new InvalidConstraintNameException();
+
+            if (defaults.Any(d => d.ColumnName.Equals(defaultDescription.ColumnName, StringComparison.InvariantCultureIgnoreCase) &&
+                                  d.Schema.Equals(defaultDescription.Schema, StringComparison.InvariantCultureIgnoreCase) &&
+                                  d.TableName.Equals(defaultDescription.TableName, StringComparison.InvariantCultureIgnoreCase)))
+                throw new InvalidReferenceColumnException();
+
+            database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD CONSTRAINT {2} DEFAULT {3} FOR {4}",
+                defaultDescription.Schema, defaultDescription.TableName, defaultDescription.Name,
+                defaultDescription.DefaultValue, defaultDescription.ColumnName));
         }
 
         public void RemoveDefault(ConstraintDescription defaultDescription) {
