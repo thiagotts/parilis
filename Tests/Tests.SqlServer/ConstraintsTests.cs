@@ -770,6 +770,38 @@ namespace Tests.SqlServer {
 
             Assert.IsNotNull(defaultValue);
         }
-      
+
+        [Test]
+        public void WhenDeafultValueExists_RemoveMethodMustRemoveTheDefaultValue() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));
+                ALTER TABLE [dbo].[TEST_TABLE] ADD CONSTRAINT [DEFAULT_TEST_TABLE_description] DEFAULT 'test' FOR [description]");
+
+            constraints.RemoveDefault(new DefaultDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "DEFAULT_TEST_TABLE_description"
+            });
+
+            var defaultValue = sqlServerDatabase.GetDefault("DEFAULT_TEST_TABLE_description", "dbo");
+
+            Assert.IsNull(defaultValue);
+        }
+
+        [Test]
+        public void WhenDeafultValueDoesNotExist_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));");
+
+            Assert.Throws<ConstraintNotFoundException>(() => constraints.RemoveDefault(new DefaultDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "DEFAULT_TEST_TABLE_description"
+            }));
+        }
     }
 }

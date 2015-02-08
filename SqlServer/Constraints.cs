@@ -115,8 +115,12 @@ namespace SqlServer {
                 defaultDescription.DefaultValue, defaultDescription.ColumnName));
         }
 
-        public void RemoveDefault(ConstraintDescription defaultDescription) {
-            throw new NotImplementedException();
+        public void RemoveDefault(DefaultDescription defaultDescription) {
+            var defaultValue = sqlServerDatabase.GetDefault(defaultDescription.Name, defaultDescription.Schema);
+            if(defaultValue == null) throw new ConstraintNotFoundException();
+
+            database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
+                defaultDescription.Schema, defaultDescription.TableName, defaultDescription.Name));
         }
 
         private bool DescriptionIsValid(ForeignKeyDescription foreignKeyDescription) {

@@ -9,6 +9,6 @@ namespace Core.Interfaces {
         void CreateUnique(UniqueDescription uniqueDescription);
         void RemoveUnique(UniqueDescription uniqueDescription);
         void CreateDefault(DefaultDescription defaultDescription);
-        void RemoveDefault(ConstraintDescription defaultDescription);
+        void RemoveDefault(DefaultDescription defaultDescription);
     }
 }
