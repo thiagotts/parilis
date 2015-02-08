@@ -637,6 +637,60 @@ namespace Tests.SqlServer {
             }));
         }
 
-        //TODO: Test removal: A UNIQUE constraint can be referenced by a FOREIGN KEY constraint.
+        [Test]
+        public void IfUniqueKeyDoesNotExist_RemoveMethodMustThrowException() {
+            var constraints = new Constraints(Database);
+            Assert.Throws<ConstraintNotFoundException>(() => constraints.RemoveUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                ColumnNames = new List<string> {"description"}
+            }));
+        }
+
+        [Test]
+        public void IfUniqueKeyExistsAndIstReferencedByAnyOtherKey_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [bigint] NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST FOREIGN KEY (id_fk) REFERENCES TEST_TABLE(description))");
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<ReferencedConstraintException>(() => constraints.RemoveUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                ColumnNames = new List<string> { "description" }
+            }));
+        }
+
+        [Test]
+        public void IfUniqueKeyExistsAndIsNotReferencedByAnyOtherKey_RemoveMethodRemoveTheUniqueKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [bigint] NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            var constraints = new Constraints(Database);
+            constraints.RemoveUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                ColumnNames = new List<string> { "description" }
+            });
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var uniqueKey = sqlServerDatabase.GetUniqueKey("UQ_TEST_description");
+
+            Assert.IsNull(uniqueKey);
+        }
     }
 }

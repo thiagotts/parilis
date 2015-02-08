@@ -88,7 +88,14 @@ namespace SqlServer {
         }
 
         public void RemoveUnique(UniqueDescription uniqueDescription) {
-            throw new NotImplementedException();
+            var uniqueKey = sqlServerDatabase.GetUniqueKey(uniqueDescription.Name);
+            if (uniqueKey == null) throw new ConstraintNotFoundException();
+
+            var foreignKeys = sqlServerDatabase.GetForeignKeysReferencing(uniqueDescription);
+            if(foreignKeys.Any()) throw new ReferencedConstraintException();
+
+            database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
+                uniqueDescription.Schema, uniqueDescription.TableName, uniqueDescription.Name));
         }
 
         public void CreateDefault(DefaultDescription defaultDescription) {

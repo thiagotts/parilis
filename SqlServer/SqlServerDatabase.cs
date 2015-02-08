@@ -111,7 +111,7 @@ namespace SqlServer {
             return foreignKeys;
         }
 
-        public IList<ForeignKeyDescription> GetForeignKeysReferencing(PrimaryKeyDescription primaryKeyDescription) {
+        public IList<ForeignKeyDescription> GetForeignKeysReferencing(ConstraintDescription primaryKeyDescription) {
             var dataSet = database.ExecuteWithResults(string.Format(@"
                 CREATE TABLE #TempTable (
                  PKTABLE_QUALIFIER nvarchar(max),
@@ -230,28 +230,6 @@ namespace SqlServer {
             return uniqueKeys;
         }
 
-        private List<List<string>> GetResults(DataSet dataSet) {
-            var rowCollection = dataSet.Tables["Table"].Rows;
-
-            var results = new List<List<string>>();
-            if (rowCollection.Count == 0) return results;
-
-            foreach (var row in rowCollection) {
-                var dataRow = row as DataRow;
-                if (dataRow == null) continue;
-
-                var result = new List<string>();
-                foreach (var item in dataRow.ItemArray) {
-                    var itemValue = item as string ?? item.ToString();
-                    result.Add(itemValue);
-                }
-
-                if (result.Any()) results.Add(result);
-            }
-
-            return results;
-        }
-
         internal ColumnDescription GetFullDescription(string schema, string tableName, string columnName) {
             if (!ColumnExists(schema, tableName, columnName)) throw new ArgumentException();
 
@@ -275,15 +253,6 @@ namespace SqlServer {
             };
         }
 
-        private bool ColumnExists(string schema, string tableName, string columnName) {
-            var table = database.Tables[tableName, schema];
-            if (table == null) return false;
-
-            table.Columns.Refresh(true);
-            var coluna = table.Columns[columnName];
-            return coluna != null;
-        }
-
         internal bool ColumnHasDuplicatedValues(ColumnDescription column) {
             if (!ColumnExists(column.Schema, column.TableName, column.Name))
                 throw new ArgumentException();
@@ -296,6 +265,37 @@ namespace SqlServer {
             var dataSet = database.ExecuteWithResults(query);
             var results = GetResults(dataSet);
             return results.Any();
+        }
+
+        private bool ColumnExists(string schema, string tableName, string columnName) {
+            var table = database.Tables[tableName, schema];
+            if (table == null) return false;
+
+            table.Columns.Refresh(true);
+            var coluna = table.Columns[columnName];
+            return coluna != null;
+        }
+
+        private List<List<string>> GetResults(DataSet dataSet) {
+            var rowCollection = dataSet.Tables["Table"].Rows;
+
+            var results = new List<List<string>>();
+            if (rowCollection.Count == 0) return results;
+
+            foreach (var row in rowCollection) {
+                var dataRow = row as DataRow;
+                if (dataRow == null) continue;
+
+                var result = new List<string>();
+                foreach (var item in dataRow.ItemArray) {
+                    var itemValue = item as string ?? item.ToString();
+                    result.Add(itemValue);
+                }
+
+                if (result.Any()) results.Add(result);
+            }
+
+            return results;
         }
     }
 }
