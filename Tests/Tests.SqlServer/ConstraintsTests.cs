@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Core.Descriptions;
 using Core.Exceptions;
 using NUnit.Framework;
 using SqlServer;
+using SqlServer.Enums;
 using Tests.Core;
 
 namespace Tests.SqlServer {
@@ -487,7 +489,7 @@ namespace Tests.SqlServer {
         public void WhenTargetTableDoesNotHaveAUniqueKeyWithTheSameName_CreateMethodMustCreateTheUniqueKey() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
-                [description] [nvarchar](4000) NULL,
+                [description] [nvarchar](400) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
             var constraints = new Constraints(Database);
@@ -509,7 +511,7 @@ namespace Tests.SqlServer {
         public void WhenThereIsAnotherUniqueKeyWithTheSameNameInTheSameSchema_CreateMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
-                [description] [nvarchar](4000) NULL,
+                [description] [nvarchar](400) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
@@ -528,33 +530,95 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void WhenDataTypeOfUniqueKeyIsInvalid_CreateMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
-        }
-
-        [Test]
         public void WhenUniqueKeysReferencesAnInvalidColumn_CreateMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                ColumnNames = new List<string> { "description2" }
+            }));
         }
 
         [Test]
         public void WhenUniqueKeyReferencesMultipleColumns_CreateMethodMustCreateTheUniqueKey() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                [description2] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            var constraints = new Constraints(Database);
+            constraints.CreateUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                ColumnNames = new List<string> {"description", "description2"}
+            });
+
+            var sqlServerDatabase = new SqlServerDatabase(Database);
+            var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+
+            Assert.AreEqual(1, uniqueKeys.Count);
+            Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
+            Assert.AreEqual(2, uniqueKeys.Single().ColumnNames.Count);
+            Assert.AreEqual("description", uniqueKeys.Single().ColumnNames.First());
+            Assert.AreEqual("description2", uniqueKeys.Single().ColumnNames.Last());
         }
 
         [Test]
         public void WhenUniqueKeyReferencesTheSameColumnTwice_CreateMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
-        }
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-        [Test]
-        public void WhenUniqueKeysReferencesAColumnThatDoesNotExist_CreateMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            var constraints = new Constraints(Database);
+            Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                ColumnNames = new List<string> {"description", "description"}
+            }));
         }
 
         [Test]
         public void WhenUniqueKeysReferencesATableThatDoesNotExist_CreateMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            var constraints = new Constraints(Database);
+            Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                ColumnNames = new List<string> {"description"}
+            }));
+        }
+
+        [TestCase("[text]")]
+        [TestCase("[ntext]")]
+        [TestCase("[image]")]
+        [TestCase("[xml]")]
+        [TestCase("[geography]")]
+        [TestCase("[geometry]")]
+        [TestCase("[nvarchar](401)")]
+        [TestCase("[varchar](901)")]
+        public void WhenDataTypeOfUniqueKeyIsInvalid_CreateMethodMustThrowException(string type) {
+            Database.ExecuteNonQuery(string.Format(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] {0} NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))", type));
+
+            var constraints = new Constraints(Database);
+            Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                ColumnNames = new List<string> {"description"}
+            }));
         }
 
         //TODO: If a UNIQUE constraint is added to a column that has duplicated values, the Database Engine returns an error and does not add the constraint.

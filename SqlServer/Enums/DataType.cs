@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 
 namespace SqlServer.Enums {
-    internal enum DataType {
+    public enum DataType {
         [DefaultValue("bigint")]
         BigInt,
 

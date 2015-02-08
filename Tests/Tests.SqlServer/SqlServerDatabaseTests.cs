@@ -294,7 +294,6 @@ namespace Tests.SqlServer {
 
             Assert.IsNotNull(result);
             Assert.AreEqual("UQ_TEST_description", result.Name);
-
         }
 
         [Test]

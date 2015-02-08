@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Core.Descriptions;
@@ -173,7 +174,7 @@ namespace SqlServer {
                     AND Col.Table_Name = Tab.Table_Name
                     AND Constraint_Type = 'UNIQUE'
                     AND Col.Constraint_Name = '{0}'", uniqueKeyName));
-            
+
             var results = GetResults(dataSet);
             if (!results.Any()) return null;
 
@@ -204,7 +205,7 @@ namespace SqlServer {
                     AND Col.Table_Name = '{1}'", tableDescription.Schema, tableDescription.Name));
 
             var results = GetResults(dataSet);
-            
+
             var uniqueKeys = new List<UniqueDescription>();
             if (!results.Any()) return uniqueKeys;
 
@@ -241,8 +242,7 @@ namespace SqlServer {
 
                 var result = new List<string>();
                 foreach (var item in dataRow.ItemArray) {
-                    var itemValue = item as string;
-                    if (itemValue == null) continue;
+                    var itemValue = item as string ?? item.ToString();
                     result.Add(itemValue);
                 }
 
@@ -250,6 +250,38 @@ namespace SqlServer {
             }
 
             return results;
+        }
+
+        internal ColumnDescription GetFullDescription(string schema, string tableName, string columnName) {
+            if (!ColumnExists(schema, tableName, columnName)) throw new ArgumentException();
+
+            var query = string.Format(@"SELECT IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
+                                        FROM INFORMATION_SCHEMA.COLUMNS
+                                        WHERE TABLE_NAME = '{0}'
+                                        AND TABLE_SCHEMA = '{1}'
+                                        AND COLUMN_NAME = '{2}'", tableName, schema, columnName);
+            
+            var dataSet = database.ExecuteWithResults(query);
+            var results = GetResults(dataSet);
+            if (!results.Any()) return null;
+
+            return new ColumnDescription {
+                Schema = schema,
+                TableName = tableName,
+                Name = columnName,
+                AllowsNull = results[0][0].Equals("YES", StringComparison.InvariantCultureIgnoreCase),
+                Type = results[0][1],
+                MaximumSize = results[0].Count > 2 ? results[0][2] : null,
+            };
+        }
+
+        private bool ColumnExists(string schema, string tableName, string columnName) {
+            var table = database.Tables[tableName, schema];
+            if (table == null) return false;
+
+            table.Columns.Refresh(true);
+            var coluna = table.Columns[columnName];
+            return coluna != null;
         }
     }
 }

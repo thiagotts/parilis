@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Core.Descriptions;
 using Core.Exceptions;
@@ -78,6 +79,9 @@ namespace SqlServer {
             var uniqueKey = sqlServerDatabase.GetUniqueKey(uniqueDescription.Name);
             if (uniqueKey != null) throw new InvalidConstraintNameException();
 
+            if (!ReferencedColumnsAreValid(uniqueDescription))
+                throw new InvalidReferenceColumnException();
+
             database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD CONSTRAINT {2} UNIQUE ({3})",
                 uniqueDescription.Schema, uniqueDescription.TableName, uniqueDescription.Name,
                 string.Join(",", uniqueDescription.ColumnNames)));
@@ -124,6 +128,36 @@ namespace SqlServer {
                 });
 
                 if (primaryKey == null || !primaryKey.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private bool ReferencedColumnsAreValid(UniqueDescription uniqueDescription) {
+            var table = database.Tables[uniqueDescription.TableName, uniqueDescription.Schema];
+            if (table == null) return false;
+
+            var invalidTypes = new List<string> { "text", "ntext", "image", "xml", "geography", "geometry" };
+            foreach (var columnName in uniqueDescription.ColumnNames) {
+                if (uniqueDescription.ColumnNames.Count(name => name.Equals(columnName, StringComparison.InvariantCultureIgnoreCase)) > 1)
+                    return false;
+
+                var column = table.Columns[columnName];
+                if(column == null) return false;
+
+                var description = sqlServerDatabase.GetFullDescription(uniqueDescription.Schema, uniqueDescription.TableName, columnName);
+                if (description == null) return false;
+
+                if (description.Type.Equals("varchar", StringComparison.InvariantCultureIgnoreCase) &&
+                    int.Parse(description.MaximumSize) > 900)
+                    return false;
+
+                if (description.Type.Equals("nvarchar", StringComparison.InvariantCultureIgnoreCase) &&
+                    int.Parse(description.MaximumSize) > 400)
+                    return false;
+
+                if (invalidTypes.Any(t => t.Equals(description.Type, StringComparison.InvariantCultureIgnoreCase)))
                     return false;
             }
 

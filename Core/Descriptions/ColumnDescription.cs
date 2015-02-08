@@ -5,5 +5,6 @@
         public string Name { get; set; }
         public string Type { get; set; }
         public bool AllowsNull { get; set; }
+        public string MaximumSize { get; set; }
     }
 }
