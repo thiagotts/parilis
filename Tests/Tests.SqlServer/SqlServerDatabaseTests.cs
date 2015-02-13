@@ -7,10 +7,13 @@ using Tests.Core;
 namespace Tests.SqlServer {
     [TestFixture]
     public class SqlServerDatabaseTests : DatabaseTest {
+        private SqlServerDatabase sqlServerDatabase;
+
         [TestFixtureSetUp]
         public override void InitializeClass() {
             base.InitializeClass();
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
+            sqlServerDatabase = new SqlServerDatabase(Database);
         }
 
         [TearDown]
@@ -32,7 +35,6 @@ namespace Tests.SqlServer {
                 [description] [nvarchar](max) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.IsNotNull(result);
@@ -51,7 +53,6 @@ namespace Tests.SqlServer {
                 [description] [nvarchar](max) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id, id2))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.IsNotNull(result);
@@ -69,7 +70,6 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL)");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.IsNull(result);
@@ -77,7 +77,6 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenThereIsNotAPrimaryKeyWithTheSpecifiedName_MustReturnNull() {
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetPrimaryKey("PK_TEST");
 
             Assert.IsNull(result);
@@ -89,7 +88,6 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_TEST PRIMARY KEY (id))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetPrimaryKey("PK_TEST");
 
             Assert.IsNotNull(result);
@@ -102,7 +100,6 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_TEST PRIMARY KEY (id))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetPrimaryKey("PK_TEST", "testschema");
 
             Assert.IsNotNull(result);
@@ -116,7 +113,6 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_TEST PRIMARY KEY (id))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetForeignKeysReferencing(new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
@@ -148,7 +144,6 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_3_id PRIMARY KEY (id),
                 CONSTRAINT FK_TEST_2 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetForeignKeysReferencing(new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
@@ -173,7 +168,6 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
                 CONSTRAINT FK_TEST FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2"});
 
             Assert.AreEqual(1, result.Count);
@@ -198,7 +192,6 @@ namespace Tests.SqlServer {
                 CONSTRAINT FK_TEST_1 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id),
                 CONSTRAINT FK_TEST_2 FOREIGN KEY (id3) REFERENCES TEST_TABLE_2(id))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE_3" });
 
             Assert.AreEqual(2, result.Count);
@@ -214,7 +207,6 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_TEST PRIMARY KEY (id))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
 
             Assert.IsNotNull(result);
@@ -229,7 +221,6 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
                 CONSTRAINT UQ_TEST_description UNIQUE (description))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
 
             Assert.AreEqual(1, result.Count);
@@ -246,7 +237,6 @@ namespace Tests.SqlServer {
                 CONSTRAINT UQ_TEST_description UNIQUE (description),
                 CONSTRAINT UQ_TEST_description2 UNIQUE (description2))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
 
             Assert.AreEqual(2, result.Count);
@@ -263,7 +253,6 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
                 CONSTRAINT UQ_TEST_description UNIQUE (description, description2))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
 
             Assert.AreEqual(1, result.Count);
@@ -275,7 +264,6 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenTableDoesNotHaveUniqueKeys_GetMethodMustReturnAnEmptyList() {
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
 
             Assert.AreEqual(0, result.Count);
@@ -289,7 +277,6 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
                 CONSTRAINT UQ_TEST_description UNIQUE (description))");
 
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetUniqueKey("UQ_TEST_description");
 
             Assert.IsNotNull(result);
@@ -298,10 +285,38 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenUniqueKeyDoesNotExist_GetMethodMustReturnNull() {
-            var sqlServerDatabase = new SqlServerDatabase(Database);
             var result = sqlServerDatabase.GetUniqueKey("UQ_TEST_description");
 
             Assert.IsNull(result);
+        }
+
+        [Test]
+        public void WhenIndexExists_GetIndexMustReturnTheCorrespondentIndex() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL);
+                CREATE INDEX index_name ON [dbo].[TEST_TABLE](id, id2)");
+
+            var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "index_name");
+
+            Assert.IsNotNull(index);
+            Assert.AreEqual("index_name", index.Name);
+            Assert.AreEqual(2, index.ColumnNames.Count);
+            Assert.IsTrue(index.ColumnNames.Any(c => c.Equals("id")));
+            Assert.IsTrue(index.ColumnNames.Any(c => c.Equals("id2")));
+        }
+
+        [Test]
+        public void WhenIndexDoesNotExist_GetIndexMustReturnNull() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "index_name");
+
+            Assert.IsNull(index);
         }
       
     }

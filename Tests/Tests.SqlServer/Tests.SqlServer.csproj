@@ -59,6 +59,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="IndexesTests.cs" />
     <Compile Include="SqlServerDatabaseTests.cs" />
     <Compile Include="ConstraintsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

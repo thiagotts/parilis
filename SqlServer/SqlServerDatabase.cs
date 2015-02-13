@@ -278,6 +278,29 @@ namespace SqlServer {
             return defaults;
         }
 
+        public IndexDescription GetIndex(string schema, string tableName, string indexName) {
+            var table = database.Tables[tableName, schema];
+            if (table == null) return null;
+
+            var index = table.Indexes[indexName];
+            if (index == null) return null;
+
+
+            var indexDescription = new IndexDescription {
+                Schema = schema,
+                TableName = tableName,
+                Name = indexName,
+                Unique = index.IsUnique,
+                ColumnNames = new List<string>()
+            };
+
+            foreach (IndexedColumn indexedColumn in index.IndexedColumns) {
+                indexDescription.ColumnNames.Add(indexedColumn.Name);
+            }
+
+            return indexDescription;
+        }
+
         internal ColumnDescription GetFullDescription(string schema, string tableName, string columnName) {
             if (!ColumnExists(schema, tableName, columnName)) throw new ArgumentException();
 
