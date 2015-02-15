@@ -21,7 +21,7 @@ namespace SqlServer {
                 throw new InvalidReferenceColumnException();
 
             IndexDescription index = sqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
-            if (index != null) throw new InvalidConstraintNameException();
+            if (index != null) throw new InvalidIndexNameException();
 
             database.ExecuteNonQuery(string.Format(@"CREATE {0} INDEX {1} ON {2}.{3} ({4})",
                 indexDescription.Unique ? "UNIQUE" : string.Empty, indexDescription.Name, indexDescription.Schema,
@@ -29,7 +29,11 @@ namespace SqlServer {
         }
 
         public void Remove(IndexDescription indexDescription) {
-            throw new NotImplementedException();
+            IndexDescription index = sqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
+            if (index == null) throw new IndexNotFoundException();
+
+            database.ExecuteNonQuery(string.Format(@"DROP INDEX [{0}].[{1}].[{2}]",
+                indexDescription.Schema, indexDescription.TableName, indexDescription.Name));
         }
 
         private bool ReferencedColumnsAreInvalid(IndexDescription indexDescription) {

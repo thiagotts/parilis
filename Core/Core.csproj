@@ -47,6 +47,8 @@
     <Compile Include="Descriptions\TableDescription.cs" />
     <Compile Include="Descriptions\ColumnDescription.cs" />
     <Compile Include="Descriptions\UniqueDescription.cs" />
+    <Compile Include="Exceptions\IndexNotFoundException.cs" />
+    <Compile Include="Exceptions\InvalidIndexNameException.cs" />
     <Compile Include="Exceptions\InvalidDataTypeException.cs" />
     <Compile Include="Exceptions\InvalidDescriptionException.cs" />
     <Compile Include="Exceptions\InvalidReferenceColumnException.cs" />

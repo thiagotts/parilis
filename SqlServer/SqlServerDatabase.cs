@@ -282,9 +282,9 @@ namespace SqlServer {
             var table = database.Tables[tableName, schema];
             if (table == null) return null;
 
+            table.Indexes.Refresh();
             var index = table.Indexes[indexName];
             if (index == null) return null;
-
 
             var indexDescription = new IndexDescription {
                 Schema = schema,

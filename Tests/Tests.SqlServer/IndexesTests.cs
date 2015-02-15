@@ -109,7 +109,7 @@ namespace Tests.SqlServer {
                         [description] [nvarchar](max) NULL);
                         CREATE INDEX idx_TEST_TABLE_id_id2 ON [dbo].[TEST_TABLE](id)");
 
-            Assert.Throws<InvalidConstraintNameException>(() => indexes.Create(new IndexDescription {
+            Assert.Throws<InvalidIndexNameException>(() => indexes.Create(new IndexDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_id2",
@@ -174,7 +174,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_2",
-                ColumnNames = new List<string> { "id" }
+                ColumnNames = new List<string> {"id"}
             });
 
             var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "idx_TEST_TABLE_id_2");
@@ -216,7 +216,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_2",
-                ColumnNames = new List<string> { "id2", "id3" }
+                ColumnNames = new List<string> {"id2", "id3"}
             });
 
             var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "idx_TEST_TABLE_id_2");
@@ -235,7 +235,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_2",
-                ColumnNames = new List<string> { "id" },
+                ColumnNames = new List<string> {"id"},
                 Unique = true
             });
 
@@ -243,6 +243,36 @@ namespace Tests.SqlServer {
 
             Assert.IsNotNull(index);
             Assert.IsTrue(index.Unique);
+        }
+
+        [Test]
+        public void WhenIndexDoesNotExist_RemoveMethodMustThrowException() {
+            Assert.Throws<IndexNotFoundException>(() => indexes.Remove(new IndexDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "idx_TEST_TABLE_id",
+                ColumnNames = new List<string> {"id2"}
+            }));
+        }
+
+        [Test]
+        public void WhenIndexExist_RemoveMethosMustRemoveTheCorrespondentIndex() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                        [id] [bigint] NOT NULL,
+                        [id2] [bigint] NOT NULL);
+                        CREATE INDEX idx_TEST_TABLE_id ON [dbo].[TEST_TABLE](id, id2)");
+
+            var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "idx_TEST_TABLE_id");
+            Assert.IsNotNull(index);
+
+            indexes.Remove(new IndexDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "idx_TEST_TABLE_id"
+            });
+
+            index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "idx_TEST_TABLE_id");
+            Assert.IsNull(index);
         }
     }
 }
