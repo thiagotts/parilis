@@ -12,5 +12,7 @@ namespace Core.Interfaces {
         IList<DefaultDescription> GetDefaults();
         ColumnDescription GetColumn(string schema, string tableName, string columnName);
         TableDescription GetTable(string schema, string tableName);
+        IndexDescription GetIndex(string schema, string tableName, string indexName);
+        IList<IndexDescription> GetIndexes(string schema, string tableName);
     }
 }

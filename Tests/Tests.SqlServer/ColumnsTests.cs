@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Core.Descriptions;
 using Core.Exceptions;
@@ -23,7 +22,10 @@ namespace Tests.SqlServer {
 
         [TearDown]
         public void FinishTest() {
-            var table = Database.Tables["TEST_TABLE"];
+            var table = Database.Tables["TEST_TABLE_2"];
+            if (table != null) table.Drop();
+
+            table = Database.Tables["TEST_TABLE"];
             if (table != null) table.Drop();
         }
 
@@ -202,6 +204,152 @@ namespace Tests.SqlServer {
                 Name = "id2",
                 Type = dataType,
                 MaximumSize = maximumValue
+            }));
+        }
+
+        [Test]
+        public void IfColumnExistsAndIsNotReferencedByAnyConstraint_RemoveMethosMustRemoveTheColumn() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            columns.Remove(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "description"
+            });
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "description");
+
+            Assert.IsNull(column);
+        }
+
+        [Test]
+        public void IfColumnExistsAndHasValuesInserted_RemoveMethosMustRemoveTheColumn() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL);
+                INSERT INTO [dbo].[TEST_TABLE] VALUES (1,'test');");
+
+            columns.Remove(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "description"
+            });
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "description");
+
+            Assert.IsNull(column);
+        }
+
+        [Test]
+        public void WhenTheColumnIsTheSingleColumnOfItsTable_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE]([id] [bigint] NOT NULL)");
+
+            Assert.Throws<SingleColumnException>(() => columns.Remove(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id"
+            }));
+        }
+
+
+        [Test]
+        public void IfTheColumnIsAPrimaryKey_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Assert.Throws<ReferencedColumnException>(() => columns.Remove(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id"
+            }));
+        }
+
+        [Test]
+        public void IfTheColumnIsReferencedByAForeignKey_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT FK_TEST FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+            Assert.Throws<ReferencedColumnException>(() => columns.Remove(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "id2"
+            }));
+        }
+
+        [Test]
+        public void IfTheColumnIsReferencedByAUniqueKey_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            Assert.Throws<ReferencedColumnException>(() => columns.Remove(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "description"
+            }));
+        }
+
+        [Test]
+        public void IfTheColumnIsReferencedByADefaultConstraint_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));
+                ALTER TABLE [dbo].[TEST_TABLE] ADD CONSTRAINT [DEFAULT_TEST_TABLE_description] DEFAULT 'test' FOR [description]");
+
+            Assert.Throws<ReferencedColumnException>(() => columns.Remove(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "description"
+            }));
+        }
+
+        [Test]
+        public void IfTheColumnIsReferencedByAnIndex_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL);
+                CREATE INDEX idx_TEST_TABLE_id2 ON [dbo].[TEST_TABLE](id2)");
+
+            Assert.Throws<ReferencedColumnException>(() => columns.Remove(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id2"
+            }));
+        }
+
+        [Test]
+        public void IfTheColumnDoesNotExist_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL)");
+
+            Assert.Throws<ColumnNotFoundException>(() => columns.Remove(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "description"
+            }));
+        }
+
+        [Test]
+        public void IfTheTableDoesNotExist_RemoveMethodMustThrowException() {
+            Assert.Throws<TableNotFoundException>(() => columns.Remove(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "description"
             }));
         }
     }

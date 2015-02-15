@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Core.Descriptions;
@@ -6,7 +7,6 @@ using Core.Exceptions;
 using Core.Interfaces;
 using Microsoft.SqlServer.Management.Smo;
 using SqlServer.Enums;
-using DataType = SqlServer.Enums.DataType;
 
 namespace SqlServer {
     public class Columns : IColumn {
@@ -41,7 +41,18 @@ namespace SqlServer {
         }
 
         public void Remove(ColumnDescription column) {
-            throw new NotImplementedException();
+            var table = sqlServerDatabase.GetTable(column.Schema, column.TableName);
+            if (table == null) throw new TableNotFoundException();
+            if (table.Columns.Count == 1) throw new SingleColumnException();
+            
+            if(!table.Columns.Any(c => c.Name.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
+                throw new ColumnNotFoundException();
+
+            if(ColumnIsReferencedByAConstraint(column))
+                throw new ReferencedColumnException();
+
+            database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP COLUMN {2}",
+                column.Schema, column.TableName, column.Name));
         }
 
         public void ChangeType(ColumnDescription @from, ColumnDescription to) {
@@ -73,7 +84,7 @@ namespace SqlServer {
                 return true;
 
             int maximumSize;
-            bool parsedSuccessfully = Int32.TryParse(column.MaximumSize, out maximumSize);
+            var parsedSuccessfully = Int32.TryParse(column.MaximumSize, out maximumSize);
             if (!parsedSuccessfully || maximumSize <= 0) return false;
 
             if (column.Type.Equals("varchar", StringComparison.InvariantCultureIgnoreCase)) {
@@ -85,5 +96,67 @@ namespace SqlServer {
 
             return true;
         }
+
+        private bool ColumnIsReferencedByAConstraint(ColumnDescription column) {
+            var tableDescription = new TableDescription {
+                Schema = column.Schema,
+                Name = column.TableName
+            };
+
+            return ColumnIsReferencedByAPrimaryKey(tableDescription, column) ||
+                   ColumnIsReferencedByAForeignKey(tableDescription, column) ||
+                   ColumnIsReferencedByAUniqueKey(tableDescription, column) ||
+                   ColumnIsReferencedByADefault(tableDescription, column) ||
+                   ColumnIsReferencedByAnIndex(tableDescription, column);
+        }
+
+        private bool ColumnIsReferencedByAPrimaryKey(TableDescription tableDescription, ColumnDescription column) {
+            PrimaryKeyDescription primaryKey = sqlServerDatabase.GetPrimaryKey(tableDescription);
+            return primaryKey != null && 
+                primaryKey.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        private bool ColumnIsReferencedByAForeignKey(TableDescription tableDescription, ColumnDescription column) {
+            IList<ForeignKeyDescription> foreignKeys = sqlServerDatabase.GetForeignKeys(tableDescription);
+            foreach (var foreignKey in foreignKeys) {
+                if (foreignKey.Columns.Any(c => c.Key.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool ColumnIsReferencedByAUniqueKey(TableDescription tableDescription, ColumnDescription column) {
+            IList<UniqueDescription> uniqueKeys = sqlServerDatabase.GetUniqueKeys(tableDescription);
+            foreach (var uniqueKey in uniqueKeys) {
+                if (uniqueKey.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool ColumnIsReferencedByADefault(TableDescription tableDescription, ColumnDescription column) {
+            IList<DefaultDescription> defaults = sqlServerDatabase.GetDefaults();
+            foreach (var defaultDescription in defaults) {
+                if (defaultDescription.Schema.Equals(column.Schema, StringComparison.InvariantCultureIgnoreCase) &&
+                    defaultDescription.TableName.Equals(column.TableName, StringComparison.InvariantCultureIgnoreCase) &&
+                    defaultDescription.ColumnName.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool ColumnIsReferencedByAnIndex(TableDescription tableDescription, ColumnDescription column) {
+            IList<IndexDescription> indexes = sqlServerDatabase.GetIndexes(column.Schema, column.TableName);
+            foreach (var index in indexes) {
+                if (index.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    return true;
+            }
+
+            return false;
+        }
+
     }
 }

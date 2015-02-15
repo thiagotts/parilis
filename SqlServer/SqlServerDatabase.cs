@@ -302,6 +302,20 @@ namespace SqlServer {
             return indexDescription;
         }
 
+        public IList<IndexDescription> GetIndexes(string schema, string tableName) {
+            var table = database.Tables[tableName, schema];
+
+            IList<IndexDescription> indexes = new List<IndexDescription>();
+            if (table == null) return indexes;
+
+            foreach (Index index in table.Indexes) {
+                IndexDescription indexDescription = GetIndex(schema, tableName, index.Name);
+                indexes.Add(indexDescription);
+            }
+
+            return indexes;
+        }
+
         public ColumnDescription GetColumn(string schema, string tableName, string columnName) {
             if (!ColumnExists(schema, tableName, columnName)) return null;
 
