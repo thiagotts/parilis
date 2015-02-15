@@ -10,5 +10,7 @@ namespace Core.Interfaces {
         UniqueDescription GetUniqueKey(string uniqueKeyName);
         DefaultDescription GetDefault(string defaultName, string schema);
         IList<DefaultDescription> GetDefaults();
+        ColumnDescription GetColumn(string schema, string tableName, string columnName);
+        TableDescription GetTable(string schema, string tableName);
     }
 }

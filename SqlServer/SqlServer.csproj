@@ -42,7 +42,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Columns.cs" />
     <Compile Include="Constraints.cs" />
+    <Compile Include="Enums\Keyword.cs" />
     <Compile Include="Enums\DataType.cs" />
     <Compile Include="Enums\Enums.cs" />
     <Compile Include="Indexes.cs" />

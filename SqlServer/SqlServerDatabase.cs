@@ -5,6 +5,7 @@ using System.Linq;
 using Core.Descriptions;
 using Core.Interfaces;
 using Microsoft.SqlServer.Management.Smo;
+using DataType = SqlServer.Enums.DataType;
 
 namespace SqlServer {
     public class SqlServerDatabase : IDatabase {
@@ -261,7 +262,7 @@ namespace SqlServer {
 
             var dataSet = database.ExecuteWithResults(query);
             var results = GetResults(dataSet);
-            
+
             var defaults = new List<DefaultDescription>();
             if (!results.Any()) return defaults;
 
@@ -301,8 +302,8 @@ namespace SqlServer {
             return indexDescription;
         }
 
-        internal ColumnDescription GetFullDescription(string schema, string tableName, string columnName) {
-            if (!ColumnExists(schema, tableName, columnName)) throw new ArgumentException();
+        public ColumnDescription GetColumn(string schema, string tableName, string columnName) {
+            if (!ColumnExists(schema, tableName, columnName)) return null;
 
             var query = string.Format(@"SELECT IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
                                         FROM INFORMATION_SCHEMA.COLUMNS
@@ -320,8 +321,33 @@ namespace SqlServer {
                 Name = columnName,
                 AllowsNull = results[0][0].Equals("YES", StringComparison.InvariantCultureIgnoreCase),
                 Type = results[0][1],
-                MaximumSize = results[0].Count > 2 ? results[0][2] : null,
+                MaximumSize = results[0].Count > 2 ?
+                    results[0][2].Equals("-1") ? "max" : results[0][2]
+                    : null,
             };
+        }
+
+        public TableDescription GetTable(string schema, string tableName) {
+            database.Tables.Refresh();
+            var table = database.Tables[tableName, schema];
+            if (table == null) return null;
+
+            var tableDescription = new TableDescription {
+                Name = table.Name,
+                Schema = table.Schema,
+                Columns = new List<ColumnDescription>()
+            };
+
+            foreach (Column column in table.Columns) {
+                tableDescription.Columns.Add(GetColumn(schema, tableName, column.Name));
+            }
+
+            return tableDescription;
+        }
+
+        internal bool DataTypeIsValid(string dataType) {
+            var dataTypes = Enums.Enums.GetDefaultValues<DataType>();
+            return dataTypes.Any(t => t.Equals(dataType, StringComparison.InvariantCultureIgnoreCase));
         }
 
         internal bool ColumnHasDuplicatedValues(ColumnDescription column) {

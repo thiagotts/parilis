@@ -170,7 +170,7 @@ namespace SqlServer {
                 var column = table.Columns[columnName];
                 if(column == null) return false;
 
-                var description = sqlServerDatabase.GetFullDescription(uniqueDescription.Schema, uniqueDescription.TableName, columnName);
+                var description = sqlServerDatabase.GetColumn(uniqueDescription.Schema, uniqueDescription.TableName, columnName);
                 if (description == null) return false;
 
                 if (description.Type.Equals("varchar", StringComparison.InvariantCultureIgnoreCase) &&
