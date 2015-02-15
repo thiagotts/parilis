@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Core.Descriptions;
@@ -55,8 +56,20 @@ namespace SqlServer {
                 column.Schema, column.TableName, column.Name));
         }
 
-        public void ChangeType(ColumnDescription @from, ColumnDescription to) {
-            throw new NotImplementedException();
+        public void ChangeType(ColumnDescription column) {
+            try {
+                database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ALTER COLUMN {2} {3}{4} {5}",
+                    column.Schema, column.TableName, column.Name, column.Type,
+                    string.IsNullOrWhiteSpace(column.MaximumSize) ? string.Empty : string.Format("({0})", column.MaximumSize),
+                    column.AllowsNull ? "NULL" : "NOT NULL"));
+            }
+            catch (FailedOperationException ex) {
+                if (ex.InnerException != null &&
+                    ex.InnerException.InnerException != null &&
+                    ex.InnerException.InnerException is SqlException &&
+                    (ex.InnerException.InnerException as SqlException).Number == 8114)
+                    throw new InvalidDataTypeException("The existent values could not be converted to the new data type.");
+            }
         }
 
         private bool ColumnNameIsValid(string columnName) {
@@ -106,8 +119,8 @@ namespace SqlServer {
             return ColumnIsReferencedByAPrimaryKey(tableDescription, column) ||
                    ColumnIsReferencedByAForeignKey(tableDescription, column) ||
                    ColumnIsReferencedByAUniqueKey(tableDescription, column) ||
-                   ColumnIsReferencedByADefault(tableDescription, column) ||
-                   ColumnIsReferencedByAnIndex(tableDescription, column);
+                   ColumnIsReferencedByADefault(column) ||
+                   ColumnIsReferencedByAnIndex(column);
         }
 
         private bool ColumnIsReferencedByAPrimaryKey(TableDescription tableDescription, ColumnDescription column) {
@@ -136,7 +149,7 @@ namespace SqlServer {
             return false;
         }
 
-        private bool ColumnIsReferencedByADefault(TableDescription tableDescription, ColumnDescription column) {
+        private bool ColumnIsReferencedByADefault(ColumnDescription column) {
             IList<DefaultDescription> defaults = sqlServerDatabase.GetDefaults();
             foreach (var defaultDescription in defaults) {
                 if (defaultDescription.Schema.Equals(column.Schema, StringComparison.InvariantCultureIgnoreCase) &&
@@ -148,7 +161,7 @@ namespace SqlServer {
             return false;
         }
 
-        private bool ColumnIsReferencedByAnIndex(TableDescription tableDescription, ColumnDescription column) {
+        private bool ColumnIsReferencedByAnIndex(ColumnDescription column) {
             IList<IndexDescription> indexes = sqlServerDatabase.GetIndexes(column.Schema, column.TableName);
             foreach (var index in indexes) {
                 if (index.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))

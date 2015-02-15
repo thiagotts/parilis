@@ -352,5 +352,98 @@ namespace Tests.SqlServer {
                 Name = "description"
             }));
         }
+
+        [Test]
+        public void WhenColumnsExistsAndIsNotReferencedByAnyConstraint_ChangeTypeMethodMustChangeTheDataType() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL)");
+
+            columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id2",
+                Type = "varchar",
+                MaximumSize = "100"
+            });
+
+            ColumnDescription column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id2");
+
+            Assert.IsNotNull(column);
+            Assert.AreEqual("id2", column.Name);
+            Assert.AreEqual("varchar", column.Type);
+            Assert.AreEqual("100", column.MaximumSize);
+        }
+
+        [Test]
+        public void WhenColumnsExistsAndHasValidValuesInserted_ChangeTypeMethodMustChangeTheDataType() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL);
+                INSERT INTO [dbo].[TEST_TABLE] VALUES (1,'123');");
+
+            columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "description",
+                Type = "bigint"
+            });
+
+            ColumnDescription column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "description");
+
+            Assert.IsNotNull(column);
+            Assert.AreEqual("description", column.Name);
+            Assert.AreEqual("bigint", column.Type);
+        }
+
+        [Test]
+        public void WhenColumnsExistsAndHasInvalidValuesInserted_ChangeTypeMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL);
+                INSERT INTO [dbo].[TEST_TABLE] VALUES (1,'abc');");
+
+            Assert.Throws<InvalidDataTypeException>(() => columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "description",
+                Type = "bigint"
+            }));
+        }
+
+        [Test]
+        public void WhenColumnsExistsAndIsReferencedByAPrimaryKey_ChangeTypeMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void WhenColumnsExistsAndIsReferencedByAForeignKey_ChangeTypeMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void WhenColumnsExistsAndIsReferencedByAUniqueKey_ChangeTypeMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void WhenColumnsExistsAndIsReferencedByADefaultConstraint_ChangeTypeMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void WhenColumnsExistsAndIsReferencedByAnIndex_ChangeTypeMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void WhenColumnDoesNotExist_ChangeTypeMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void WhenTableDoesNotExist_ChangeTypeMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
     }
 }
