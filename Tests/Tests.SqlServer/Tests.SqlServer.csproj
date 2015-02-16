@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="ColumnsTests.cs" />
     <Compile Include="IndexesTests.cs" />
+    <Compile Include="SchemasTests.cs" />
     <Compile Include="SqlServerDatabaseTests.cs" />
     <Compile Include="ConstraintsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -424,5 +424,11 @@ namespace SqlServer {
 
             return results;
         }
+
+        public bool SchemaExists(string schemaName) {
+            database.Schemas.Refresh();
+            Schema schema = database.Schemas[schemaName];
+            return schema != null;
+        }
     }
 }

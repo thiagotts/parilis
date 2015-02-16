@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Core.Descriptions;
 using Core.Exceptions;
@@ -32,12 +31,12 @@ namespace SqlServer {
         }
 
         public void Remove(string schema, string tableName) {
-            TableDescription table = sqlServerDatabase.GetTable(schema, tableName);
-            if(table == null) throw new TableNotFoundException();
+            var table = sqlServerDatabase.GetTable(schema, tableName);
+            if (table == null) throw new TableNotFoundException();
 
-            PrimaryKeyDescription primaryKey = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = schema, Name = tableName});
+            var primaryKey = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = schema, Name = tableName});
             if (primaryKey != null) {
-                IList<ForeignKeyDescription> foreignKeys = sqlServerDatabase.GetForeignKeysReferencing(primaryKey);
+                var foreignKeys = sqlServerDatabase.GetForeignKeysReferencing(primaryKey);
                 if (foreignKeys.Any()) throw new ReferencedTableException();
             }
 
