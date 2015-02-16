@@ -48,6 +48,7 @@
     <Compile Include="Descriptions\ColumnDescription.cs" />
     <Compile Include="Descriptions\UniqueDescription.cs" />
     <Compile Include="Exceptions\ColumnNotFoundException.cs" />
+    <Compile Include="Exceptions\InvalidTableNameException.cs" />
     <Compile Include="Exceptions\ParilisException.cs" />
     <Compile Include="Exceptions\SingleColumnException.cs" />
     <Compile Include="Exceptions\ReferencedColumnException.cs" />
