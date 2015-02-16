@@ -14,7 +14,7 @@ namespace SqlServer.Enums {
         }
 
         public static IEnumerable<string> GetDefaultValues<T>() {
-            var fields = typeof(T).GetFields();
+            var fields = typeof (T).GetFields();
             IList<string> result = new List<string>();
 
             foreach (var field in fields) {

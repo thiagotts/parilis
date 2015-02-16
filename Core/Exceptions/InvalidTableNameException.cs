@@ -1,3 +1,3 @@
 ﻿namespace Core.Exceptions {
-    public class InvalidTableNameException : ParilisException { }
+    public class InvalidTableNameException : ParilisException {}
 }

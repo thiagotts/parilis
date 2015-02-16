@@ -61,7 +61,7 @@ namespace Tests.SqlServer {
 
             schemas.Remove("schema1");
 
-            bool result = sqlServerDatabase.SchemaExists("schema1");
+            var result = sqlServerDatabase.SchemaExists("schema1");
             Assert.IsFalse(result);
         }
 
@@ -83,8 +83,6 @@ namespace Tests.SqlServer {
         [Test]
         public void IfTheSchemaIsDbo_RemoveMethodMustThrowException() {
             Assert.Throws<ReferencedSchemaException>(() => schemas.Remove("dbo"));
-
         }
-      
     }
 }

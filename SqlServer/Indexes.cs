@@ -17,10 +17,10 @@ namespace SqlServer {
         }
 
         public void Create(IndexDescription indexDescription) {
-            if(!ReferencedColumnsAreInvalid(indexDescription))
+            if (!ReferencedColumnsAreInvalid(indexDescription))
                 throw new InvalidReferenceColumnException();
 
-            IndexDescription index = sqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
+            var index = sqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
             if (index != null) throw new InvalidIndexNameException();
 
             database.ExecuteNonQuery(string.Format(@"CREATE {0} INDEX {1} ON {2}.{3} ({4})",
@@ -29,7 +29,7 @@ namespace SqlServer {
         }
 
         public void Remove(IndexDescription indexDescription) {
-            IndexDescription index = sqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
+            var index = sqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
             if (index == null) throw new IndexNotFoundException();
 
             database.ExecuteNonQuery(string.Format(@"DROP INDEX [{0}].[{1}].[{2}]",
@@ -40,7 +40,7 @@ namespace SqlServer {
             var table = database.Tables[indexDescription.TableName, indexDescription.Schema];
             if (table == null) return false;
 
-            var invalidTypes = new List<string> { "text", "ntext", "image", "xml", "geography", "geometry" };
+            var invalidTypes = new List<string> {"text", "ntext", "image", "xml", "geography", "geometry"};
             foreach (var columnName in indexDescription.ColumnNames) {
                 if (indexDescription.ColumnNames.Count(name => name.Equals(columnName, StringComparison.InvariantCultureIgnoreCase)) > 1)
                     return false;
@@ -60,7 +60,7 @@ namespace SqlServer {
                     return false;
 
                 if (invalidTypes.Any(t => t.Equals(description.Type, StringComparison.InvariantCultureIgnoreCase)))
-                    return false;                
+                    return false;
             }
 
             return true;

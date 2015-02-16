@@ -66,9 +66,9 @@ namespace SqlServer {
                 Name = foreignKeyDescription.TableName
             });
 
-            if(!foreignKeys.Any(key => key.Schema.Equals(foreignKeyDescription.Schema) &&
-                key.TableName.Equals(foreignKeyDescription.TableName) &&
-                key.Name.Equals(foreignKeyDescription.Name)))
+            if (!foreignKeys.Any(key => key.Schema.Equals(foreignKeyDescription.Schema) &&
+                                        key.TableName.Equals(foreignKeyDescription.TableName) &&
+                                        key.Name.Equals(foreignKeyDescription.Name)))
                 throw new ConstraintNotFoundException();
 
             database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
@@ -92,7 +92,7 @@ namespace SqlServer {
             if (uniqueKey == null) throw new ConstraintNotFoundException();
 
             var foreignKeys = sqlServerDatabase.GetForeignKeysReferencing(uniqueDescription);
-            if(foreignKeys.Any()) throw new ReferencedConstraintException();
+            if (foreignKeys.Any()) throw new ReferencedConstraintException();
 
             database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
                 uniqueDescription.Schema, uniqueDescription.TableName, uniqueDescription.Name));
@@ -117,7 +117,7 @@ namespace SqlServer {
 
         public void RemoveDefault(DefaultDescription defaultDescription) {
             var defaultValue = sqlServerDatabase.GetDefault(defaultDescription.Name, defaultDescription.Schema);
-            if(defaultValue == null) throw new ConstraintNotFoundException();
+            if (defaultValue == null) throw new ConstraintNotFoundException();
 
             database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
                 defaultDescription.Schema, defaultDescription.TableName, defaultDescription.Name));
@@ -162,13 +162,13 @@ namespace SqlServer {
             var table = database.Tables[uniqueDescription.TableName, uniqueDescription.Schema];
             if (table == null) return false;
 
-            var invalidTypes = new List<string> { "text", "ntext", "image", "xml", "geography", "geometry" };
+            var invalidTypes = new List<string> {"text", "ntext", "image", "xml", "geography", "geometry"};
             foreach (var columnName in uniqueDescription.ColumnNames) {
                 if (uniqueDescription.ColumnNames.Count(name => name.Equals(columnName, StringComparison.InvariantCultureIgnoreCase)) > 1)
                     return false;
 
                 var column = table.Columns[columnName];
-                if(column == null) return false;
+                if (column == null) return false;
 
                 var description = sqlServerDatabase.GetColumn(uniqueDescription.Schema, uniqueDescription.TableName, columnName);
                 if (description == null) return false;

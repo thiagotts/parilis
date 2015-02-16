@@ -1,3 +1,3 @@
 ﻿namespace Core.Exceptions {
-    public class SchemaNotFoundException : ParilisException { }
+    public class SchemaNotFoundException : ParilisException {}
 }

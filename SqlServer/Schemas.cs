@@ -1,8 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Core.Exceptions;
 using Core.Interfaces;
-using Microsoft.SqlServer.Management.Sdk.Sfc;
 using Microsoft.SqlServer.Management.Smo;
 
 namespace SqlServer {
@@ -23,10 +21,10 @@ namespace SqlServer {
         }
 
         public void Remove(string schemaName) {
-            if(!sqlServerDatabase.SchemaExists(schemaName))
+            if (!sqlServerDatabase.SchemaExists(schemaName))
                 throw new SchemaNotFoundException();
 
-            if(SchemaIsReferenced(schemaName))
+            if (SchemaIsReferenced(schemaName))
                 throw new ReferencedSchemaException();
 
             database.ExecuteNonQuery(string.Format(@"DROP SCHEMA {0}", schemaName));
@@ -34,10 +32,10 @@ namespace SqlServer {
 
         private bool SchemaIsReferenced(string schemaName) {
             database.Schemas.Refresh();
-            Schema schema = database.Schemas[schemaName];
+            var schema = database.Schemas[schemaName];
             if (schema == null) return false;
 
-            Urn[] ownedObjects = schema.EnumOwnedObjects();
+            var ownedObjects = schema.EnumOwnedObjects();
             return ownedObjects != null && ownedObjects.Any();
         }
     }

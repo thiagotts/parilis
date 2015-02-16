@@ -105,6 +105,6 @@ namespace SqlServer.Enums {
         Geography,
 
         [DefaultValue("geometry")]
-        Geometry 
+        Geometry
     }
 }

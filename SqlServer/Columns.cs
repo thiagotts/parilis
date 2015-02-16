@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
 using Microsoft.SqlServer.Management.Smo;
-using SqlServer.Enums;
 
 namespace SqlServer {
     public class Columns : IColumn {
@@ -45,11 +42,11 @@ namespace SqlServer {
             var table = sqlServerDatabase.GetTable(column.Schema, column.TableName);
             if (table == null) throw new TableNotFoundException();
             if (table.Columns.Count == 1) throw new SingleColumnException();
-            
-            if(!table.Columns.Any(c => c.Name.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
+
+            if (!table.Columns.Any(c => c.Name.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
                 throw new ColumnNotFoundException();
 
-            if(ColumnIsReferencedByAConstraint(column))
+            if (ColumnIsReferencedByAConstraint(column))
                 throw new ReferencedColumnException();
 
             database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP COLUMN {2}",
@@ -127,13 +124,13 @@ namespace SqlServer {
         }
 
         private bool ColumnIsReferencedByAPrimaryKey(TableDescription tableDescription, ColumnDescription column) {
-            PrimaryKeyDescription primaryKey = sqlServerDatabase.GetPrimaryKey(tableDescription);
-            return primaryKey != null && 
-                primaryKey.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase));
+            var primaryKey = sqlServerDatabase.GetPrimaryKey(tableDescription);
+            return primaryKey != null &&
+                   primaryKey.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase));
         }
 
         private bool ColumnIsReferencedByAForeignKey(TableDescription tableDescription, ColumnDescription column) {
-            IList<ForeignKeyDescription> foreignKeys = sqlServerDatabase.GetForeignKeys(tableDescription);
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(tableDescription);
             foreach (var foreignKey in foreignKeys) {
                 if (foreignKey.Columns.Any(c => c.Key.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
                     return true;
@@ -143,7 +140,7 @@ namespace SqlServer {
         }
 
         private bool ColumnIsReferencedByAUniqueKey(TableDescription tableDescription, ColumnDescription column) {
-            IList<UniqueDescription> uniqueKeys = sqlServerDatabase.GetUniqueKeys(tableDescription);
+            var uniqueKeys = sqlServerDatabase.GetUniqueKeys(tableDescription);
             foreach (var uniqueKey in uniqueKeys) {
                 if (uniqueKey.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
                     return true;
@@ -153,7 +150,7 @@ namespace SqlServer {
         }
 
         private bool ColumnIsReferencedByADefault(ColumnDescription column) {
-            IList<DefaultDescription> defaults = sqlServerDatabase.GetDefaults();
+            var defaults = sqlServerDatabase.GetDefaults();
             foreach (var defaultDescription in defaults) {
                 if (defaultDescription.Schema.Equals(column.Schema, StringComparison.InvariantCultureIgnoreCase) &&
                     defaultDescription.TableName.Equals(column.TableName, StringComparison.InvariantCultureIgnoreCase) &&
@@ -165,7 +162,7 @@ namespace SqlServer {
         }
 
         private bool ColumnIsReferencedByAnIndex(ColumnDescription column) {
-            IList<IndexDescription> indexes = sqlServerDatabase.GetIndexes(column.Schema, column.TableName);
+            var indexes = sqlServerDatabase.GetIndexes(column.Schema, column.TableName);
             foreach (var index in indexes) {
                 if (index.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
                     return true;
@@ -173,6 +170,5 @@ namespace SqlServer {
 
             return false;
         }
-
     }
 }

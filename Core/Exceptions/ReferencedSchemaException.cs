@@ -1,3 +1,3 @@
 ﻿namespace Core.Exceptions {
-    public class ReferencedSchemaException : ParilisException { }
+    public class ReferencedSchemaException : ParilisException {}
 }

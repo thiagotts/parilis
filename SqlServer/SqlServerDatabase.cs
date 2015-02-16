@@ -311,7 +311,7 @@ namespace SqlServer {
             if (table == null) return indexes;
 
             foreach (Index index in table.Indexes) {
-                IndexDescription indexDescription = GetIndex(schema, tableName, index.Name);
+                var indexDescription = GetIndex(schema, tableName, index.Name);
                 indexes.Add(indexDescription);
             }
 
@@ -427,7 +427,7 @@ namespace SqlServer {
 
         public bool SchemaExists(string schemaName) {
             database.Schemas.Refresh();
-            Schema schema = database.Schemas[schemaName];
+            var schema = database.Schemas[schemaName];
             return schema != null;
         }
     }

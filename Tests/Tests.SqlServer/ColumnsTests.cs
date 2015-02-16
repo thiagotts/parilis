@@ -367,7 +367,7 @@ namespace Tests.SqlServer {
                 MaximumSize = "100"
             });
 
-            ColumnDescription column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id2");
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id2");
 
             Assert.IsNotNull(column);
             Assert.AreEqual("id2", column.Name);
@@ -389,7 +389,7 @@ namespace Tests.SqlServer {
                 Type = "bigint"
             });
 
-            ColumnDescription column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "description");
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "description");
 
             Assert.IsNotNull(column);
             Assert.AreEqual("description", column.Name);

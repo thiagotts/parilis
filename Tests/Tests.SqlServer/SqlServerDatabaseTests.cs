@@ -151,7 +151,7 @@ namespace Tests.SqlServer {
             });
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(2 , result.Count);
+            Assert.AreEqual(2, result.Count);
             Assert.IsTrue(result.Any(key => key.Name.Equals("FK_TEST_1")));
             Assert.IsTrue(result.Any(key => key.Name.Equals("FK_TEST_2")));
         }
@@ -192,7 +192,7 @@ namespace Tests.SqlServer {
                 CONSTRAINT FK_TEST_1 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id),
                 CONSTRAINT FK_TEST_2 FOREIGN KEY (id3) REFERENCES TEST_TABLE_2(id))");
 
-            var result = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE_3" });
+            var result = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_3"});
 
             Assert.AreEqual(2, result.Count);
             Assert.AreEqual("FK_TEST_1", result.First().Name);
@@ -207,7 +207,7 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_TEST PRIMARY KEY (id))");
 
-            var result = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            var result = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
@@ -221,7 +221,7 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
                 CONSTRAINT UQ_TEST_description UNIQUE (description))");
 
-            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual("UQ_TEST_description", result.Single().Name);
@@ -237,7 +237,7 @@ namespace Tests.SqlServer {
                 CONSTRAINT UQ_TEST_description UNIQUE (description),
                 CONSTRAINT UQ_TEST_description2 UNIQUE (description2))");
 
-            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.AreEqual(2, result.Count);
             Assert.AreEqual("UQ_TEST_description", result.First().Name);
@@ -253,7 +253,7 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
                 CONSTRAINT UQ_TEST_description UNIQUE (description, description2))");
 
-            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual("UQ_TEST_description", result.Single().Name);
@@ -264,7 +264,7 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenTableDoesNotHaveUniqueKeys_GetMethodMustReturnAnEmptyList() {
-            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.AreEqual(0, result.Count);
         }
@@ -318,6 +318,5 @@ namespace Tests.SqlServer {
 
             Assert.IsNull(index);
         }
-      
     }
 }

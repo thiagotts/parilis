@@ -639,7 +639,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> { "description" }
+                ColumnNames = new List<string> {"description"}
             }));
         }
 
@@ -655,7 +655,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> { "description" }
+                ColumnNames = new List<string> {"description"}
             });
 
             var uniqueKey = sqlServerDatabase.GetUniqueKey("UQ_TEST_description");

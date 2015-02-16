@@ -26,7 +26,7 @@ namespace Tests.Core {
         }
 
         private void InitializeServer() {
-            ServerConnection serverConnection = new ServerConnection(ServerHostname, User, Password);
+            var serverConnection = new ServerConnection(ServerHostname, User, Password);
             server = new Server(serverConnection);
         }
 
@@ -36,7 +36,7 @@ namespace Tests.Core {
                 server.Databases[DatabaseName].Drop();
             }
 
-            Database database = new Database(server, DatabaseName);
+            var database = new Database(server, DatabaseName);
             server.Databases.Add(database);
             database.Create();
 
