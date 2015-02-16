@@ -1,5 +1,3 @@
-﻿using System;
-
-namespace Core.Exceptions {
-    public class IndexNotFoundException : Exception { }
+﻿namespace Core.Exceptions {
+    public class IndexNotFoundException : ParilisException {}
 }

@@ -1,5 +1,3 @@
-﻿using System;
-
-namespace Core.Exceptions {
-    public class InvalidIndexNameException : Exception { }
+﻿namespace Core.Exceptions {
+    public class InvalidIndexNameException : ParilisException {}
 }

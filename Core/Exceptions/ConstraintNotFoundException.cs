@@ -1,5 +1,3 @@
-﻿using System;
-
-namespace Core.Exceptions {
-    public class ConstraintNotFoundException : Exception { }
+﻿namespace Core.Exceptions {
+    public class ConstraintNotFoundException : ParilisException {}
 }

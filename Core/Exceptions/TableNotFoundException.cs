@@ -1,5 +1,3 @@
-﻿using System;
-
-namespace Core.Exceptions {
-    public class TableNotFoundException : Exception { }
+﻿namespace Core.Exceptions {
+    public class TableNotFoundException : ParilisException {}
 }

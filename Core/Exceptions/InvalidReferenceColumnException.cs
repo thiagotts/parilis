@@ -1,5 +1,3 @@
-﻿using System;
-
-namespace Core.Exceptions {
-    public class InvalidReferenceColumnException : Exception { }
+﻿namespace Core.Exceptions {
+    public class InvalidReferenceColumnException : ParilisException {}
 }

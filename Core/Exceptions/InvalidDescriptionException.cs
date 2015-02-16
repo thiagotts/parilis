@@ -1,5 +1,3 @@
-﻿using System;
-
-namespace Core.Exceptions {
-    public class InvalidDescriptionException : Exception { }
+﻿namespace Core.Exceptions {
+    public class InvalidDescriptionException : ParilisException {}
 }

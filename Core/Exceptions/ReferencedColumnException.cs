@@ -1,5 +1,3 @@
-﻿using System;
-
-namespace Core.Exceptions {
-    public class ReferencedColumnException : Exception { }
+﻿namespace Core.Exceptions {
+    public class ReferencedColumnException : ParilisException {}
 }

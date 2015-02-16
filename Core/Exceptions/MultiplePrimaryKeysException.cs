@@ -1,5 +1,3 @@
-﻿using System;
-
-namespace Core.Exceptions {
-    public class MultiplePrimaryKeysException : Exception {}
+﻿namespace Core.Exceptions {
+    public class MultiplePrimaryKeysException : ParilisException {}
 }

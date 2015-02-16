@@ -1,5 +1,3 @@
-﻿using System;
-
-namespace Core.Exceptions {
-    public class ColumnNotFoundException : Exception { }
+﻿namespace Core.Exceptions {
+    public class ColumnNotFoundException : ParilisException {}
 }
