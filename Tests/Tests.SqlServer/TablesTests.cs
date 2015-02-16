@@ -21,12 +21,16 @@ namespace Tests.SqlServer {
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
         }
 
-        [TearDown]
-        public void FinishTest() {
+        [SetUp]
+        public void InitializeTest() {
+            Database.Tables.Refresh();
             var table = Database.Tables["TEST_TABLE_2"];
             if (table != null) table.Drop();
 
             table = Database.Tables["TEST_TABLE"];
+            if (table != null) table.Drop();
+
+            table = Database.Tables["TEST_TABLE", "testschema"];
             if (table != null) table.Drop();
         }
 
@@ -121,47 +125,126 @@ namespace Tests.SqlServer {
 
         [Test]
         public void IfTableExistsWithNoDataAndIsNotReferencedByAnyConstraint_RemoveMethodMustRemoveTheTable() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            tables.Remove("dbo", "TEST_TABLE");
+
+            var table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE");
+
+            Assert.IsNull(table);
         }
 
         [Test]
         public void IfTableExistsWithExistentDataAndIsNotReferencedByAnyConstraint_RemoveMethodMustRemoveTheTable() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL);
+                INSERT INTO [dbo].[TEST_TABLE] VALUES (1, 'test');");
+
+            tables.Remove("dbo", "TEST_TABLE");
+
+            var table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE");
+
+            Assert.IsNull(table);
         }
 
         [Test]
-        public void IfTableHasAPrimaryKey_RemoveMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+        public void IfTableHasAPrimaryKey_RemoveMethodMustRemoveTheTable() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            tables.Remove("dbo", "TEST_TABLE");
+
+            var table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE");
+
+            Assert.IsNull(table);
         }
 
         [Test]
-        public void IfTableHasAForeignKey_RemoveMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+        public void IfTableHasAForeignKey_RemoveMethodMustRemoveTheTable() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT FK_TEST FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+            tables.Remove("dbo", "TEST_TABLE_2");
+
+            var table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE_2");
+
+            Assert.IsNull(table);
         }
 
         [Test]
         public void IfTableIsReferencedByAForeignKey_RemoveMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT FK_TEST FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+            Assert.Throws<ReferencedTableException>(() => tables.Remove("dbo", "TEST_TABLE"));
+        }
+
+        [Test]
+        public void IfTableHasAUniqueKey_RemoveMethodMustRemoveTheTable() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            tables.Remove("dbo", "TEST_TABLE");
+
+            var table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE");
+
+            Assert.IsNull(table);
         }
 
         [Test]
         public void IfTableHasADefaultConstraint_RemoveMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
-        }
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));
+                ALTER TABLE [dbo].[TEST_TABLE] ADD CONSTRAINT [DEFAULT_TEST_TABLE_description] DEFAULT 'test' FOR [description]");
 
-        [Test]
-        public void IfTableHasAUniqueKey_RemoveMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            tables.Remove("dbo", "TEST_TABLE");
+
+            var table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE");
+
+            Assert.IsNull(table);
         }
 
         [Test]
         public void IfTableHasAnIndex_RemoveMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL);
+                CREATE INDEX idx_TEST_TABLE_id2 ON [dbo].[TEST_TABLE](id2)");
+
+            tables.Remove("dbo", "TEST_TABLE");
+
+            var table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE");
+
+            Assert.IsNull(table);
         }
 
         [Test]
         public void IfTableDoesNotExist_RemoveMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Assert.Throws<TableNotFoundException>(() => tables.Remove("dbo", "TEST_TABLE"));
         }
     }
 }

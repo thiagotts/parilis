@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
@@ -31,7 +32,16 @@ namespace SqlServer {
         }
 
         public void Remove(string schema, string tableName) {
-            throw new NotImplementedException();
+            TableDescription table = sqlServerDatabase.GetTable(schema, tableName);
+            if(table == null) throw new TableNotFoundException();
+
+            PrimaryKeyDescription primaryKey = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = schema, Name = tableName});
+            if (primaryKey != null) {
+                IList<ForeignKeyDescription> foreignKeys = sqlServerDatabase.GetForeignKeysReferencing(primaryKey);
+                if (foreignKeys.Any()) throw new ReferencedTableException();
+            }
+
+            database.ExecuteNonQuery(string.Format(@"DROP TABLE [{0}].[{1}]", schema, tableName));
         }
 
         private bool TableNameIsValid(TableDescription tableDescription) {
