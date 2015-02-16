@@ -4,6 +4,7 @@ using Core.Descriptions;
 using Core.Exceptions;
 using NUnit.Framework;
 using SqlServer;
+using SqlServer.Enums;
 using Tests.Core;
 
 namespace Tests.SqlServer {
@@ -29,6 +30,10 @@ namespace Tests.SqlServer {
             if (table != null) table.Drop();
         }
 
+        private readonly string[] InvalidTableNames = Enums.GetDescriptions<Keyword>().Concat(new List<string> {
+            "123abc", "abc abc", "%abc", "$abc", "ab*c", "", "  ", null, new string('a', 129)
+        }).ToArray();
+
         [Test]
         public void IfThereIsNotAnotherTableWithTheSameNameInTheSameSchema_CreateMethodMustCreateTheTable() {
             tables.Create(new TableDescription {
@@ -44,7 +49,7 @@ namespace Tests.SqlServer {
                 }
             });
 
-            TableDescription table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE");
+            var table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE");
 
             Assert.IsNotNull(table);
             Assert.AreEqual("TEST_TABLE", table.Name);
@@ -72,7 +77,7 @@ namespace Tests.SqlServer {
                 }
             });
 
-            TableDescription table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE");
+            var table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE");
 
             Assert.IsNotNull(table);
             Assert.AreEqual("TEST_TABLE", table.Name);
@@ -98,6 +103,65 @@ namespace Tests.SqlServer {
                     }
                 }
             }));
+        }
+
+        [Test, TestCaseSource("InvalidTableNames")]
+        public void IfTableHasAnInvalidName_CreateMethodMustThrowException(string tableName) {
+            Assert.Throws<InvalidTableNameException>(() => tables.Create(new TableDescription {
+                Schema = "dbo",
+                Name = tableName,
+                Columns = new List<ColumnDescription> {
+                    new ColumnDescription {
+                        Name = "id",
+                        Type = "bigint"
+                    }
+                }
+            }));
+        }
+
+        [Test]
+        public void IfTableExistsWithNoDataAndIsNotReferencedByAnyConstraint_RemoveMethodMustRemoveTheTable() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void IfTableExistsWithExistentDataAndIsNotReferencedByAnyConstraint_RemoveMethodMustRemoveTheTable() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void IfTableHasAPrimaryKey_RemoveMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void IfTableHasAForeignKey_RemoveMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void IfTableIsReferencedByAForeignKey_RemoveMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void IfTableHasADefaultConstraint_RemoveMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void IfTableHasAUniqueKey_RemoveMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void IfTableHasAnIndex_RemoveMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
+        }
+
+        [Test]
+        public void IfTableDoesNotExist_RemoveMethodMustThrowException() {
+            Assert.Inconclusive("Escrever teste.");
         }
     }
 }

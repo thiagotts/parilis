@@ -30,7 +30,7 @@ namespace Tests.SqlServer {
         }
 
         private static readonly string[] InvalidColumnNames = Enums.GetDescriptions<Keyword>().Concat(new List<string> {
-            "123abc", "abc abc", "%abc", "$abc", "ab*c", "", "  ", null
+            "123abc", "abc abc", "%abc", "$abc", "ab*c", "", "  ", null, new string('a', 129)
         }).ToArray();
 
         [Test]

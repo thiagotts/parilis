@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Core.Descriptions;
 using Core.Interfaces;
 using Microsoft.SqlServer.Management.Smo;
+using SqlServer.Enums;
 using DataType = SqlServer.Enums.DataType;
 
 namespace SqlServer {
@@ -376,6 +378,20 @@ namespace SqlServer {
             var dataSet = database.ExecuteWithResults(query);
             var results = GetResults(dataSet);
             return results.Any();
+        }
+
+        internal bool IdentifierNameIsValid(string identifierName) {
+            if (string.IsNullOrWhiteSpace(identifierName) || identifierName.Length > 128) return false;
+
+            var firstCharacter = identifierName[0].ToString();
+            if (!Regex.IsMatch(firstCharacter, @"[a-zA-Z_@#]")) return false;
+
+            if (!Regex.IsMatch(identifierName, @"^[a-zA-Z0-9_@#$]*$")) return false;
+
+            var keywords = Enums.Enums.GetDescriptions<Keyword>();
+            if (keywords.Any(k => k.Equals(identifierName, StringComparison.InvariantCultureIgnoreCase))) return false;
+
+            return true;
         }
 
         private bool ColumnExists(string schema, string tableName, string columnName) {

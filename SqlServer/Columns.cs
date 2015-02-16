@@ -26,7 +26,7 @@ namespace SqlServer {
             if (sqlServerDatabase.GetColumn(column.Schema, column.TableName, column.Name) != null)
                 throw new InvalidColumnNameException();
 
-            if (!ColumnNameIsValid(column.Name))
+            if (!sqlServerDatabase.IdentifierNameIsValid(column.Name))
                 throw new InvalidColumnNameException();
 
             if (!sqlServerDatabase.DataTypeIsValid(column.Type))
@@ -87,20 +87,6 @@ namespace SqlServer {
 
                 else throw;
             }
-        }
-
-        private bool ColumnNameIsValid(string columnName) {
-            if (string.IsNullOrWhiteSpace(columnName)) return false;
-
-            var firstCharacter = columnName[0].ToString();
-            if (!Regex.IsMatch(firstCharacter, @"[a-zA-Z_@#]")) return false;
-
-            if (!Regex.IsMatch(columnName, @"^[a-zA-Z0-9_@#$]*$")) return false;
-
-            var keywords = Enums.Enums.GetDescriptions<Keyword>();
-            if (keywords.Any(k => k.Equals(columnName, StringComparison.InvariantCultureIgnoreCase))) return false;
-
-            return true;
         }
 
         private bool MaximumSizeIsValid(ColumnDescription column) {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
@@ -8,8 +7,8 @@ using Microsoft.SqlServer.Management.Smo;
 
 namespace SqlServer {
     public class Tables : ITable {
-        private Database database;
-        private SqlServerDatabase sqlServerDatabase;
+        private readonly Database database;
+        private readonly SqlServerDatabase sqlServerDatabase;
 
         public Tables(Database database) {
             this.database = database;
@@ -17,11 +16,11 @@ namespace SqlServer {
         }
 
         public void Create(TableDescription tableDescription) {
-            if(sqlServerDatabase.GetTable(tableDescription.Schema, tableDescription.Name) != null)
+            if (!TableNameIsValid(tableDescription))
                 throw new InvalidTableNameException();
 
             var columns = new List<string>();
-            foreach (var column in tableDescription.Columns) {
+            foreach (var column in tableDescription.Columns ?? new List<ColumnDescription>()) {
                 columns.Add(string.Format("[{0}] [{1}]{2} {3}", column.Name, column.Type,
                     string.IsNullOrWhiteSpace(column.MaximumSize) ? string.Empty : string.Format("({0})", column.MaximumSize),
                     column.AllowsNull ? "NULL" : "NOT NULL"));
@@ -33,6 +32,12 @@ namespace SqlServer {
 
         public void Remove(string schema, string tableName) {
             throw new NotImplementedException();
+        }
+
+        private bool TableNameIsValid(TableDescription tableDescription) {
+            return !string.IsNullOrWhiteSpace(tableDescription.Name) &&
+                   sqlServerDatabase.GetTable(tableDescription.Schema, tableDescription.Name) == null &&
+                   sqlServerDatabase.IdentifierNameIsValid(tableDescription.Name);
         }
     }
 }
