@@ -21,11 +21,12 @@ namespace Tests.SqlServer {
 
         [SetUp]
         public void InitializeTest() {
+            Database.Tables.Refresh();
+            var table = Database.Tables["TEST_TABLE", "schema1"];
+            if (table != null) table.Drop();
+
             Database.Schemas.Refresh();
             var schema = Database.Schemas["schema1"];
-            if (schema != null) schema.Drop();
-
-            schema = Database.Schemas["schema2"];
             if (schema != null) schema.Drop();
         }
 
@@ -52,7 +53,38 @@ namespace Tests.SqlServer {
         [Test, TestCaseSource("InvalidSchemaNames")]
         public void IfSchemaNameIsInvalid_CreateMethodMustThrowException(string schemaName) {
             Assert.Throws<InvalidSchemaNameException>(() => schemas.Create(schemaName));
+        }
+
+        [Test]
+        public void IfSchemaExistsAndHasNoTables_RemoveMethodMustRemoveTheSchema() {
+            Database.ExecuteNonQuery(@"CREATE SCHEMA schema1");
+
+            schemas.Remove("schema1");
+
+            bool result = sqlServerDatabase.SchemaExists("schema1");
+            Assert.IsFalse(result);
+        }
+
+        [Test]
+        public void IfSchemaExistsAndHasTables_RemoveMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE SCHEMA schema1");
+            Database.ExecuteNonQuery(@"CREATE TABLE [schema1].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            Assert.Throws<ReferencedSchemaException>(() => schemas.Remove("schema1"));
+        }
+
+        [Test]
+        public void IfSchemaDoesNotExist_RemoveMethodMustThrowException() {
+            Assert.Throws<SchemaNotFoundException>(() => schemas.Remove("schema1"));
+        }
+
+        [Test]
+        public void IfTheSchemaIsDbo_RemoveMethodMustThrowException() {
+            Assert.Throws<ReferencedSchemaException>(() => schemas.Remove("dbo"));
 
         }
+      
     }
 }
