@@ -413,37 +413,225 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenColumnsExistsAndIsReferencedByAPrimaryKey_ChangeTypeMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [int] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Assert.Throws<ReferencedColumnException>(() => columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id",
+                Type = "bigint"
+            }));
         }
 
         [Test]
         public void WhenColumnsExistsAndIsReferencedByAForeignKey_ChangeTypeMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [int] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id2] [int] NOT NULL,
+                CONSTRAINT FK_TEST FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+            Assert.Throws<ReferencedColumnException>(() => columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "id2",
+                Type = "bigint"
+            }));
         }
 
         [Test]
         public void WhenColumnsExistsAndIsReferencedByAUniqueKey_ChangeTypeMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            Assert.Throws<ReferencedColumnException>(() => columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "description",
+                Type = "bigint"
+            }));
         }
 
         [Test]
         public void WhenColumnsExistsAndIsReferencedByADefaultConstraint_ChangeTypeMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));
+                ALTER TABLE [dbo].[TEST_TABLE] ADD CONSTRAINT [DEFAULT_TEST_TABLE_description] DEFAULT 'test' FOR [description]");
+
+            Assert.Throws<ReferencedColumnException>(() => columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "description",
+                Type = "bigint"
+            }));
         }
 
         [Test]
         public void WhenColumnsExistsAndIsReferencedByAnIndex_ChangeTypeMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [int] NOT NULL);
+                CREATE INDEX idx_TEST_TABLE_id2 ON [dbo].[TEST_TABLE](id2)");
+
+            Assert.Throws<ReferencedColumnException>(() => columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id2",
+                Type = "bigint"
+            }));
         }
 
         [Test]
         public void WhenColumnDoesNotExist_ChangeTypeMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [int] NOT NULL);");
+
+            Assert.Throws<ColumnNotFoundException>(() => columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id3",
+                Type = "bigint"
+            }));
         }
 
         [Test]
         public void WhenTableDoesNotExist_ChangeTypeMethodMustThrowException() {
-            Assert.Inconclusive("Escrever teste.");
+            Assert.Throws<TableNotFoundException>(() => columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id",
+                Type = "bigint"
+            }));
+        }
+
+        [Test]
+        public void WhenDataTypeIsInvalid_ChangeTypeMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            Assert.Throws<InvalidDataTypeException>(() => columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id",
+                Type = "invalidtype"
+            }));
+        }
+
+        [Test]
+        public void WhenColumnAllowsNull_ChangeTypeMethodMustChangeDataTypeAllowingNullValues() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id",
+                Type = "int",
+                AllowsNull = true
+            });
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id");
+
+            Assert.IsNotNull(column);
+            Assert.AreEqual("int", column.Type);
+            Assert.IsTrue(column.AllowsNull);
+        }
+
+        [Test]
+        public void WhenColumnDoesNotAllowNull_ChangeTypeMethodMustChangeDataTypeNotAllowingNullValues() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id",
+                Type = "int",
+                AllowsNull = false
+            });
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id");
+
+            Assert.IsNotNull(column);
+            Assert.AreEqual("int", column.Type);
+            Assert.IsFalse(column.AllowsNull);
+        }
+
+        [Test]
+        public void WhenMaximumValueIsDefinedWithAnInvalidType_ChangeTypeMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            Assert.Throws<InvalidDataTypeException>(() => columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id",
+                Type = "int",
+                MaximumSize = "255"
+            }));
+        }
+
+        [TestCase("varchar", "8000")]
+        [TestCase("nvarchar", "4000")]
+        [TestCase("varchar", "max")]
+        [TestCase("nvarchar", "max")]
+        public void WhenMaximumValueIsDefinedWithAValidType_ChangeTypeMethodMustChangeDataTypeWithTheMaximumSize(string dataType, string maximumValue) {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id",
+                Type = dataType,
+                AllowsNull = false,
+                MaximumSize = maximumValue
+            });
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id");
+
+            Assert.IsNotNull(column);
+            Assert.AreEqual(dataType, column.Type);
+            Assert.AreEqual(maximumValue, column.MaximumSize);
+        }
+
+        [TestCase("varchar", "8001")]
+        [TestCase("nvarchar", "4001")]
+        [TestCase("varchar", "0")]
+        [TestCase("nvarchar", "0")]
+        [TestCase("varchar", "-1")]
+        [TestCase("nvarchar", "-1")]
+        [TestCase("varchar", "abc")]
+        [TestCase("nvarchar", "abc")]
+        public void WhenMaximumValueIsOutOfBounds_ChangeTypeMethodMustThrowException(string dataType, string maximumValue) {
+            Database.ExecuteNonQuery(string.Format(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)"));
+
+            Assert.Throws<InvalidDataTypeException>(() => columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id",
+                Type = dataType,
+                MaximumSize = maximumValue
+            }));
         }
     }
 }

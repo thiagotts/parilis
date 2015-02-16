@@ -57,6 +57,21 @@ namespace SqlServer {
         }
 
         public void ChangeType(ColumnDescription column) {
+            var table = sqlServerDatabase.GetTable(column.Schema, column.TableName);
+            if (table == null) throw new TableNotFoundException();
+
+            if (!table.Columns.Any(c => c.Name.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
+                throw new ColumnNotFoundException();
+
+            if (!sqlServerDatabase.DataTypeIsValid(column.Type))
+                throw new InvalidDataTypeException();
+
+            if (ColumnIsReferencedByAConstraint(column))
+                throw new ReferencedColumnException();
+
+            if (!MaximumSizeIsValid(column))
+                throw new InvalidDataTypeException();
+
             try {
                 database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ALTER COLUMN {2} {3}{4} {5}",
                     column.Schema, column.TableName, column.Name, column.Type,
@@ -69,6 +84,8 @@ namespace SqlServer {
                     ex.InnerException.InnerException is SqlException &&
                     (ex.InnerException.InnerException as SqlException).Number == 8114)
                     throw new InvalidDataTypeException("The existent values could not be converted to the new data type.");
+
+                else throw;
             }
         }
 
