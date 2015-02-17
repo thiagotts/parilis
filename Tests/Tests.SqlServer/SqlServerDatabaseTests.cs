@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Core.Descriptions;
 using NUnit.Framework;
 using SqlServer;
@@ -326,7 +325,7 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenDatabaseHasNoTables_GetTablesMustReturnAnEmptyList() {
-            IList<TableDescription> result = sqlServerDatabase.GetTables();
+            var result = sqlServerDatabase.GetTables();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
@@ -341,7 +340,7 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-            IList<TableDescription> result = sqlServerDatabase.GetTables();
+            var result = sqlServerDatabase.GetTables();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count);
@@ -365,11 +364,11 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-            IList<TableDescription> result = sqlServerDatabase.GetTables();
+            var result = sqlServerDatabase.GetTables();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count);
-            TableDescription table = result.First(t => t.Schema.Equals("testschema"));
+            var table = result.First(t => t.Schema.Equals("testschema"));
             Assert.AreEqual("testschema", table.Schema);
             Assert.AreEqual("TEST_TABLE", table.Name);
             Assert.AreEqual(1, table.Columns.Count);
@@ -379,6 +378,59 @@ namespace Tests.SqlServer {
             Assert.AreEqual("nvarchar", table.Columns.Single().Type);
             Assert.AreEqual("100", table.Columns.Single().MaximumSize);
             Assert.IsFalse(table.Columns.Single().AllowsNull);
+        }
+
+        [Test]
+        public void WhenDatabaseHasNoIndexes_GetIndexesMustReturnAnEmptyList() {
+            var result = sqlServerDatabase.GetIndexes();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test]
+        public void WhenDatabaseHasIndexesOnASingleSchema_GetIndexesMustReturnAllIndexes() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL);
+                CREATE INDEX index_name ON [dbo].[TEST_TABLE](id)");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL);
+                CREATE INDEX index_name2 ON [dbo].[TEST_TABLE_2](id)");
+
+            var result = sqlServerDatabase.GetIndexes();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+            Assert.AreEqual("dbo", result.First().Schema);
+            Assert.AreEqual("TEST_TABLE", result.First().TableName);
+            Assert.AreEqual("index_name", result.First().Name);
+            Assert.AreEqual(1, result.First().ColumnNames.Count);
+            Assert.AreEqual("id", result.First().ColumnNames.Single());
+            Assert.IsFalse(result.First().Unique);
+        }
+
+        [Test]
+        public void WhenDatabaseHasIndexesOnMultiplesSchema_GetIndexesMustReturnAllIndexes() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE](
+                [id] [bigint] NOT NULL);
+                CREATE INDEX index_name ON [testschema].[TEST_TABLE](id)");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL);
+                CREATE INDEX index_name2 ON [dbo].[TEST_TABLE_2](id)");
+
+            var result = sqlServerDatabase.GetIndexes();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+            var index = result.First(t => t.Schema.Equals("testschema"));
+            Assert.AreEqual("testschema", index.Schema);
+            Assert.AreEqual("TEST_TABLE", index.TableName);
+            Assert.AreEqual("index_name", index.Name);
+            Assert.AreEqual(1, index.ColumnNames.Count);
+            Assert.AreEqual("id", index.ColumnNames.Single());
+            Assert.IsFalse(index.Unique);
         }
     }
 }

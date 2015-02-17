@@ -60,7 +60,16 @@ namespace SqlServer {
         }
 
         public IList<IndexDescription> GetIndexes() {
-            throw new NotImplementedException();
+            database.Tables.Refresh();
+            var indexes = new List<IndexDescription>();
+
+            foreach (Table table in database.Tables) {
+                foreach (Index index in table.Indexes) {
+                    indexes.Add(GetDescription(index, table.Schema, table.Name));
+                }
+            }
+
+            return indexes;
         }
 
         public IList<IndexDescription> GetIndexes(string schema, string tableName) {
@@ -86,19 +95,7 @@ namespace SqlServer {
             var index = table.Indexes[indexName];
             if (index == null) return null;
 
-            var indexDescription = new IndexDescription {
-                Schema = schema,
-                TableName = tableName,
-                Name = indexName,
-                Unique = index.IsUnique,
-                ColumnNames = new List<string>()
-            };
-
-            foreach (IndexedColumn indexedColumn in index.IndexedColumns) {
-                indexDescription.ColumnNames.Add(indexedColumn.Name);
-            }
-
-            return indexDescription;
+            return GetDescription(index, schema, tableName);
         }
 
         public IList<PrimaryKeyDescription> GetPrimaryKeys() {
@@ -366,6 +363,22 @@ namespace SqlServer {
             }
 
             return tableDescription;
+        }
+
+        private IndexDescription GetDescription(Index index, string schema, string tableName) {
+            var indexDescription = new IndexDescription {
+                Schema = schema,
+                TableName = tableName,
+                Name = index.Name,
+                Unique = index.IsUnique,
+                ColumnNames = new List<string>()
+            };
+
+            foreach (IndexedColumn indexedColumn in index.IndexedColumns) {
+                indexDescription.ColumnNames.Add(indexedColumn.Name);
+            }
+
+            return indexDescription;
         }
 
         public PrimaryKeyDescription GetPrimaryKey(string primaryKeyName, string schema = "dbo") {
