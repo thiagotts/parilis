@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Core.Descriptions;
 using NUnit.Framework;
 using SqlServer;
@@ -18,6 +19,7 @@ namespace Tests.SqlServer {
 
         [TearDown]
         public void FinishTest() {
+            Database.Tables.Refresh();
             var table = Database.Tables["TEST_TABLE_3"];
             if (table != null) table.Drop();
 
@@ -25,6 +27,9 @@ namespace Tests.SqlServer {
             if (table != null) table.Drop();
 
             table = Database.Tables["TEST_TABLE"];
+            if (table != null) table.Drop();
+
+            table = Database.Tables["TEST_TABLE", "testschema"];
             if (table != null) table.Drop();
         }
 
@@ -317,6 +322,63 @@ namespace Tests.SqlServer {
             var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "index_name");
 
             Assert.IsNull(index);
+        }
+
+        [Test]
+        public void WhenDatabaseHasNoTables_GetTablesMustReturnAnEmptyList() {
+            IList<TableDescription> result = sqlServerDatabase.GetTables();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test]
+        public void WhenDatabaseHasTablesOnASingleSchema_GetTablesMustReturnAllTables() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [nvarchar](100) NOT NULL)");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            IList<TableDescription> result = sqlServerDatabase.GetTables();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+            Assert.AreEqual("dbo", result.First().Schema);
+            Assert.AreEqual("TEST_TABLE", result.First().Name);
+            Assert.AreEqual(1, result.First().Columns.Count);
+            Assert.AreEqual("dbo", result.First().Columns.Single().Schema);
+            Assert.AreEqual("TEST_TABLE", result.First().Columns.Single().TableName);
+            Assert.AreEqual("id", result.First().Columns.Single().Name);
+            Assert.AreEqual("nvarchar", result.First().Columns.Single().Type);
+            Assert.AreEqual("100", result.First().Columns.Single().MaximumSize);
+            Assert.IsFalse(result.First().Columns.Single().AllowsNull);
+        }
+
+        [Test]
+        public void WhenDatabaseHasTablesOnMultipleSchemas_GetTablesMustReturnAllTables() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE](
+                [id] [nvarchar](100) NOT NULL)");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            IList<TableDescription> result = sqlServerDatabase.GetTables();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+            TableDescription table = result.First(t => t.Schema.Equals("testschema"));
+            Assert.AreEqual("testschema", table.Schema);
+            Assert.AreEqual("TEST_TABLE", table.Name);
+            Assert.AreEqual(1, table.Columns.Count);
+            Assert.AreEqual("testschema", table.Columns.Single().Schema);
+            Assert.AreEqual("TEST_TABLE", table.Columns.Single().TableName);
+            Assert.AreEqual("id", table.Columns.Single().Name);
+            Assert.AreEqual("nvarchar", table.Columns.Single().Type);
+            Assert.AreEqual("100", table.Columns.Single().MaximumSize);
+            Assert.IsFalse(table.Columns.Single().AllowsNull);
         }
     }
 }

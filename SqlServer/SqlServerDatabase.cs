@@ -18,25 +18,20 @@ namespace SqlServer {
         }
 
         public IList<TableDescription> GetTables() {
-            throw new NotImplementedException();
+            database.Tables.Refresh();
+            var tables = new List<TableDescription>();
+
+            foreach (Table table in database.Tables) {
+                tables.Add(GetDescription(table));
+            }
+
+            return tables;
         }
 
         public TableDescription GetTable(string schema, string tableName) {
             database.Tables.Refresh();
             var table = database.Tables[tableName, schema];
-            if (table == null) return null;
-
-            var tableDescription = new TableDescription {
-                Name = table.Name,
-                Schema = table.Schema,
-                Columns = new List<ColumnDescription>()
-            };
-
-            foreach (Column column in table.Columns) {
-                tableDescription.Columns.Add(GetColumn(schema, tableName, column.Name));
-            }
-
-            return tableDescription;
+            return table == null ? null : GetDescription(table);
         }
 
         public ColumnDescription GetColumn(string schema, string tableName, string columnName) {
@@ -83,6 +78,7 @@ namespace SqlServer {
         }
 
         public IndexDescription GetIndex(string schema, string tableName, string indexName) {
+            database.Tables.Refresh();
             var table = database.Tables[tableName, schema];
             if (table == null) return null;
 
@@ -356,6 +352,20 @@ namespace SqlServer {
                 DefaultValue = results[0][2],
                 Name = defaultName
             };
+        }
+
+        private TableDescription GetDescription(Table table) {
+            var tableDescription = new TableDescription {
+                Name = table.Name,
+                Schema = table.Schema,
+                Columns = new List<ColumnDescription>()
+            };
+
+            foreach (Column column in table.Columns) {
+                tableDescription.Columns.Add(GetColumn(table.Schema, table.Name, column.Name));
+            }
+
+            return tableDescription;
         }
 
         public PrimaryKeyDescription GetPrimaryKey(string primaryKeyName, string schema = "dbo") {
