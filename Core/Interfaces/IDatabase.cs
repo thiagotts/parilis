@@ -3,6 +3,7 @@ using Core.Descriptions;
 
 namespace Core.Interfaces {
     public interface IDatabase {
+        IList<string> GetSchemas();
         IList<TableDescription> GetTables();
         TableDescription GetTable(string schema, string tableName);
         ColumnDescription GetColumn(string schema, string tableName, string columnName);

@@ -25,6 +25,18 @@ namespace SqlServer {
             database = server.Databases[connectionInfo.DatabaseName];
         }
 
+        public IList<string> GetSchemas() {
+            database.Schemas.Refresh();
+            var schemas = new List<string>();
+
+            foreach (Schema schema in database.Schemas) {
+                if (!schema.Owner.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)) continue;
+                schemas.Add(schema.Name);
+            }
+
+            return schemas;
+        }
+
         public IList<TableDescription> GetTables() {
             database.Tables.Refresh();
             var tables = new List<TableDescription>();

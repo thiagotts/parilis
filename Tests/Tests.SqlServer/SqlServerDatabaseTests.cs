@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Core;
 using Core.Descriptions;
 using Core.Interfaces;
@@ -14,12 +15,16 @@ namespace Tests.SqlServer {
         [TestFixtureSetUp]
         public override void InitializeClass() {
             base.InitializeClass();
-            Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
             sqlServerDatabase = Components.Instance.GetComponent<IDatabase>(ConnectionInfo) as SqlServerDatabase;
         }
 
-        [TearDown]
+        [SetUp]
         public void FinishTest() {
+            Database.Schemas.Refresh();
+            if (Database.Schemas["testschema"] == null) {
+                Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
+            }
+
             Database.Tables.Refresh();
             var table = Database.Tables["TEST_TABLE_3"];
             if (table != null) table.Drop();
@@ -622,5 +627,27 @@ namespace Tests.SqlServer {
             Assert.AreEqual(1, foreignKey.ColumnNames.Count);
             Assert.AreEqual("description", foreignKey.ColumnNames.Single());
         }
+
+        [Test]
+        public void WhenDatabaseHasASingleSchema_GetSchemasMustReturnTheSchemaName() {
+            Database.ExecuteNonQuery(@"DROP SCHEMA testschema");
+
+            IList<string> schemas = sqlServerDatabase.GetSchemas();
+
+            Assert.IsNotNull(schemas);
+            Assert.AreEqual(1, schemas.Count);
+            Assert.AreEqual("dbo", schemas.Single());
+        }
+
+        [Test]
+        public void WhenDatabaseHasMultipleSchemas_GetSchemasMustReturnAllSchemaNames() {
+            IList<string> schemas = sqlServerDatabase.GetSchemas();
+
+            Assert.IsNotNull(schemas);
+            Assert.AreEqual(2, schemas.Count);
+            Assert.IsTrue(schemas.Any(s => s.Equals("dbo")));
+            Assert.IsTrue(schemas.Any(s => s.Equals("testschema")));
+        }
+      
     }
 }
