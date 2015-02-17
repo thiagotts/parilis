@@ -82,6 +82,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Actions\ColumnActionTests.cs" />
+    <Compile Include="Actions\SchemaActionTests.cs" />
     <Compile Include="Actions\TableActionTests.cs" />
     <Compile Include="Actions\IndexActionTests.cs" />
     <Compile Include="Actions\ConstraintActionTests.cs" />
