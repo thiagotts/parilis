@@ -17,6 +17,98 @@ namespace SqlServer {
             this.database = database;
         }
 
+        public IList<TableDescription> GetTables() {
+            throw new NotImplementedException();
+        }
+
+        public TableDescription GetTable(string schema, string tableName) {
+            database.Tables.Refresh();
+            var table = database.Tables[tableName, schema];
+            if (table == null) return null;
+
+            var tableDescription = new TableDescription {
+                Name = table.Name,
+                Schema = table.Schema,
+                Columns = new List<ColumnDescription>()
+            };
+
+            foreach (Column column in table.Columns) {
+                tableDescription.Columns.Add(GetColumn(schema, tableName, column.Name));
+            }
+
+            return tableDescription;
+        }
+
+        public ColumnDescription GetColumn(string schema, string tableName, string columnName) {
+            if (!ColumnExists(schema, tableName, columnName)) return null;
+
+            var query = string.Format(@"SELECT IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
+                                        FROM INFORMATION_SCHEMA.COLUMNS
+                                        WHERE TABLE_NAME = '{0}'
+                                        AND TABLE_SCHEMA = '{1}'
+                                        AND COLUMN_NAME = '{2}'", tableName, schema, columnName);
+
+            var dataSet = database.ExecuteWithResults(query);
+            var results = GetResults(dataSet);
+            if (!results.Any()) return null;
+
+            return new ColumnDescription {
+                Schema = schema,
+                TableName = tableName,
+                Name = columnName,
+                AllowsNull = results[0][0].Equals("YES", StringComparison.InvariantCultureIgnoreCase),
+                Type = results[0][1],
+                MaximumSize = results[0].Count > 2 ?
+                    results[0][2].Equals("-1") ? "max" : results[0][2]
+                    : null,
+            };
+        }
+
+        public IList<IndexDescription> GetIndexes() {
+            throw new NotImplementedException();
+        }
+
+        public IList<IndexDescription> GetIndexes(string schema, string tableName) {
+            var table = database.Tables[tableName, schema];
+
+            IList<IndexDescription> indexes = new List<IndexDescription>();
+            if (table == null) return indexes;
+
+            foreach (Index index in table.Indexes) {
+                var indexDescription = GetIndex(schema, tableName, index.Name);
+                indexes.Add(indexDescription);
+            }
+
+            return indexes;
+        }
+
+        public IndexDescription GetIndex(string schema, string tableName, string indexName) {
+            var table = database.Tables[tableName, schema];
+            if (table == null) return null;
+
+            table.Indexes.Refresh();
+            var index = table.Indexes[indexName];
+            if (index == null) return null;
+
+            var indexDescription = new IndexDescription {
+                Schema = schema,
+                TableName = tableName,
+                Name = indexName,
+                Unique = index.IsUnique,
+                ColumnNames = new List<string>()
+            };
+
+            foreach (IndexedColumn indexedColumn in index.IndexedColumns) {
+                indexDescription.ColumnNames.Add(indexedColumn.Name);
+            }
+
+            return indexDescription;
+        }
+
+        public IList<PrimaryKeyDescription> GetPrimaryKeys() {
+            throw new NotImplementedException();
+        }
+
         public PrimaryKeyDescription GetPrimaryKey(TableDescription table) {
             var dataSet = database.ExecuteWithResults(string.Format(@"
                 SELECT Col.CONSTRAINT_NAME, Col.COLUMN_NAME FROM
@@ -42,27 +134,8 @@ namespace SqlServer {
             return primaryKey;
         }
 
-        public PrimaryKeyDescription GetPrimaryKey(string primaryKeyName, string schema = "dbo") {
-            var dataSet = database.ExecuteWithResults(string.Format(@"
-                SELECT Col.Table_Name, Col.COLUMN_NAME FROM
-                    INFORMATION_SCHEMA.TABLE_CONSTRAINTS Tab,
-                    INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE Col
-                WHERE
-                    Col.Constraint_Name = '{0}'
-                    AND Constraint_Type = 'PRIMARY KEY'
-                    AND Col.Table_Schema = '{1}'", primaryKeyName, schema));
-
-            var results = GetResults(dataSet);
-            if (!results.Any()) return null;
-
-            var primaryKey = new PrimaryKeyDescription {Schema = schema, TableName = results[0][0], Name = primaryKeyName};
-            primaryKey.ColumnNames = new List<string>();
-
-            foreach (var result in results) {
-                primaryKey.ColumnNames.Add(result[1]);
-            }
-
-            return primaryKey;
+        public IList<ForeignKeyDescription> GetForeignKeys() {
+            throw new NotImplementedException();
         }
 
         public IList<ForeignKeyDescription> GetForeignKeys(TableDescription tableDescription) {
@@ -167,32 +240,8 @@ namespace SqlServer {
             return foreignKeys;
         }
 
-        public UniqueDescription GetUniqueKey(string uniqueKeyName) {
-            var dataSet = database.ExecuteWithResults(string.Format(@"
-                SELECT Col.TABLE_SCHEMA, Col.TABLE_NAME, Col.COLUMN_NAME FROM
-                    INFORMATION_SCHEMA.TABLE_CONSTRAINTS Tab,
-                    INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE Col
-                WHERE
-                    Col.Constraint_Name = Tab.Constraint_Name
-                    AND Col.Table_Name = Tab.Table_Name
-                    AND Constraint_Type = 'UNIQUE'
-                    AND Col.Constraint_Name = '{0}'", uniqueKeyName));
-
-            var results = GetResults(dataSet);
-            if (!results.Any()) return null;
-
-            var uniqueKey = new UniqueDescription {
-                Name = uniqueKeyName,
-                Schema = results[0][0],
-                TableName = results[0][1],
-                ColumnNames = new List<string>()
-            };
-
-            foreach (var result in results) {
-                uniqueKey.ColumnNames.Add(result[2]);
-            }
-
-            return uniqueKey;
+        public IList<UniqueDescription> GetUniqueKeys() {
+            throw new NotImplementedException();
         }
 
         public IList<UniqueDescription> GetUniqueKeys(TableDescription tableDescription) {
@@ -233,26 +282,32 @@ namespace SqlServer {
             return uniqueKeys;
         }
 
-        public DefaultDescription GetDefault(string defaultName, string schema) {
-            var query = string.Format(@"SELECT tables.name, all_columns.name, default_constraints.definition
-                                        FROM sys.all_columns
-                                        INNER JOIN sys.tables ON all_columns.object_id = tables.object_id
-                                        INNER JOIN sys.schemas ON tables.schema_id = schemas.schema_id
-                                        INNER JOIN sys.default_constraints ON all_columns.default_object_id = default_constraints.object_id
-                                        WHERE default_constraints.name LIKE '{0}'
-                                        AND schemas.name LIKE '{1}'", defaultName, schema);
+        public UniqueDescription GetUniqueKey(string uniqueKeyName) {
+            var dataSet = database.ExecuteWithResults(string.Format(@"
+                SELECT Col.TABLE_SCHEMA, Col.TABLE_NAME, Col.COLUMN_NAME FROM
+                    INFORMATION_SCHEMA.TABLE_CONSTRAINTS Tab,
+                    INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE Col
+                WHERE
+                    Col.Constraint_Name = Tab.Constraint_Name
+                    AND Col.Table_Name = Tab.Table_Name
+                    AND Constraint_Type = 'UNIQUE'
+                    AND Col.Constraint_Name = '{0}'", uniqueKeyName));
 
-            var dataSet = database.ExecuteWithResults(query);
             var results = GetResults(dataSet);
             if (!results.Any()) return null;
 
-            return new DefaultDescription {
-                Schema = schema,
-                TableName = results[0][0],
-                ColumnName = results[0][1],
-                DefaultValue = results[0][2],
-                Name = defaultName
+            var uniqueKey = new UniqueDescription {
+                Name = uniqueKeyName,
+                Schema = results[0][0],
+                TableName = results[0][1],
+                ColumnNames = new List<string>()
             };
+
+            foreach (var result in results) {
+                uniqueKey.ColumnNames.Add(result[2]);
+            }
+
+            return uniqueKey;
         }
 
         public IList<DefaultDescription> GetDefaults() {
@@ -281,84 +336,49 @@ namespace SqlServer {
             return defaults;
         }
 
-        public IndexDescription GetIndex(string schema, string tableName, string indexName) {
-            var table = database.Tables[tableName, schema];
-            if (table == null) return null;
-
-            table.Indexes.Refresh();
-            var index = table.Indexes[indexName];
-            if (index == null) return null;
-
-            var indexDescription = new IndexDescription {
-                Schema = schema,
-                TableName = tableName,
-                Name = indexName,
-                Unique = index.IsUnique,
-                ColumnNames = new List<string>()
-            };
-
-            foreach (IndexedColumn indexedColumn in index.IndexedColumns) {
-                indexDescription.ColumnNames.Add(indexedColumn.Name);
-            }
-
-            return indexDescription;
-        }
-
-        public IList<IndexDescription> GetIndexes(string schema, string tableName) {
-            var table = database.Tables[tableName, schema];
-
-            IList<IndexDescription> indexes = new List<IndexDescription>();
-            if (table == null) return indexes;
-
-            foreach (Index index in table.Indexes) {
-                var indexDescription = GetIndex(schema, tableName, index.Name);
-                indexes.Add(indexDescription);
-            }
-
-            return indexes;
-        }
-
-        public ColumnDescription GetColumn(string schema, string tableName, string columnName) {
-            if (!ColumnExists(schema, tableName, columnName)) return null;
-
-            var query = string.Format(@"SELECT IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
-                                        FROM INFORMATION_SCHEMA.COLUMNS
-                                        WHERE TABLE_NAME = '{0}'
-                                        AND TABLE_SCHEMA = '{1}'
-                                        AND COLUMN_NAME = '{2}'", tableName, schema, columnName);
+        public DefaultDescription GetDefault(string defaultName, string schema) {
+            var query = string.Format(@"SELECT tables.name, all_columns.name, default_constraints.definition
+                                        FROM sys.all_columns
+                                        INNER JOIN sys.tables ON all_columns.object_id = tables.object_id
+                                        INNER JOIN sys.schemas ON tables.schema_id = schemas.schema_id
+                                        INNER JOIN sys.default_constraints ON all_columns.default_object_id = default_constraints.object_id
+                                        WHERE default_constraints.name LIKE '{0}'
+                                        AND schemas.name LIKE '{1}'", defaultName, schema);
 
             var dataSet = database.ExecuteWithResults(query);
             var results = GetResults(dataSet);
             if (!results.Any()) return null;
 
-            return new ColumnDescription {
+            return new DefaultDescription {
                 Schema = schema,
-                TableName = tableName,
-                Name = columnName,
-                AllowsNull = results[0][0].Equals("YES", StringComparison.InvariantCultureIgnoreCase),
-                Type = results[0][1],
-                MaximumSize = results[0].Count > 2 ?
-                    results[0][2].Equals("-1") ? "max" : results[0][2]
-                    : null,
+                TableName = results[0][0],
+                ColumnName = results[0][1],
+                DefaultValue = results[0][2],
+                Name = defaultName
             };
         }
 
-        public TableDescription GetTable(string schema, string tableName) {
-            database.Tables.Refresh();
-            var table = database.Tables[tableName, schema];
-            if (table == null) return null;
+        public PrimaryKeyDescription GetPrimaryKey(string primaryKeyName, string schema = "dbo") {
+            var dataSet = database.ExecuteWithResults(string.Format(@"
+                SELECT Col.Table_Name, Col.COLUMN_NAME FROM
+                    INFORMATION_SCHEMA.TABLE_CONSTRAINTS Tab,
+                    INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE Col
+                WHERE
+                    Col.Constraint_Name = '{0}'
+                    AND Constraint_Type = 'PRIMARY KEY'
+                    AND Col.Table_Schema = '{1}'", primaryKeyName, schema));
 
-            var tableDescription = new TableDescription {
-                Name = table.Name,
-                Schema = table.Schema,
-                Columns = new List<ColumnDescription>()
-            };
+            var results = GetResults(dataSet);
+            if (!results.Any()) return null;
 
-            foreach (Column column in table.Columns) {
-                tableDescription.Columns.Add(GetColumn(schema, tableName, column.Name));
+            var primaryKey = new PrimaryKeyDescription {Schema = schema, TableName = results[0][0], Name = primaryKeyName};
+            primaryKey.ColumnNames = new List<string>();
+
+            foreach (var result in results) {
+                primaryKey.ColumnNames.Add(result[1]);
             }
 
-            return tableDescription;
+            return primaryKey;
         }
 
         internal bool DataTypeIsValid(string dataType) {
