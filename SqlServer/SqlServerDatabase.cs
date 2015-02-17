@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Castle.Core;
 using Core.Descriptions;
 using Core.Interfaces;
 using Microsoft.SqlServer.Management.Smo;
@@ -10,6 +11,7 @@ using SqlServer.Enums;
 using DataType = SqlServer.Enums.DataType;
 
 namespace SqlServer {
+    [CastleComponent("SqlServer.SqlServerDatabase", typeof(IDatabase), Lifestyle = LifestyleType.Singleton)]
     public class SqlServerDatabase : IDatabase {
         private readonly Database database;
 

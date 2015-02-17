@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Castle.Core;
 using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
 using Microsoft.SqlServer.Management.Smo;
 
 namespace SqlServer {
+    [CastleComponent("SqlServer.Tables", typeof(ITable), Lifestyle = LifestyleType.Singleton)]
     public class Tables : ITable {
         private readonly Database database;
         private readonly SqlServerDatabase sqlServerDatabase;

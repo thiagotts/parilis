@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components.cs" />
     <Compile Include="Descriptions\ConstraintDescription.cs" />
     <Compile Include="Descriptions\DefaultDescription.cs" />
     <Compile Include="Descriptions\ForeignKeyDescription.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Exceptions\ConstraintNotFoundException.cs" />
     <Compile Include="Exceptions\InvalidConstraintNameException.cs" />
     <Compile Include="Exceptions\MultiplePrimaryKeysException.cs" />
+    <Compile Include="Facility.cs" />
     <Compile Include="Interfaces\IColumn.cs" />
     <Compile Include="Interfaces\IConstraint.cs" />
     <Compile Include="Interfaces\IIndex.cs" />

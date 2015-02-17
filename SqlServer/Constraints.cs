@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Castle.Core;
 using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
 using Microsoft.SqlServer.Management.Smo;
 
 namespace SqlServer {
+    [CastleComponent("SqlServer.Constraints", typeof(IConstraint), Lifestyle = LifestyleType.Singleton)]
     public class Constraints : IConstraint {
         private readonly Database database;
         private readonly SqlServerDatabase sqlServerDatabase;

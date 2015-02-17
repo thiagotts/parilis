@@ -1,9 +1,11 @@
 ﻿using System.Linq;
+using Castle.Core;
 using Core.Exceptions;
 using Core.Interfaces;
 using Microsoft.SqlServer.Management.Smo;
 
 namespace SqlServer {
+    [CastleComponent("SqlServer.Schemas", typeof(ISchema), Lifestyle = LifestyleType.Singleton)]
     public class Schemas : ISchema {
         private readonly Database database;
         private readonly SqlServerDatabase sqlServerDatabase;
