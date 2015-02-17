@@ -2,10 +2,10 @@
 
 namespace Core.Actions {
     internal class IndexRemoval : IndexAction {
-        public IndexRemoval(ConnectionInfo connectionInfo, IndexDescription indexDescription) : base(connectionInfo, indexDescription) { }
+        public IndexRemoval(ConnectionInfo connectionInfo, IndexDescription columnDescription) : base(connectionInfo, columnDescription) { }
 
         internal override void Execute() {
-            Indexes.Remove(IndexDescription);
+            Indexes.Remove(ColumnDescription);
         }
     }
 }
