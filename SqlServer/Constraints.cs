@@ -10,7 +10,6 @@ using Core.Interfaces;
 namespace SqlServer {
     [CastleComponent("SqlServer.Constraints", typeof (IConstraint), Lifestyle = LifestyleType.Transient)]
     public class Constraints : SqlServerEntity, IConstraint {
-
         public Constraints(ConnectionInfo database) {
             Initialize(database);
         }

@@ -5,7 +5,6 @@ using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
 using NUnit.Framework;
-using SqlServer;
 using SqlServer.Enums;
 using Tests.Core;
 

@@ -1,5 +1,4 @@
 ﻿using Core;
-using Core.Descriptions;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using NUnit.Framework;

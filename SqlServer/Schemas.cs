@@ -1,12 +1,11 @@
 ﻿using System.Linq;
 using Castle.Core;
 using Core;
-using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
 
 namespace SqlServer {
-    [CastleComponent("SqlServer.Schemas", typeof(ISchema), Lifestyle = LifestyleType.Transient)]
+    [CastleComponent("SqlServer.Schemas", typeof (ISchema), Lifestyle = LifestyleType.Transient)]
     public class Schemas : SqlServerEntity, ISchema {
         public Schemas(ConnectionInfo database) {
             Initialize(database);

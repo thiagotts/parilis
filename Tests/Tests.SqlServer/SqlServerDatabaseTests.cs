@@ -621,6 +621,6 @@ namespace Tests.SqlServer {
             Assert.AreEqual("UQ_TEST_2_description", foreignKey.Name);
             Assert.AreEqual(1, foreignKey.ColumnNames.Count);
             Assert.AreEqual("description", foreignKey.ColumnNames.Single());
-        }      
+        }
     }
 }

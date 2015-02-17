@@ -50,7 +50,7 @@ namespace Tests.SqlServer {
 
             constraints.CreatePrimaryKey(primaryKey);
 
-            var result = sqlServerDatabase.GetPrimaryKey(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
             Assert.IsNotNull(result);
             Assert.AreEqual("PK_dbo_TEST_TABLE", result.Name);
         }

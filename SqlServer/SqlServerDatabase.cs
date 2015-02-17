@@ -13,7 +13,7 @@ using SqlServer.Enums;
 using DataType = SqlServer.Enums.DataType;
 
 namespace SqlServer {
-    [CastleComponent("SqlServer.SqlServerDatabase", typeof(IDatabase), Lifestyle = LifestyleType.Singleton)]
+    [CastleComponent("SqlServer.SqlServerDatabase", typeof (IDatabase), Lifestyle = LifestyleType.Singleton)]
     public class SqlServerDatabase : IDatabase {
         private readonly Database database;
 

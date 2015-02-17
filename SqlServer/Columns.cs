@@ -9,9 +9,8 @@ using Core.Interfaces;
 using Microsoft.SqlServer.Management.Smo;
 
 namespace SqlServer {
-    [CastleComponent("SqlServer.Columns", typeof(IColumn), Lifestyle = LifestyleType.Transient)]
+    [CastleComponent("SqlServer.Columns", typeof (IColumn), Lifestyle = LifestyleType.Transient)]
     public class Columns : SqlServerEntity, IColumn {
-
         public Columns(ConnectionInfo database) {
             Initialize(database);
         }

@@ -8,7 +8,7 @@ using Core.Exceptions;
 using Core.Interfaces;
 
 namespace SqlServer {
-    [CastleComponent("SqlServer.Indexes", typeof(IIndex), Lifestyle = LifestyleType.Transient)]
+    [CastleComponent("SqlServer.Indexes", typeof (IIndex), Lifestyle = LifestyleType.Transient)]
     public class Indexes : SqlServerEntity, IIndex {
         public Indexes(ConnectionInfo database) {
             Initialize(database);
