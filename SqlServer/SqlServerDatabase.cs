@@ -31,7 +31,7 @@ namespace SqlServer {
 
             foreach (Table table in database.Tables) {
                 tables.Add(GetDescription(table));
-            }
+            } 
 
             return tables;
         }
