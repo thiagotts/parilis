@@ -3,6 +3,5 @@
 namespace Core.Descriptions {
     public class UniqueDescription : ConstraintDescription {
         public IList<string> ColumnNames { get; set; }
-        public bool Clustered { get; set; }
     }
 }

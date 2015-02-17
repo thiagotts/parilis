@@ -560,5 +560,65 @@ namespace Tests.SqlServer {
             Assert.AreEqual("TEST_TABLE", foreignKey.Columns.Single().Value.TableName);
             Assert.AreEqual("id", foreignKey.Columns.Single().Value.Name);
         }
+
+        [Test]
+        public void WhenDatabaseHasNoUniqueKeys_GetUniqueKeysMustReturnAnEmptyList() {
+            var result = sqlServerDatabase.GetUniqueKeys();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test]
+        public void WhenDatabaseHasUniqueKeysOnASingleSchema_GetUniqueKeysMustReturnAllUniqueKeys() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_2_description UNIQUE (description))");
+
+            var result = sqlServerDatabase.GetUniqueKeys();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+            var foreignKey = result.First(t => t.Schema.Equals("dbo"));
+            Assert.AreEqual("dbo", foreignKey.Schema);
+            Assert.AreEqual("TEST_TABLE", foreignKey.TableName);
+            Assert.AreEqual("UQ_TEST_description", foreignKey.Name);
+            Assert.AreEqual(1, foreignKey.ColumnNames.Count);
+            Assert.AreEqual("description", foreignKey.ColumnNames.Single());
+        }
+
+        [Test]
+        public void WhenDatabaseHasUniqueKeysOnMultipleSchemas_GetUniqueKeysMustReturnAllUniqueKeys() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_2_description UNIQUE (description))");
+
+            var result = sqlServerDatabase.GetUniqueKeys();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+            var foreignKey = result.First(t => t.Schema.Equals("testschema"));
+            Assert.AreEqual("testschema", foreignKey.Schema);
+            Assert.AreEqual("TEST_TABLE", foreignKey.TableName);
+            Assert.AreEqual("UQ_TEST_2_description", foreignKey.Name);
+            Assert.AreEqual(1, foreignKey.ColumnNames.Count);
+            Assert.AreEqual("description", foreignKey.ColumnNames.Single());
+        }      
     }
 }

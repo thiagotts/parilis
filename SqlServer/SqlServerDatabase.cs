@@ -103,7 +103,7 @@ namespace SqlServer {
             var primaryKeys = new List<PrimaryKeyDescription>();
 
             foreach (Table table in database.Tables) {
-                PrimaryKeyDescription primaryKey = GetPrimaryKey(new TableDescription {Schema = table.Schema, Name = table.Name});
+                var primaryKey = GetPrimaryKey(new TableDescription {Schema = table.Schema, Name = table.Name});
                 primaryKeys.Add(primaryKey);
             }
 
@@ -140,7 +140,7 @@ namespace SqlServer {
             var foreignKeys = new List<ForeignKeyDescription>();
 
             foreach (Table table in database.Tables) {
-                IList<ForeignKeyDescription> keys = GetForeignKeys(new TableDescription { Schema = table.Schema, Name = table.Name });
+                var keys = GetForeignKeys(new TableDescription {Schema = table.Schema, Name = table.Name});
                 foreach (var foreignKey in keys) {
                     foreignKeys.Add(foreignKey);
                 }
@@ -252,7 +252,17 @@ namespace SqlServer {
         }
 
         public IList<UniqueDescription> GetUniqueKeys() {
-            throw new NotImplementedException();
+            database.Tables.Refresh();
+            var uniqueKeys = new List<UniqueDescription>();
+
+            foreach (Table table in database.Tables) {
+                var uniques = GetUniqueKeys(new TableDescription {Schema = table.Schema, Name = table.Name});
+                foreach (var uniqueKey in uniques) {
+                    uniqueKeys.Add(uniqueKey);
+                }
+            }
+
+            return uniqueKeys;
         }
 
         public IList<UniqueDescription> GetUniqueKeys(TableDescription tableDescription) {
