@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Core.Descriptions;
 using NUnit.Framework;
 using SqlServer;
@@ -26,10 +25,10 @@ namespace Tests.SqlServer {
             table = Database.Tables["TEST_TABLE_2"];
             if (table != null) table.Drop();
 
-            table = Database.Tables["TEST_TABLE"];
+            table = Database.Tables["TEST_TABLE", "testschema"];
             if (table != null) table.Drop();
 
-            table = Database.Tables["TEST_TABLE", "testschema"];
+            table = Database.Tables["TEST_TABLE"];
             if (table != null) table.Drop();
         }
 
@@ -436,7 +435,7 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenDatabaseHasNoPrimaryKeys_GetPrimaryKeysMustReturnAnEmptyList() {
-            IList<PrimaryKeyDescription> result = sqlServerDatabase.GetPrimaryKeys();
+            var result = sqlServerDatabase.GetPrimaryKeys();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
@@ -452,7 +451,7 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
 
-            IList<PrimaryKeyDescription> result = sqlServerDatabase.GetPrimaryKeys();
+            var result = sqlServerDatabase.GetPrimaryKeys();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count);
@@ -474,7 +473,7 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
 
-            IList<PrimaryKeyDescription> result = sqlServerDatabase.GetPrimaryKeys();
+            var result = sqlServerDatabase.GetPrimaryKeys();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count);
@@ -484,6 +483,82 @@ namespace Tests.SqlServer {
             Assert.AreEqual("PK_dbo_TEST_TABLE_id", primaryKey.Name);
             Assert.AreEqual(1, primaryKey.ColumnNames.Count);
             Assert.AreEqual("id", primaryKey.ColumnNames.Single());
+        }
+
+        [Test]
+        public void WhenDatabasehasNoForeignKeys_GetForeignsKeysMustReturnAnEmptyList() {
+            var result = sqlServerDatabase.GetForeignKeys();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test]
+        public void WhenDatabasehasForeignKeysOnASingleSchema_GetForeignsKeysMustReturnAllForeignKeys() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST_2 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_3](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_3_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST_3 FOREIGN KEY (id2) REFERENCES TEST_TABLE_2(id))");
+
+            var result = sqlServerDatabase.GetForeignKeys();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+            var foreignKey = result.First(t => t.Schema.Equals("dbo"));
+            Assert.AreEqual("dbo", foreignKey.Schema);
+            Assert.AreEqual("TEST_TABLE_2", foreignKey.TableName);
+            Assert.AreEqual("FK_TEST_2", foreignKey.Name);
+            Assert.AreEqual(1, foreignKey.Columns.Count);
+            Assert.AreEqual("id2", foreignKey.Columns.Single().Key);
+            Assert.AreEqual("dbo", foreignKey.Columns.Single().Value.Schema);
+            Assert.AreEqual("TEST_TABLE", foreignKey.Columns.Single().Value.TableName);
+            Assert.AreEqual("id", foreignKey.Columns.Single().Value.Name);
+        }
+
+        [Test]
+        public void WhenDatabasehasForeignKeysOnMultipleSchemas_GetForeignsKeysMustReturnAllForeignKeys() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST_2 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_3_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST_3 FOREIGN KEY (id2) REFERENCES [dbo].[TEST_TABLE](id))");
+
+            var result = sqlServerDatabase.GetForeignKeys();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+            var foreignKey = result.First(t => t.Schema.Equals("testschema"));
+            Assert.AreEqual("testschema", foreignKey.Schema);
+            Assert.AreEqual("TEST_TABLE", foreignKey.TableName);
+            Assert.AreEqual("FK_TEST_3", foreignKey.Name);
+            Assert.AreEqual(1, foreignKey.Columns.Count);
+            Assert.AreEqual("id2", foreignKey.Columns.Single().Key);
+            Assert.AreEqual("dbo", foreignKey.Columns.Single().Value.Schema);
+            Assert.AreEqual("TEST_TABLE", foreignKey.Columns.Single().Value.TableName);
+            Assert.AreEqual("id", foreignKey.Columns.Single().Value.Name);
         }
     }
 }

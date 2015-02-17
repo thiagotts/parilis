@@ -136,7 +136,17 @@ namespace SqlServer {
         }
 
         public IList<ForeignKeyDescription> GetForeignKeys() {
-            throw new NotImplementedException();
+            database.Tables.Refresh();
+            var foreignKeys = new List<ForeignKeyDescription>();
+
+            foreach (Table table in database.Tables) {
+                IList<ForeignKeyDescription> keys = GetForeignKeys(new TableDescription { Schema = table.Schema, Name = table.Name });
+                foreach (var foreignKey in keys) {
+                    foreignKeys.Add(foreignKey);
+                }
+            }
+
+            return foreignKeys;
         }
 
         public IList<ForeignKeyDescription> GetForeignKeys(TableDescription tableDescription) {
