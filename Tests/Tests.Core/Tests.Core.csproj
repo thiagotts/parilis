@@ -81,6 +81,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Actions\IndexActionTests.cs" />
     <Compile Include="Actions\ConstraintActionTests.cs" />
     <Compile Include="CastleExtension.cs" />
     <Compile Include="DatabaseTest.cs" />

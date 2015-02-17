@@ -47,6 +47,9 @@
   <ItemGroup>
     <Compile Include="Actions\Action.cs" />
     <Compile Include="Actions\ConstraintAction.cs" />
+    <Compile Include="Actions\IndexRemoval.cs" />
+    <Compile Include="Actions\IndexCreation.cs" />
+    <Compile Include="Actions\IndexAction.cs" />
     <Compile Include="Actions\PrimaryKeyRemoval.cs" />
     <Compile Include="Actions\PrimaryKeyCreation.cs" />
     <Compile Include="Actions\ForeignKeyRemoval.cs" />
