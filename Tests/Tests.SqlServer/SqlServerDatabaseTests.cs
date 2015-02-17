@@ -1,5 +1,7 @@
 ﻿using System.Linq;
+using Core;
 using Core.Descriptions;
+using Core.Interfaces;
 using NUnit.Framework;
 using SqlServer;
 using Tests.Core;
@@ -13,7 +15,7 @@ namespace Tests.SqlServer {
         public override void InitializeClass() {
             base.InitializeClass();
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
-            sqlServerDatabase = new SqlServerDatabase(ConnectionInfo);
+            sqlServerDatabase = Components.Instance.GetComponent<IDatabase>(ConnectionInfo) as SqlServerDatabase;
         }
 
         [TearDown]

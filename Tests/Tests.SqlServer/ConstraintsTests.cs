@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Core;
 using Core.Descriptions;
 using Core.Exceptions;
+using Core.Interfaces;
 using NUnit.Framework;
 using SqlServer;
 using Tests.Core;
@@ -9,14 +11,14 @@ using Tests.Core;
 namespace Tests.SqlServer {
     [TestFixture]
     public class ConstraintsTests : DatabaseTest {
-        private Constraints constraints;
+        private IConstraint constraints;
         private SqlServerDatabase sqlServerDatabase;
 
         [TestFixtureSetUp]
         public override void InitializeClass() {
             base.InitializeClass();
-            constraints = new Constraints(ConnectionInfo);
-            sqlServerDatabase = new SqlServerDatabase(ConnectionInfo);
+            constraints = Components.Instance.GetComponent<IConstraint>(ConnectionInfo);
+            sqlServerDatabase = Components.Instance.GetComponent<IDatabase>(ConnectionInfo) as SqlServerDatabase;
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
         }
 

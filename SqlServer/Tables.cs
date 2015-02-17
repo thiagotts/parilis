@@ -7,7 +7,7 @@ using Core.Exceptions;
 using Core.Interfaces;
 
 namespace SqlServer {
-    [CastleComponent("SqlServer.Tables", typeof (ITable), Lifestyle = LifestyleType.Singleton)]
+    [CastleComponent("SqlServer.Tables", typeof(ITable), Lifestyle = LifestyleType.Transient)]
     public class Tables : SqlServerEntity, ITable {
         public Tables(ConnectionInfo database) {
             Initialize(database);

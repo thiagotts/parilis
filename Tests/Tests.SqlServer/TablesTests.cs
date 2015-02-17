@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Core;
 using Core.Descriptions;
 using Core.Exceptions;
+using Core.Interfaces;
 using NUnit.Framework;
 using SqlServer;
 using SqlServer.Enums;
@@ -10,14 +12,14 @@ using Tests.Core;
 namespace Tests.SqlServer {
     [TestFixture]
     public class TablesTests : DatabaseTest {
-        private Tables tables;
-        private SqlServerDatabase sqlServerDatabase;
+        private ITable tables;
+        private IDatabase sqlServerDatabase;
 
         [TestFixtureSetUp]
         public override void InitializeClass() {
             base.InitializeClass();
-            tables = new Tables(ConnectionInfo);
-            sqlServerDatabase = new SqlServerDatabase(ConnectionInfo);
+            tables = Components.Instance.GetComponent<ITable>(ConnectionInfo);
+            sqlServerDatabase = Components.Instance.GetComponent<IDatabase>(ConnectionInfo);
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
         }
 

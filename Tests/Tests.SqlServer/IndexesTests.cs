@@ -1,21 +1,22 @@
 ﻿using System.Collections.Generic;
+using Core;
 using Core.Descriptions;
 using Core.Exceptions;
+using Core.Interfaces;
 using NUnit.Framework;
-using SqlServer;
 using Tests.Core;
 
 namespace Tests.SqlServer {
     [TestFixture]
     public class IndexesTests : DatabaseTest {
-        private Indexes indexes;
-        private SqlServerDatabase sqlServerDatabase;
+        private IIndex indexes;
+        private IDatabase sqlServerDatabase;
 
         [TestFixtureSetUp]
         public override void InitializeClass() {
             base.InitializeClass();
-            indexes = new Indexes(ConnectionInfo);
-            sqlServerDatabase = new SqlServerDatabase(ConnectionInfo);
+            indexes = Components.Instance.GetComponent<IIndex>(ConnectionInfo);
+            sqlServerDatabase = Components.Instance.GetComponent<IDatabase>(ConnectionInfo);
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
         }
 

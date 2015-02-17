@@ -1,23 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Core;
 using Core.Descriptions;
 using Core.Exceptions;
+using Core.Interfaces;
 using NUnit.Framework;
-using SqlServer;
 using SqlServer.Enums;
 using Tests.Core;
 
 namespace Tests.SqlServer {
     [TestFixture]
     public class ColumnsTests : DatabaseTest {
-        private Columns columns;
-        private SqlServerDatabase sqlServerDatabase;
+        private IColumn columns;
+        private IDatabase sqlServerDatabase;
 
         [TestFixtureSetUp]
         public override void InitializeClass() {
             base.InitializeClass();
-            columns = new Columns(ConnectionInfo);
-            sqlServerDatabase = new SqlServerDatabase(ConnectionInfo);
+            columns = Components.Instance.GetComponent<IColumn>(ConnectionInfo);
+            sqlServerDatabase = Components.Instance.GetComponent<IDatabase>(ConnectionInfo);
         }
 
         [SetUp]

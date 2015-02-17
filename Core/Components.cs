@@ -34,7 +34,7 @@ namespace Core {
         }
 
         public virtual T GetComponent<T>(params object[] args) {
-            return Instance.container.Kernel.Resolve<T>(args);
+            return Instance.container.Kernel.Resolve<T>(new Arguments(args));
         }
 
         public static void Dispose() {
