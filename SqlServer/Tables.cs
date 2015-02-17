@@ -1,20 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Castle.Core;
+using Core;
 using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
-using Microsoft.SqlServer.Management.Smo;
 
 namespace SqlServer {
-    [CastleComponent("SqlServer.Tables", typeof(ITable), Lifestyle = LifestyleType.Singleton)]
-    public class Tables : ITable {
-        private readonly Database database;
-        private readonly SqlServerDatabase sqlServerDatabase;
-
-        public Tables(Database database) {
-            this.database = database;
-            sqlServerDatabase = new SqlServerDatabase(database);
+    [CastleComponent("SqlServer.Tables", typeof (ITable), Lifestyle = LifestyleType.Singleton)]
+    public class Tables : SqlServerEntity, ITable {
+        public Tables(ConnectionInfo database) {
+            Initialize(database);
         }
 
         public void Create(TableDescription tableDescription) {
@@ -28,27 +24,27 @@ namespace SqlServer {
                     column.AllowsNull ? "NULL" : "NOT NULL"));
             }
 
-            database.ExecuteNonQuery(string.Format(@"CREATE TABLE [{0}].[{1}]({2})",
+            Database.ExecuteNonQuery(string.Format(@"CREATE TABLE [{0}].[{1}]({2})",
                 tableDescription.Schema, tableDescription.Name, string.Join(",", columns)));
         }
 
         public void Remove(string schema, string tableName) {
-            var table = sqlServerDatabase.GetTable(schema, tableName);
+            var table = SqlServerDatabase.GetTable(schema, tableName);
             if (table == null) throw new TableNotFoundException();
 
-            var primaryKey = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = schema, Name = tableName});
+            var primaryKey = SqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = schema, Name = tableName});
             if (primaryKey != null) {
-                var foreignKeys = sqlServerDatabase.GetForeignKeysReferencing(primaryKey);
+                var foreignKeys = SqlServerDatabase.GetForeignKeysReferencing(primaryKey);
                 if (foreignKeys.Any()) throw new ReferencedTableException();
             }
 
-            database.ExecuteNonQuery(string.Format(@"DROP TABLE [{0}].[{1}]", schema, tableName));
+            Database.ExecuteNonQuery(string.Format(@"DROP TABLE [{0}].[{1}]", schema, tableName));
         }
 
         private bool TableNameIsValid(TableDescription tableDescription) {
             return !string.IsNullOrWhiteSpace(tableDescription.Name) &&
-                   sqlServerDatabase.GetTable(tableDescription.Schema, tableDescription.Name) == null &&
-                   sqlServerDatabase.IdentifierNameIsValid(tableDescription.Name);
+                   SqlServerDatabase.GetTable(tableDescription.Schema, tableDescription.Name) == null &&
+                   SqlServerDatabase.IdentifierNameIsValid(tableDescription.Name);
         }
     }
 }

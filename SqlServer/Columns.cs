@@ -2,6 +2,7 @@
 using System.Data.SqlClient;
 using System.Linq;
 using Castle.Core;
+using Core;
 using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
@@ -9,39 +10,36 @@ using Microsoft.SqlServer.Management.Smo;
 
 namespace SqlServer {
     [CastleComponent("SqlServer.Columns", typeof(IColumn), Lifestyle = LifestyleType.Singleton)]
-    public class Columns : IColumn {
-        private readonly Database database;
-        private readonly SqlServerDatabase sqlServerDatabase;
+    public class Columns : SqlServerEntity, IColumn {
 
-        public Columns(Database database) {
-            this.database = database;
-            sqlServerDatabase = new SqlServerDatabase(database);
+        public Columns(ConnectionInfo database) {
+            Initialize(database);
         }
 
         public void Create(ColumnDescription column) {
-            if (sqlServerDatabase.GetTable(column.Schema, column.TableName) == null)
+            if (SqlServerDatabase.GetTable(column.Schema, column.TableName) == null)
                 throw new TableNotFoundException();
 
-            if (sqlServerDatabase.GetColumn(column.Schema, column.TableName, column.Name) != null)
+            if (SqlServerDatabase.GetColumn(column.Schema, column.TableName, column.Name) != null)
                 throw new InvalidColumnNameException();
 
-            if (!sqlServerDatabase.IdentifierNameIsValid(column.Name))
+            if (!SqlServerDatabase.IdentifierNameIsValid(column.Name))
                 throw new InvalidColumnNameException();
 
-            if (!sqlServerDatabase.DataTypeIsValid(column.Type))
+            if (!SqlServerDatabase.DataTypeIsValid(column.Type))
                 throw new InvalidDataTypeException();
 
             if (!MaximumSizeIsValid(column))
                 throw new InvalidDataTypeException();
 
-            database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD {2} {3}{4} {5}",
+            Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD {2} {3}{4} {5}",
                 column.Schema, column.TableName, column.Name, column.Type,
                 string.IsNullOrWhiteSpace(column.MaximumSize) ? string.Empty : string.Format("({0})", column.MaximumSize),
                 column.AllowsNull ? "NULL" : "NOT NULL"));
         }
 
         public void Remove(ColumnDescription column) {
-            var table = sqlServerDatabase.GetTable(column.Schema, column.TableName);
+            var table = SqlServerDatabase.GetTable(column.Schema, column.TableName);
             if (table == null) throw new TableNotFoundException();
             if (table.Columns.Count == 1) throw new SingleColumnException();
 
@@ -51,18 +49,18 @@ namespace SqlServer {
             if (ColumnIsReferencedByAConstraint(column))
                 throw new ReferencedColumnException();
 
-            database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP COLUMN {2}",
+            Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP COLUMN {2}",
                 column.Schema, column.TableName, column.Name));
         }
 
         public void ChangeType(ColumnDescription column) {
-            var table = sqlServerDatabase.GetTable(column.Schema, column.TableName);
+            var table = SqlServerDatabase.GetTable(column.Schema, column.TableName);
             if (table == null) throw new TableNotFoundException();
 
             if (!table.Columns.Any(c => c.Name.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
                 throw new ColumnNotFoundException();
 
-            if (!sqlServerDatabase.DataTypeIsValid(column.Type))
+            if (!SqlServerDatabase.DataTypeIsValid(column.Type))
                 throw new InvalidDataTypeException();
 
             if (ColumnIsReferencedByAConstraint(column))
@@ -72,7 +70,7 @@ namespace SqlServer {
                 throw new InvalidDataTypeException();
 
             try {
-                database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ALTER COLUMN {2} {3}{4} {5}",
+                Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ALTER COLUMN {2} {3}{4} {5}",
                     column.Schema, column.TableName, column.Name, column.Type,
                     string.IsNullOrWhiteSpace(column.MaximumSize) ? string.Empty : string.Format("({0})", column.MaximumSize),
                     column.AllowsNull ? "NULL" : "NOT NULL"));
@@ -126,13 +124,13 @@ namespace SqlServer {
         }
 
         private bool ColumnIsReferencedByAPrimaryKey(TableDescription tableDescription, ColumnDescription column) {
-            var primaryKey = sqlServerDatabase.GetPrimaryKey(tableDescription);
+            var primaryKey = SqlServerDatabase.GetPrimaryKey(tableDescription);
             return primaryKey != null &&
                    primaryKey.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase));
         }
 
         private bool ColumnIsReferencedByAForeignKey(TableDescription tableDescription, ColumnDescription column) {
-            var foreignKeys = sqlServerDatabase.GetForeignKeys(tableDescription);
+            var foreignKeys = SqlServerDatabase.GetForeignKeys(tableDescription);
             foreach (var foreignKey in foreignKeys) {
                 if (foreignKey.Columns.Any(c => c.Key.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
                     return true;
@@ -142,7 +140,7 @@ namespace SqlServer {
         }
 
         private bool ColumnIsReferencedByAUniqueKey(TableDescription tableDescription, ColumnDescription column) {
-            var uniqueKeys = sqlServerDatabase.GetUniqueKeys(tableDescription);
+            var uniqueKeys = SqlServerDatabase.GetUniqueKeys(tableDescription);
             foreach (var uniqueKey in uniqueKeys) {
                 if (uniqueKey.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
                     return true;
@@ -152,7 +150,7 @@ namespace SqlServer {
         }
 
         private bool ColumnIsReferencedByADefault(ColumnDescription column) {
-            var defaults = sqlServerDatabase.GetDefaults();
+            var defaults = SqlServerDatabase.GetDefaults();
             foreach (var defaultDescription in defaults) {
                 if (defaultDescription.Schema.Equals(column.Schema, StringComparison.InvariantCultureIgnoreCase) &&
                     defaultDescription.TableName.Equals(column.TableName, StringComparison.InvariantCultureIgnoreCase) &&
@@ -164,7 +162,7 @@ namespace SqlServer {
         }
 
         private bool ColumnIsReferencedByAnIndex(ColumnDescription column) {
-            var indexes = sqlServerDatabase.GetIndexes(column.Schema, column.TableName);
+            var indexes = SqlServerDatabase.GetIndexes(column.Schema, column.TableName);
             foreach (var index in indexes) {
                 if (index.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
                     return true;

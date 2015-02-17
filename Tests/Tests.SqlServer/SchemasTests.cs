@@ -15,8 +15,8 @@ namespace Tests.SqlServer {
         [TestFixtureSetUp]
         public override void InitializeClass() {
             base.InitializeClass();
-            schemas = new Schemas(Database);
-            sqlServerDatabase = new SqlServerDatabase(Database);
+            schemas = new Schemas(ConnectionInfo);
+            sqlServerDatabase = new SqlServerDatabase(ConnectionInfo);
         }
 
         [SetUp]

@@ -14,8 +14,8 @@ namespace Tests.SqlServer {
         [TestFixtureSetUp]
         public override void InitializeClass() {
             base.InitializeClass();
-            indexes = new Indexes(Database);
-            sqlServerDatabase = new SqlServerDatabase(Database);
+            indexes = new Indexes(ConnectionInfo);
+            sqlServerDatabase = new SqlServerDatabase(ConnectionInfo);
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
         }
 

@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Components.cs" />
     <Compile Include="Descriptions\ConstraintDescription.cs" />
+    <Compile Include="ConnectionInfo.cs" />
     <Compile Include="Descriptions\DefaultDescription.cs" />
     <Compile Include="Descriptions\ForeignKeyDescription.cs" />
     <Compile Include="Descriptions\IndexDescription.cs" />

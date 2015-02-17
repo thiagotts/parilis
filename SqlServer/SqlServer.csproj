@@ -58,6 +58,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Schemas.cs" />
     <Compile Include="SqlServerDatabase.cs" />
+    <Compile Include="SqlServerEntity.cs" />
     <Compile Include="Tables.cs" />
   </ItemGroup>
   <ItemGroup>

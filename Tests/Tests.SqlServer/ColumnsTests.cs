@@ -16,17 +16,23 @@ namespace Tests.SqlServer {
         [TestFixtureSetUp]
         public override void InitializeClass() {
             base.InitializeClass();
-            columns = new Columns(Database);
-            sqlServerDatabase = new SqlServerDatabase(Database);
+            columns = new Columns(ConnectionInfo);
+            sqlServerDatabase = new SqlServerDatabase(ConnectionInfo);
         }
 
-        [TearDown]
+        [SetUp]
         public void FinishTest() {
-            var table = Database.Tables["TEST_TABLE_2"];
-            if (table != null) table.Drop();
+            Database.Tables.Refresh();
+            DropTable("TEST_TABLE_2");
+            DropTable("TEST_TABLE");
+        }
 
-            table = Database.Tables["TEST_TABLE"];
-            if (table != null) table.Drop();
+        private void DropTable(string tableName) {
+            var table = Database.Tables[tableName];
+            if (table != null) {
+                if (table.Indexes != null && table.Indexes.Count > 0) table.Indexes[0].Drop();
+                table.Drop();
+            }
         }
 
         private static readonly string[] InvalidColumnNames = Enums.GetDescriptions<Keyword>().Concat(new List<string> {

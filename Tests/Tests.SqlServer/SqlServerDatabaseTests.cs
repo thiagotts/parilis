@@ -13,7 +13,7 @@ namespace Tests.SqlServer {
         public override void InitializeClass() {
             base.InitializeClass();
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
-            sqlServerDatabase = new SqlServerDatabase(Database);
+            sqlServerDatabase = new SqlServerDatabase(ConnectionInfo);
         }
 
         [TearDown]

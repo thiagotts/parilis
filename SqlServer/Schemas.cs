@@ -1,40 +1,37 @@
 ﻿using System.Linq;
 using Castle.Core;
+using Core;
+using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
-using Microsoft.SqlServer.Management.Smo;
 
 namespace SqlServer {
-    [CastleComponent("SqlServer.Schemas", typeof(ISchema), Lifestyle = LifestyleType.Singleton)]
-    public class Schemas : ISchema {
-        private readonly Database database;
-        private readonly SqlServerDatabase sqlServerDatabase;
-
-        public Schemas(Database database) {
-            this.database = database;
-            sqlServerDatabase = new SqlServerDatabase(database);
+    [CastleComponent("SqlServer.Schemas", typeof (ISchema), Lifestyle = LifestyleType.Singleton)]
+    public class Schemas : SqlServerEntity, ISchema {
+        public Schemas(ConnectionInfo database) {
+            Initialize(database);
         }
 
         public void Create(string schemaName) {
-            if (sqlServerDatabase.SchemaExists(schemaName) || !sqlServerDatabase.IdentifierNameIsValid(schemaName))
+            if (SqlServerDatabase.SchemaExists(schemaName) || !SqlServerDatabase.IdentifierNameIsValid(schemaName))
                 throw new InvalidSchemaNameException();
 
-            database.ExecuteNonQuery(string.Format(@"CREATE SCHEMA {0}", schemaName));
+            Database.ExecuteNonQuery(string.Format(@"CREATE SCHEMA {0}", schemaName));
         }
 
         public void Remove(string schemaName) {
-            if (!sqlServerDatabase.SchemaExists(schemaName))
+            if (!SqlServerDatabase.SchemaExists(schemaName))
                 throw new SchemaNotFoundException();
 
             if (SchemaIsReferenced(schemaName))
                 throw new ReferencedSchemaException();
 
-            database.ExecuteNonQuery(string.Format(@"DROP SCHEMA {0}", schemaName));
+            Database.ExecuteNonQuery(string.Format(@"DROP SCHEMA {0}", schemaName));
         }
 
         private bool SchemaIsReferenced(string schemaName) {
-            database.Schemas.Refresh();
-            var schema = database.Schemas[schemaName];
+            Database.Schemas.Refresh();
+            var schema = Database.Schemas[schemaName];
             if (schema == null) return false;
 
             var ownedObjects = schema.EnumOwnedObjects();

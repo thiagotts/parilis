@@ -15,17 +15,21 @@ namespace Tests.SqlServer {
         [TestFixtureSetUp]
         public override void InitializeClass() {
             base.InitializeClass();
-            constraints = new Constraints(Database);
-            sqlServerDatabase = new SqlServerDatabase(Database);
+            constraints = new Constraints(ConnectionInfo);
+            sqlServerDatabase = new SqlServerDatabase(ConnectionInfo);
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
         }
 
-        [TearDown]
+        [SetUp]
         public void FinishTest() {
+            Database.Tables.Refresh();
             var table = Database.Tables["TEST_TABLE_2"];
             if (table != null) table.Drop();
 
             table = Database.Tables["TEST_TABLE"];
+            if (table != null) table.Drop();
+
+            table = Database.Tables["TEST_TABLE", "testschema"];
             if (table != null) table.Drop();
         }
 
@@ -44,7 +48,7 @@ namespace Tests.SqlServer {
 
             constraints.CreatePrimaryKey(primaryKey);
 
-            var result = new SqlServerDatabase(Database).GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
+            var result = sqlServerDatabase.GetPrimaryKey(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
             Assert.IsNotNull(result);
             Assert.AreEqual("PK_dbo_TEST_TABLE", result.Name);
         }
@@ -107,7 +111,7 @@ namespace Tests.SqlServer {
 
             constraints.CreatePrimaryKey(primaryKey);
 
-            var result = new SqlServerDatabase(Database).GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
+            var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
             Assert.IsNotNull(result);
             Assert.AreEqual("PK_dbo_TEST_TABLE_id", result.Name);
             Assert.AreEqual("dbo", result.Schema);

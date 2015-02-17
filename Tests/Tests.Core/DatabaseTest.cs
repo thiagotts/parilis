@@ -1,21 +1,31 @@
-﻿using Microsoft.SqlServer.Management.Common;
+﻿using Core;
+using Core.Descriptions;
+using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using NUnit.Framework;
 
 namespace Tests.Core {
     [TestFixture]
     public class DatabaseTest {
-        protected string ServerHostname = @"localhost\sqlexpress";
-        protected string DatabaseName = "TESTS_PARILIS";
-        protected string User = "parilis";
-        protected string Password = "parilis";
+        private const string ServerHostname = @"localhost\sqlexpress";
+        private const string DatabaseName = "TESTS_PARILIS";
+        private const string User = "parilis";
+        private const string Password = "parilis";
         private Server server;
         protected Database Database;
+        protected ConnectionInfo ConnectionInfo;
 
         [TestFixtureSetUp]
         public virtual void InitializeClass() {
             InitializeServer();
             Database = CreateDatabase();
+
+            ConnectionInfo = new ConnectionInfo {
+                HostName = ServerHostname,
+                DatabaseName = DatabaseName,
+                User = User,
+                Password = Password
+            };
         }
 
         [TestFixtureTearDown]

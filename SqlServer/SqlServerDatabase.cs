@@ -4,8 +4,10 @@ using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Castle.Core;
+using Core;
 using Core.Descriptions;
 using Core.Interfaces;
+using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using SqlServer.Enums;
 using DataType = SqlServer.Enums.DataType;
@@ -15,8 +17,12 @@ namespace SqlServer {
     public class SqlServerDatabase : IDatabase {
         private readonly Database database;
 
-        public SqlServerDatabase(Database database) {
-            this.database = database;
+        public SqlServerDatabase(ConnectionInfo connectionInfo) {
+            var serverConnection = new ServerConnection(connectionInfo.HostName, connectionInfo.User, connectionInfo.Password);
+            var server = new Server(serverConnection);
+
+            server.Databases.Refresh();
+            database = server.Databases[connectionInfo.DatabaseName];
         }
 
         public IList<TableDescription> GetTables() {
@@ -66,6 +72,7 @@ namespace SqlServer {
             var indexes = new List<IndexDescription>();
 
             foreach (Table table in database.Tables) {
+                table.Indexes.Refresh();
                 foreach (Index index in table.Indexes) {
                     indexes.Add(GetDescription(index, table.Schema, table.Name));
                 }
@@ -80,6 +87,7 @@ namespace SqlServer {
             IList<IndexDescription> indexes = new List<IndexDescription>();
             if (table == null) return indexes;
 
+            table.Indexes.Refresh();
             foreach (Index index in table.Indexes) {
                 var indexDescription = GetIndex(schema, tableName, index.Name);
                 indexes.Add(indexDescription);
@@ -388,6 +396,7 @@ namespace SqlServer {
                 Columns = new List<ColumnDescription>()
             };
 
+            table.Columns.Refresh();
             foreach (Column column in table.Columns) {
                 tableDescription.Columns.Add(GetColumn(table.Schema, table.Name, column.Name));
             }
@@ -404,6 +413,7 @@ namespace SqlServer {
                 ColumnNames = new List<string>()
             };
 
+            index.IndexedColumns.Refresh();
             foreach (IndexedColumn indexedColumn in index.IndexedColumns) {
                 indexDescription.ColumnNames.Add(indexedColumn.Name);
             }
@@ -468,6 +478,7 @@ namespace SqlServer {
         }
 
         private bool ColumnExists(string schema, string tableName, string columnName) {
+            database.Tables.Refresh();
             var table = database.Tables[tableName, schema];
             if (table == null) return false;
 

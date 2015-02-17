@@ -2,44 +2,41 @@
 using System.Collections.Generic;
 using System.Linq;
 using Castle.Core;
+using Core;
 using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
-using Microsoft.SqlServer.Management.Smo;
 
 namespace SqlServer {
-    [CastleComponent("SqlServer.Indexes", typeof(IIndex), Lifestyle = LifestyleType.Singleton)]
-    public class Indexes : IIndex {
-        private readonly Database database;
-        private readonly SqlServerDatabase sqlServerDatabase;
-
-        public Indexes(Database database) {
-            this.database = database;
-            sqlServerDatabase = new SqlServerDatabase(database);
+    [CastleComponent("SqlServer.Indexes", typeof (IIndex), Lifestyle = LifestyleType.Singleton)]
+    public class Indexes : SqlServerEntity, IIndex {
+        public Indexes(ConnectionInfo database) {
+            Initialize(database);
         }
 
         public void Create(IndexDescription indexDescription) {
             if (!ReferencedColumnsAreInvalid(indexDescription))
                 throw new InvalidReferenceColumnException();
 
-            var index = sqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
+            var index = SqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
             if (index != null) throw new InvalidIndexNameException();
 
-            database.ExecuteNonQuery(string.Format(@"CREATE {0} INDEX {1} ON {2}.{3} ({4})",
+            Database.ExecuteNonQuery(string.Format(@"CREATE {0} INDEX {1} ON {2}.{3} ({4})",
                 indexDescription.Unique ? "UNIQUE" : string.Empty, indexDescription.Name, indexDescription.Schema,
                 indexDescription.TableName, string.Join(",", indexDescription.ColumnNames)));
         }
 
         public void Remove(IndexDescription indexDescription) {
-            var index = sqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
+            var index = SqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
             if (index == null) throw new IndexNotFoundException();
 
-            database.ExecuteNonQuery(string.Format(@"DROP INDEX [{0}].[{1}].[{2}]",
+            Database.ExecuteNonQuery(string.Format(@"DROP INDEX [{0}].[{1}].[{2}]",
                 indexDescription.Schema, indexDescription.TableName, indexDescription.Name));
         }
 
         private bool ReferencedColumnsAreInvalid(IndexDescription indexDescription) {
-            var table = database.Tables[indexDescription.TableName, indexDescription.Schema];
+            Database.Tables.Refresh();
+            var table = Database.Tables[indexDescription.TableName, indexDescription.Schema];
             if (table == null) return false;
 
             var invalidTypes = new List<string> {"text", "ntext", "image", "xml", "geography", "geometry"};
@@ -50,7 +47,7 @@ namespace SqlServer {
                 var column = table.Columns[columnName];
                 if (column == null) return false;
 
-                var description = sqlServerDatabase.GetColumn(indexDescription.Schema, indexDescription.TableName, columnName);
+                var description = SqlServerDatabase.GetColumn(indexDescription.Schema, indexDescription.TableName, columnName);
                 if (description == null) return false;
 
                 if (description.Type.Equals("varchar", StringComparison.InvariantCultureIgnoreCase) &&
