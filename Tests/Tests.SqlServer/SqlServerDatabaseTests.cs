@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Core.Descriptions;
 using NUnit.Framework;
 using SqlServer;
@@ -431,6 +432,58 @@ namespace Tests.SqlServer {
             Assert.AreEqual(1, index.ColumnNames.Count);
             Assert.AreEqual("id", index.ColumnNames.Single());
             Assert.IsFalse(index.Unique);
+        }
+
+        [Test]
+        public void WhenDatabaseHasNoPrimaryKeys_GetPrimaryKeysMustReturnAnEmptyList() {
+            IList<PrimaryKeyDescription> result = sqlServerDatabase.GetPrimaryKeys();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test]
+        public void WhenDatabaseHasPrimaryKeysOnASingleSchema_GetPrimaryKeysMustAllPrimaryKeys() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
+
+            IList<PrimaryKeyDescription> result = sqlServerDatabase.GetPrimaryKeys();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+            var primaryKey = result.First(t => t.Schema.Equals("dbo"));
+            Assert.AreEqual("dbo", primaryKey.Schema);
+            Assert.AreEqual("TEST_TABLE", primaryKey.TableName);
+            Assert.AreEqual("PK_dbo_TEST_TABLE_id", primaryKey.Name);
+            Assert.AreEqual(1, primaryKey.ColumnNames.Count);
+            Assert.AreEqual("id", primaryKey.ColumnNames.Single());
+        }
+
+        [Test]
+        public void WhenDatabaseHasPrimaryKeysOnMultipleSchemas_GetPrimaryKeysMustAllPrimaryKeys() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
+
+            IList<PrimaryKeyDescription> result = sqlServerDatabase.GetPrimaryKeys();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count);
+            var primaryKey = result.First(t => t.Schema.Equals("testschema"));
+            Assert.AreEqual("testschema", primaryKey.Schema);
+            Assert.AreEqual("TEST_TABLE", primaryKey.TableName);
+            Assert.AreEqual("PK_dbo_TEST_TABLE_id", primaryKey.Name);
+            Assert.AreEqual(1, primaryKey.ColumnNames.Count);
+            Assert.AreEqual("id", primaryKey.ColumnNames.Single());
         }
     }
 }

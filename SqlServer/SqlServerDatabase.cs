@@ -99,7 +99,15 @@ namespace SqlServer {
         }
 
         public IList<PrimaryKeyDescription> GetPrimaryKeys() {
-            throw new NotImplementedException();
+            database.Tables.Refresh();
+            var primaryKeys = new List<PrimaryKeyDescription>();
+
+            foreach (Table table in database.Tables) {
+                PrimaryKeyDescription primaryKey = GetPrimaryKey(new TableDescription {Schema = table.Schema, Name = table.Name});
+                primaryKeys.Add(primaryKey);
+            }
+
+            return primaryKeys;
         }
 
         public PrimaryKeyDescription GetPrimaryKey(TableDescription table) {
