@@ -389,5 +389,24 @@ namespace Tests.Core {
             Assert.AreEqual("TEST_TABLE", (actions.Single() as PrimaryKeyCreation).PrimaryKeyDescription.TableName);
             Assert.AreEqual("primary2", (actions.Single() as PrimaryKeyCreation).PrimaryKeyDescription.Name);
         }
+
+        [Test]
+        public void WhenReferenceDatabaseHasAForeignKeyThatActualDatabaseDoesNot_MustReturnAForeignKeyCreationAction() {
+            referenceDatabase.ForeignKeys.Add(new ForeignKeyDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "foreign1" });
+            referenceDatabase.ForeignKeys.Add(new ForeignKeyDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "foreign2" });
+            actualDatabase.ForeignKeys.Add(new ForeignKeyDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "foreign1" });
+            actualDatabase.ForeignKeys.Add(new ForeignKeyDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "foreign2" });
+
+            referenceDatabase.ForeignKeys.Add(new ForeignKeyDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "foreign2" });
+
+            var actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(1, actions.Count);
+            Assert.IsTrue(actions.Single() is ForeignKeyCreation);
+            Assert.AreEqual("dbo", (actions.Single() as ForeignKeyCreation).ForeignKeyDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (actions.Single() as ForeignKeyCreation).ForeignKeyDescription.TableName);
+            Assert.AreEqual("foreign2", (actions.Single() as ForeignKeyCreation).ForeignKeyDescription.Name);
+        }
     }
 }

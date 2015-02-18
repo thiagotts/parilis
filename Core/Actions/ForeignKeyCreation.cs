@@ -2,14 +2,14 @@
 
 namespace Core.Actions {
     internal class ForeignKeyCreation : ConstraintAction {
-        private readonly ForeignKeyDescription foreignKeyDescription;
+        internal readonly ForeignKeyDescription ForeignKeyDescription;
 
         public ForeignKeyCreation(ConnectionInfo connectionInfo, ForeignKeyDescription foreignKeyDescription) : base(connectionInfo) {
-            this.foreignKeyDescription = foreignKeyDescription;
+            this.ForeignKeyDescription = foreignKeyDescription;
         }
 
         internal override void Execute() {
-            Constraints.CreateForeignKey(foreignKeyDescription);
+            Constraints.CreateForeignKey(ForeignKeyDescription);
         }
     }
 }
