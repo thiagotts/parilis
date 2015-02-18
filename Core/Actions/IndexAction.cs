@@ -6,7 +6,7 @@ namespace Core.Actions {
         internal readonly IIndex Indexes;
         internal readonly IndexDescription IndexDescription;
 
-        protected IndexAction(ConnectionInfo connectionInfo, IndexDescription indexDescription) : base(connectionInfo) {
+        protected IndexAction(ConnectionInfo connectionInfo, IndexDescription indexDescription) {
             this.IndexDescription = indexDescription;
             Indexes = Components.Instance.GetComponent<IIndex>(connectionInfo);
         }

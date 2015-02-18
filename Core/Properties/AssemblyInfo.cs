@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
+using log4net.Config;
 
 [assembly: AssemblyTitle("Core")]
 [assembly: AssemblyDescription("")]
@@ -20,6 +21,7 @@ using System.Runtime.InteropServices;
 // COM, set the ComVisible attribute to true on that type.
 
 [assembly: ComVisible(false)]
+[assembly: XmlConfigurator(Watch = true)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 

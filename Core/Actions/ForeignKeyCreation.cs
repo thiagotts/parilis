@@ -8,6 +8,13 @@ namespace Core.Actions {
             this.ForeignKeyDescription = foreignKeyDescription;
         }
 
+        public override string Description {
+            get {
+                return string.Format("Creating foreign key {0} in table {1}.",
+                    ForeignKeyDescription.FullName, ForeignKeyDescription.TableName);
+            }
+        }
+
         internal override void Execute() {
             Constraints.CreateForeignKey(ForeignKeyDescription);
         }

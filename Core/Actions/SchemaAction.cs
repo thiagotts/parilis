@@ -5,7 +5,7 @@ namespace Core.Actions {
         internal readonly ISchema Schemas;
         internal readonly string SchemaName;
 
-        protected SchemaAction(ConnectionInfo connectionInfo, string schemaName) : base(connectionInfo) {
+        protected SchemaAction(ConnectionInfo connectionInfo, string schemaName) {
             SchemaName = schemaName;
             Schemas = Components.Instance.GetComponent<ISchema>(connectionInfo);
         }
