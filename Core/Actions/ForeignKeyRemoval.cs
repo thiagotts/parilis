@@ -2,14 +2,14 @@
 
 namespace Core.Actions {
     internal class ForeignKeyRemoval : ConstraintAction {
-        private readonly ForeignKeyDescription foreignKeyDescription;
+        internal readonly ForeignKeyDescription ForeignKeyDescription;
 
         public ForeignKeyRemoval(ConnectionInfo connectionInfo, ForeignKeyDescription foreignKeyDescription) : base(connectionInfo) {
-            this.foreignKeyDescription = foreignKeyDescription;
+            this.ForeignKeyDescription = foreignKeyDescription;
         }
 
         internal override void Execute() {
-            Constraints.RemoveForeignKey(foreignKeyDescription);
+            Constraints.RemoveForeignKey(ForeignKeyDescription);
         }
     }
 }

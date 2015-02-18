@@ -4,7 +4,7 @@ using Core.Interfaces;
 namespace Core.Actions {
     internal abstract class TableAction : Action {
         internal readonly ITable Tables;
-        protected readonly TableDescription TableDescription;
+        internal readonly TableDescription TableDescription;
 
         protected TableAction(ConnectionInfo connectionInfo, TableDescription tableDescription) : base(connectionInfo) {
             TableDescription = tableDescription;

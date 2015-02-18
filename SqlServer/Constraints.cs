@@ -74,7 +74,7 @@ namespace SqlServer {
         }
 
         public void CreateUnique(UniqueDescription uniqueDescription) {
-            var uniqueKey = SqlServerDatabase.GetUniqueKey(uniqueDescription.Name);
+            var uniqueKey = SqlServerDatabase.GetUniqueKey(uniqueDescription.Name, uniqueDescription.Schema);
             if (uniqueKey != null) throw new InvalidConstraintNameException();
 
             if (!ReferencedColumnsAreValid(uniqueDescription))
@@ -86,7 +86,7 @@ namespace SqlServer {
         }
 
         public void RemoveUnique(UniqueDescription uniqueDescription) {
-            var uniqueKey = SqlServerDatabase.GetUniqueKey(uniqueDescription.Name);
+            var uniqueKey = SqlServerDatabase.GetUniqueKey(uniqueDescription.Name, uniqueDescription.Schema);
             if (uniqueKey == null) throw new ConstraintNotFoundException();
 
             var foreignKeys = SqlServerDatabase.GetForeignKeysReferencing(uniqueDescription);

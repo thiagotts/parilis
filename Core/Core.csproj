@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionIdentifier.cs" />
     <Compile Include="Actions\Action.cs" />
     <Compile Include="Actions\SchemaAction.cs" />
     <Compile Include="Actions\SchemaRemoval.cs" />

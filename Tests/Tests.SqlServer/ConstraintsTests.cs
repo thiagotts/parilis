@@ -23,12 +23,15 @@ namespace Tests.SqlServer {
         }
 
         [SetUp]
-        public void FinishTest() {
+        public void InitializeTest() {
             Database.Tables.Refresh();
             var table = Database.Tables["TEST_TABLE_2"];
             if (table != null) table.Drop();
 
             table = Database.Tables["TEST_TABLE"];
+            if (table != null) table.Drop();
+
+            table = Database.Tables["TEST_TABLE_2", "testschema"];
             if (table != null) table.Drop();
 
             table = Database.Tables["TEST_TABLE", "testschema"];
@@ -213,7 +216,7 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void WhenTargetTableAlreadyHasAForeignKeyWithTheSameName_CreateMethodMustThrowException() {
+        public void WhenTargetTableAlreadyHasAForeignKeyWithTheSameNameInTheSameSchema_CreateMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
@@ -239,6 +242,49 @@ namespace Tests.SqlServer {
                     }
                 }
             }));
+        }
+
+        [Test]
+        public void WhenTargetTableAlreadyHasAForeignKeyWithTheSameNameInAnotherSchema_CreateMethodMustCreateTheForeignKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST FOREIGN KEY (id_fk) REFERENCES TEST_TABLE(id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
+
+            constraints.CreateForeignKey(new ForeignKeyDescription {
+                Schema = "testschema",
+                TableName = "TEST_TABLE_2",
+                Name = "FK_TEST",
+                Columns = new Dictionary<string, ColumnDescription> {
+                    {
+                        "id_fk",
+                        new ColumnDescription {
+                            Schema = "testschema",
+                            TableName = "TEST_TABLE",
+                            Name = "id"
+                        }
+                    }
+                }
+            });
+
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "testschema", Name = "TEST_TABLE_2" });
+
+            Assert.AreEqual(1, foreignKeys.Count);
+            Assert.AreEqual("FK_TEST", foreignKeys.Single().Name);
         }
 
         [Test]
@@ -514,6 +560,32 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void WhenThereIsAnotherUniqueKeyWithTheSameNameInAnotherSchema_CreateMethodMustCreateTheUniqueKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            constraints.CreateUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                ColumnNames = new List<string> {"description"}
+            });
+
+            var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+
+            Assert.AreEqual(1, uniqueKeys.Count);
+            Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
+        }
+
+        [Test]
         public void WhenUniqueKeysReferencesAnInvalidColumn_CreateMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
@@ -664,7 +736,7 @@ namespace Tests.SqlServer {
                 ColumnNames = new List<string> {"description"}
             });
 
-            var uniqueKey = sqlServerDatabase.GetUniqueKey("UQ_TEST_description");
+            var uniqueKey = sqlServerDatabase.GetUniqueKey("UQ_TEST_description", "dbo");
 
             Assert.IsNull(uniqueKey);
         }

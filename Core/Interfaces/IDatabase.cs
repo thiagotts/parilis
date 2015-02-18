@@ -17,7 +17,7 @@ namespace Core.Interfaces {
         IList<ForeignKeyDescription> GetForeignKeysReferencing(ConstraintDescription primaryKeyDescription);
         IList<UniqueDescription> GetUniqueKeys();
         IList<UniqueDescription> GetUniqueKeys(TableDescription tableDescription);
-        UniqueDescription GetUniqueKey(string uniqueKeyName);
+        UniqueDescription GetUniqueKey(string uniqueKeyName, string schema);
         IList<DefaultDescription> GetDefaults();
         DefaultDescription GetDefault(string defaultName, string schema);
     }

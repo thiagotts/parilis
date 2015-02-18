@@ -288,7 +288,7 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
                 CONSTRAINT UQ_TEST_description UNIQUE (description))");
 
-            var result = sqlServerDatabase.GetUniqueKey("UQ_TEST_description");
+            var result = sqlServerDatabase.GetUniqueKey("UQ_TEST_description", "dbo");
 
             Assert.IsNotNull(result);
             Assert.AreEqual("UQ_TEST_description", result.Name);
@@ -296,7 +296,7 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenUniqueKeyDoesNotExist_GetMethodMustReturnNull() {
-            var result = sqlServerDatabase.GetUniqueKey("UQ_TEST_description");
+            var result = sqlServerDatabase.GetUniqueKey("UQ_TEST_description", "dbo");
 
             Assert.IsNull(result);
         }

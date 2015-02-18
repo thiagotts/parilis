@@ -2,14 +2,14 @@
 
 namespace Core.Actions {
     internal class UniqueRemoval : ConstraintAction {
-        private readonly UniqueDescription uniqueDescription;
+        internal readonly UniqueDescription UniqueDescription;
 
         public UniqueRemoval(ConnectionInfo connectionInfo, UniqueDescription uniqueDescription) : base(connectionInfo) {
-            this.uniqueDescription = uniqueDescription;
+            this.UniqueDescription = uniqueDescription;
         }
 
         internal override void Execute() {
-            Constraints.RemoveUnique(uniqueDescription);
+            Constraints.RemoveUnique(UniqueDescription);
         }
     }
 }

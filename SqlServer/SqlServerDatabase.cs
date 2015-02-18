@@ -325,29 +325,30 @@ namespace SqlServer {
             return uniqueKeys;
         }
 
-        public UniqueDescription GetUniqueKey(string uniqueKeyName) {
+        public UniqueDescription GetUniqueKey(string uniqueKeyName, string schema) {
             var dataSet = database.ExecuteWithResults(string.Format(@"
-                SELECT Col.TABLE_SCHEMA, Col.TABLE_NAME, Col.COLUMN_NAME FROM
+                SELECT Col.TABLE_NAME, Col.COLUMN_NAME FROM
                     INFORMATION_SCHEMA.TABLE_CONSTRAINTS Tab,
                     INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE Col
                 WHERE
                     Col.Constraint_Name = Tab.Constraint_Name
                     AND Col.Table_Name = Tab.Table_Name
                     AND Constraint_Type = 'UNIQUE'
-                    AND Col.Constraint_Name = '{0}'", uniqueKeyName));
+                    AND Col.Constraint_Name = '{0}'
+                    AND Col.TABLE_SCHEMA = '{1}'", uniqueKeyName, schema));
 
             var results = GetResults(dataSet);
             if (!results.Any()) return null;
 
             var uniqueKey = new UniqueDescription {
                 Name = uniqueKeyName,
-                Schema = results[0][0],
-                TableName = results[0][1],
+                Schema = schema,
+                TableName = results[0][0],
                 ColumnNames = new List<string>()
             };
 
             foreach (var result in results) {
-                uniqueKey.ColumnNames.Add(result[2]);
+                uniqueKey.ColumnNames.Add(result[1]);
             }
 
             return uniqueKey;
