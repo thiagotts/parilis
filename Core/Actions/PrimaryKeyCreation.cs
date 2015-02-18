@@ -2,14 +2,14 @@
 
 namespace Core.Actions {
     internal class PrimaryKeyCreation : ConstraintAction {
-        private readonly PrimaryKeyDescription primaryKeyDescription;
+        internal readonly PrimaryKeyDescription PrimaryKeyDescription;
 
         public PrimaryKeyCreation(ConnectionInfo connectionInfo, PrimaryKeyDescription primaryKeyDescription) : base(connectionInfo) {
-            this.primaryKeyDescription = primaryKeyDescription;
+            this.PrimaryKeyDescription = primaryKeyDescription;
         }
 
         internal override void Execute() {
-            Constraints.CreatePrimaryKey(primaryKeyDescription);
+            Constraints.CreatePrimaryKey(PrimaryKeyDescription);
         }
     }
 }

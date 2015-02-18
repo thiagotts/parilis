@@ -170,6 +170,12 @@ namespace Core {
 
             foreach (var columnCreation in GetColumnCreations())
                 actions.Add(columnCreation);
+
+            foreach (var indexCreation in GetIndexCreations())
+                actions.Add(indexCreation);
+
+            foreach (var primaryKeyCreation in GetPrimaryKeyCreations())
+                actions.Add(primaryKeyCreation);
         }
 
         private IEnumerable<Action> GetSchemaCreations() {
@@ -208,6 +214,26 @@ namespace Core {
             }
 
             return columnCreations;
+        }
+
+        private IEnumerable<Action> GetIndexCreations() {
+            var indexCreations = new List<IndexCreation>();
+            foreach (var index in referenceDatabase.Indexes) {
+                if (!actualDatabase.Indexes.Any(i => i.FullName.Equals(index.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                    indexCreations.Add(new IndexCreation(connectionInfo, index));
+            }
+
+            return indexCreations;
+        }
+
+        private IEnumerable<Action> GetPrimaryKeyCreations() {
+            var primaryKeyCreations = new List<PrimaryKeyCreation>();
+            foreach (var primaryKey in referenceDatabase.PrimaryKeys) {
+                if (!actualDatabase.PrimaryKeys.Any(p => p.FullName.Equals(primaryKey.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                    primaryKeyCreations.Add(new PrimaryKeyCreation(connectionInfo, primaryKey));
+            }
+
+            return primaryKeyCreations;
         }
     }
 }

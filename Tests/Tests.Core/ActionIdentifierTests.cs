@@ -347,5 +347,47 @@ namespace Tests.Core {
             Assert.IsTrue(columnCreation.ColumnDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase));
             Assert.IsTrue(columnCreation.ColumnDescription.Name.Equals("column2", StringComparison.InvariantCultureIgnoreCase));
         }
+
+        [Test]
+        public void WhenReferenceDatabaseHasAnIndexThatActualDatabaseDoesNot_MustReturnAnIndexCreationAction() {
+            referenceDatabase.Indexes.Add(new IndexDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "index1" });
+            referenceDatabase.Indexes.Add(new IndexDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "index2" });
+            actualDatabase.Indexes.Add(new IndexDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "index1" });
+            actualDatabase.Indexes.Add(new IndexDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "index2" });
+
+            referenceDatabase.Indexes.Add(new IndexDescription { Schema = "dbo", TableName = "TEST_TABLE_2", Name = "index1" });
+            referenceDatabase.Indexes.Add(new IndexDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "index2" });
+
+            var actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(2, actions.Count);
+            Assert.IsTrue(actions.All(a => a is IndexCreation));
+            Assert.IsTrue(actions.Cast<IndexCreation>().Any(a => a.IndexDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Cast<IndexCreation>().Any(a => a.IndexDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Cast<IndexCreation>().Any(a => a.IndexDescription.Name.Equals("index2", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Cast<IndexCreation>().Any(a => a.IndexDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Cast<IndexCreation>().Any(a => a.IndexDescription.TableName.Equals("TEST_TABLE_2", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Cast<IndexCreation>().Any(a => a.IndexDescription.Name.Equals("index1", StringComparison.InvariantCultureIgnoreCase)));
+        }
+
+        [Test]
+        public void WhenReferenceDatabaseHasAPrimaryKeyThatActualDatabaseDoesNot_MustReturnAPrimaryKeyCreationAction() {
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1" });
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2" });
+            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1" });
+            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2" });
+
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "primary2" });
+
+            var actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(1, actions.Count);
+            Assert.IsTrue(actions.Single() is PrimaryKeyCreation);
+            Assert.AreEqual("dbo", (actions.Single() as PrimaryKeyCreation).PrimaryKeyDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (actions.Single() as PrimaryKeyCreation).PrimaryKeyDescription.TableName);
+            Assert.AreEqual("primary2", (actions.Single() as PrimaryKeyCreation).PrimaryKeyDescription.Name);
+        }
     }
 }
