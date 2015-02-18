@@ -2,7 +2,7 @@
 using Core.Descriptions;
 using NUnit.Framework;
 
-namespace Tests.Core {
+namespace Tests.SqlServer {
     [TestFixture]
     public class ParilisTests {
 

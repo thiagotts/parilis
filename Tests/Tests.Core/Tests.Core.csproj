@@ -91,7 +91,6 @@
     <Compile Include="DatabaseTest.cs" />
     <Compile Include="Facility.cs" />
     <Compile Include="MockTest.cs" />
-    <Compile Include="ParilisTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

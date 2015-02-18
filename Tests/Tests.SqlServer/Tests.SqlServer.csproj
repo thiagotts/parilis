@@ -71,6 +71,7 @@
     <Compile Include="ColumnsTests.cs" />
     <Compile Include="Facility.cs" />
     <Compile Include="IndexesTests.cs" />
+    <Compile Include="ParilisTests.cs" />
     <Compile Include="SchemasTests.cs" />
     <Compile Include="SqlServerDatabaseTests.cs" />
     <Compile Include="ConstraintsTests.cs" />
