@@ -21,6 +21,7 @@ namespace Core {
             var actions = new List<Action>();
             GetRemovals(actions);
             GetModifications(actions);
+            GetCreations(actions);
 
             return actions;
         }
@@ -158,6 +159,34 @@ namespace Core {
                     }
                 }
             }
+        }
+
+        private void GetCreations(List<Action> actions) {
+            foreach (var schemaCreation in GetSchemaCreations())
+                actions.Add(schemaCreation);
+
+            foreach (var tableCreation in GetTableCreations())
+                actions.Add(tableCreation);
+        }
+
+        private IEnumerable<Action> GetSchemaCreations() {
+            var schemaCreations = new List<SchemaCreation>();
+            foreach (var schema in referenceDatabase.Schemas) {
+                if (!actualDatabase.Schemas.Any(s => s.Equals(schema, StringComparison.InvariantCultureIgnoreCase)))
+                    schemaCreations.Add(new SchemaCreation(connectionInfo, schema));
+            }
+
+            return schemaCreations;
+        }
+
+        private IEnumerable<Action> GetTableCreations() {
+            var tableCreations = new List<TableCreation>();
+            foreach (var table in referenceDatabase.Tables) {
+                if (!actualDatabase.Tables.Any(t => t.FullName.Equals(table.FullName)))
+                    tableCreations.Add(new TableCreation(connectionInfo, table));
+            }
+
+            return tableCreations;
         }
     }
 }

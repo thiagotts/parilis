@@ -286,5 +286,40 @@ namespace Tests.Core {
             Assert.IsTrue(columnModification.ColumnDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase));
             Assert.IsTrue(columnModification.ColumnDescription.Name.Equals("column1", StringComparison.InvariantCultureIgnoreCase));
         }
+
+        [Test]
+        public void WhenReferenceDatabaseHasASchemaThatActualDatabaseDoesNot_MustReturnASchemaCreationAction() {
+            referenceDatabase.Schemas.Add("dbo");
+            referenceDatabase.Schemas.Add("testschema");
+            referenceDatabase.Tables.Add(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            referenceDatabase.Tables.Add(new TableDescription { Schema = "testschema", Name = "TEST_TABLE" });
+
+            actualDatabase.Schemas.Add("dbo");
+            actualDatabase.Tables.Add(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+
+            var actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(2, actions.Count);
+            Assert.AreEqual(1, actions.Count(a => a is TableCreation));
+            Assert.AreEqual(1, actions.Count(a => a is SchemaCreation));
+            var schemaCreation = actions.Single(a => a is SchemaCreation) as SchemaCreation;
+            Assert.AreEqual("testschema", schemaCreation.SchemaName);
+        }
+
+        [Test]
+        public void WhenReferenceDatabaseHasATableThatActualDatabaseDoesNot_MustReturnATableCreationAction() {
+            referenceDatabase.Tables.Add(new TableDescription { Name = "TEST_TABLE" });
+            referenceDatabase.Tables.Add(new TableDescription { Name = "TEST_TABLE_2" });
+
+            actualDatabase.Tables.Add(new TableDescription { Name = "TEST_TABLE" });
+
+            var actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(1, actions.Count);
+            Assert.IsTrue(actions.Single() is TableCreation);
+            Assert.AreEqual("TEST_TABLE_2", (actions.Single() as TableCreation).TableDescription.Name);
+        }
     }
 }
