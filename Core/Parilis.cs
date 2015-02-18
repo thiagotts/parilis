@@ -6,8 +6,8 @@ using Action = Core.Actions.Action;
 
 namespace Core {
     public class Parilis {
-        private readonly DatabaseDescription actualDatabase;
-        private readonly DatabaseDescription referenceDatabase;
+        private DatabaseDescription actualDatabase;
+        private DatabaseDescription referenceDatabase;
 
         public Parilis(DatabaseDescription actualDatabase, DatabaseDescription referenceDatabase) {
             this.actualDatabase = actualDatabase;
@@ -30,7 +30,11 @@ namespace Core {
                 return false;
             }
 
-            return true;
+            actualDatabase = new DatabaseDescription(actualDatabase.ConnectionInfo);
+            referenceDatabase = new DatabaseDescription(referenceDatabase.ConnectionInfo);
+            
+            actions = actionIdentifier.GetActions();
+            return actions.Count == 0;
         }
     }
 }
