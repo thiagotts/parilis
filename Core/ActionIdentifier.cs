@@ -167,6 +167,9 @@ namespace Core {
 
             foreach (var tableCreation in GetTableCreations())
                 actions.Add(tableCreation);
+
+            foreach (var columnCreation in GetColumnCreations())
+                actions.Add(columnCreation);
         }
 
         private IEnumerable<Action> GetSchemaCreations() {
@@ -187,6 +190,24 @@ namespace Core {
             }
 
             return tableCreations;
+        }
+
+        private IEnumerable<Action> GetColumnCreations() {
+            var columnCreations = new List<ColumnCreation>();
+
+            foreach (var table in referenceDatabase.Tables) {
+                var actualTable = actualDatabase.Tables.SingleOrDefault(t =>
+                    t.FullName.Equals(table.FullName, StringComparison.InvariantCultureIgnoreCase));
+
+                if (actualTable == null) continue;
+
+                foreach (var column in table.Columns ?? new List<ColumnDescription>()) {
+                    if (!actualTable.Columns.Any(c => c.FullName.Equals(column.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                        columnCreations.Add(new ColumnCreation(connectionInfo, column));
+                }
+            }
+
+            return columnCreations;
         }
     }
 }
