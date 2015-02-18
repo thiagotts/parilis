@@ -153,13 +153,13 @@ namespace Tests.Core {
 
         [Test]
         public void WhenActualDatabaseHasAColumnThatReferenceDatabaseDoesNot_MustReturnAColumnRemovalAction() {
-            actualDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE"}}});
-            actualDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column2", Schema = "testschema", TableName = "TEST_TABLE"}}});
-            referenceDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE"}}});
-            referenceDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column2", Schema = "testschema", TableName = "TEST_TABLE"}}});
+            actualDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE", Type = "int"}}});
+            actualDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column2", Schema = "testschema", TableName = "TEST_TABLE", Type = "int"}}});
+            referenceDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE", Type = "int"}}});
+            referenceDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column2", Schema = "testschema", TableName = "TEST_TABLE", Type = "int"}}});
 
-            actualDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE_2"}}});
-            actualDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column2", Schema = "dbo", TableName = "TEST_TABLE"}}});
+            actualDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE_2", Type = "int"}}});
+            actualDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column2", Schema = "dbo", TableName = "TEST_TABLE", Type = "int"}}});
 
             var actions = actionIdentifier.GetActions();
 
@@ -203,6 +203,88 @@ namespace Tests.Core {
             Assert.AreEqual(1, actions.Count(a => a is SchemaRemoval));
             var schemaRemoval = actions.Single(a => a is SchemaRemoval) as SchemaRemoval;
             Assert.AreEqual("testschema", schemaRemoval.SchemaName);
+        }
+
+        [Test]
+        public void WhenActualDatabaseHasAColumnWithDifferentDataTypeWhenComparedToReferenceDatabase_MustReturnAColumnModificationAction() {
+            actualDatabase.Tables.Add(new TableDescription {
+                Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
+                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "int"},
+                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
+                }
+            });
+            referenceDatabase.Tables.Add(new TableDescription {
+                Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
+                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "bigint"},
+                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
+                }
+            });
+
+            var actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(1, actions.Count);
+            Assert.AreEqual(1, actions.Count(a => a is ColumnModification));
+            var columnModification = actions.Single(a => a is ColumnModification) as ColumnModification;
+            Assert.IsTrue(columnModification.ColumnDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase));
+            Assert.IsTrue(columnModification.ColumnDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase));
+            Assert.IsTrue(columnModification.ColumnDescription.Name.Equals("column1", StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        [Test]
+        public void WhenActualDatabaseHasAColumnWithDifferentMaximumSizeWhenComparedToReferenceDatabase_MustReturnAColumnModificationAction() {
+            actualDatabase.Tables.Add(new TableDescription {
+                Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
+                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "100"},
+                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
+                }
+            });
+            referenceDatabase.Tables.Add(new TableDescription {
+                Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
+                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "255"},
+                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
+                }
+            });
+
+            var actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(1, actions.Count);
+            Assert.AreEqual(1, actions.Count(a => a is ColumnModification));
+            var columnModification = actions.Single(a => a is ColumnModification) as ColumnModification;
+            Assert.IsTrue(columnModification.ColumnDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase));
+            Assert.IsTrue(columnModification.ColumnDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase));
+            Assert.IsTrue(columnModification.ColumnDescription.Name.Equals("column1", StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        [Test]
+        public void WhenActualDatabaseHasAColumnAllowingNullAndReferenceDatabaseDoesNot_MustReturnAColumnModificationAction() {
+            actualDatabase.Tables.Add(new TableDescription {
+                Schema = "dbo",
+                Name = "TEST_TABLE",
+                Columns = new List<ColumnDescription> {
+                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "255", AllowsNull = true},
+                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
+                }
+            });
+            referenceDatabase.Tables.Add(new TableDescription {
+                Schema = "dbo",
+                Name = "TEST_TABLE",
+                Columns = new List<ColumnDescription> {
+                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "255", AllowsNull = false},
+                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
+                }
+            });
+
+            var actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(1, actions.Count);
+            Assert.AreEqual(1, actions.Count(a => a is ColumnModification));
+            var columnModification = actions.Single(a => a is ColumnModification) as ColumnModification;
+            Assert.IsTrue(columnModification.ColumnDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase));
+            Assert.IsTrue(columnModification.ColumnDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase));
+            Assert.IsTrue(columnModification.ColumnDescription.Name.Equals("column1", StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }

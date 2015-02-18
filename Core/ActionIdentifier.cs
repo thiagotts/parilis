@@ -19,40 +19,36 @@ namespace Core {
 
         internal IList<Action> GetActions() {
             var actions = new List<Action>();
-
-            foreach (var defaultRemoval in GetDefaultRemovals()) {
-                actions.Add(defaultRemoval);
-            }
-
-            foreach (var uniqueRemoval in GetUniqueRemovals()) {
-                actions.Add(uniqueRemoval);
-            }
-
-            foreach (var foreignKeyRemoval in GetForeignKeyRemovals()) {
-                actions.Add(foreignKeyRemoval);
-            }
-
-            foreach (var primaryKeyRemoval in GetPrimaryKeyRemovals()) {
-                actions.Add(primaryKeyRemoval);
-            }
-
-            foreach (var indexRemoval in GetIndexRemovals()) {
-                actions.Add(indexRemoval);
-            }
-
-            foreach (var columnRemoval in GetColumnRemovals()) {
-                actions.Add(columnRemoval);
-            }
-
-            foreach (var tableRemoval in GetTableRemovals()) {
-                actions.Add(tableRemoval);
-            }
-
-            foreach (var schemaRemoval in GetSchemaRemovals()) {
-                actions.Add(schemaRemoval);
-            }
+            GetRemovals(actions);
+            GetModifications(actions);
 
             return actions;
+        }
+
+        private void GetRemovals(List<Action> actions) {
+            foreach (var defaultRemoval in GetDefaultRemovals())
+                actions.Add(defaultRemoval);
+
+            foreach (var uniqueRemoval in GetUniqueRemovals())
+                actions.Add(uniqueRemoval);
+
+            foreach (var foreignKeyRemoval in GetForeignKeyRemovals())
+                actions.Add(foreignKeyRemoval);
+
+            foreach (var primaryKeyRemoval in GetPrimaryKeyRemovals())
+                actions.Add(primaryKeyRemoval);
+
+            foreach (var indexRemoval in GetIndexRemovals())
+                actions.Add(indexRemoval);
+
+            foreach (var columnRemoval in GetColumnRemovals())
+                actions.Add(columnRemoval);
+
+            foreach (var tableRemoval in GetTableRemovals())
+                actions.Add(tableRemoval);
+
+            foreach (var schemaRemoval in GetSchemaRemovals())
+                actions.Add(schemaRemoval);
         }
 
         private IEnumerable<Action> GetDefaultRemovals() {
@@ -109,7 +105,7 @@ namespace Core {
             var columnRemovals = new List<ColumnRemoval>();
 
             foreach (var table in actualDatabase.Tables) {
-                TableDescription referenceTable = referenceDatabase.Tables.SingleOrDefault(t => 
+                var referenceTable = referenceDatabase.Tables.SingleOrDefault(t =>
                     t.FullName.Equals(table.FullName, StringComparison.InvariantCultureIgnoreCase));
 
                 if (referenceTable == null) continue;
@@ -117,7 +113,7 @@ namespace Core {
                 foreach (var column in table.Columns ?? new List<ColumnDescription>()) {
                     if (!referenceTable.Columns.Any(c => c.FullName.Equals(column.FullName, StringComparison.InvariantCultureIgnoreCase)))
                         columnRemovals.Add(new ColumnRemoval(connectionInfo, column));
-                }                
+                }
             }
 
             return columnRemovals;
@@ -141,6 +137,27 @@ namespace Core {
             }
 
             return schemaRemovals;
+        }
+
+        private void GetModifications(List<Action> actions) {
+            foreach (var table in actualDatabase.Tables) {
+                var referenceTable = referenceDatabase.Tables.SingleOrDefault(t =>
+                    t.FullName.Equals(table.FullName, StringComparison.InvariantCultureIgnoreCase));
+
+                if (referenceTable == null) continue;
+
+                foreach (var column in table.Columns ?? new List<ColumnDescription>()) {
+                    if (!referenceTable.Columns.Any(c => c.FullName.Equals(column.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                        continue;
+
+                    var referenceColumn = referenceTable.Columns.Single(c => c.FullName.Equals(column.FullName, StringComparison.InvariantCultureIgnoreCase));
+                    if (!column.Type.Equals(referenceColumn.Type, StringComparison.InvariantCultureIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(column.MaximumSize) && !column.MaximumSize.Equals(referenceColumn.MaximumSize, StringComparison.InvariantCultureIgnoreCase)) ||
+                        !column.AllowsNull.Equals(referenceColumn.AllowsNull)) {
+                        actions.Add(new ColumnModification(connectionInfo, column));
+                    }
+                }
+            }
         }
     }
 }
