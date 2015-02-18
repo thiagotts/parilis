@@ -107,6 +107,7 @@
     <Compile Include="Interfaces\ISchema.cs" />
     <Compile Include="Interfaces\IDatabase.cs" />
     <Compile Include="Interfaces\ITable.cs" />
+    <Compile Include="Parilis.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
