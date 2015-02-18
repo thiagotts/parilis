@@ -3,7 +3,7 @@ using Core.Interfaces;
 
 namespace Core.Descriptions {
     public class DatabaseDescription {
-        internal ConnectionInfo ConnectionInfo;
+        internal readonly ConnectionInfo ConnectionInfo;
 
         public DatabaseDescription(ConnectionInfo connectionInfo) {
             ConnectionInfo = connectionInfo;
