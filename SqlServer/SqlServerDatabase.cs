@@ -13,7 +13,7 @@ using SqlServer.Enums;
 using DataType = SqlServer.Enums.DataType;
 
 namespace SqlServer {
-    [CastleComponent("SqlServer.SqlServerDatabase", typeof (IDatabase), Lifestyle = LifestyleType.Singleton)]
+    [CastleComponent("SqlServer.SqlServerDatabase", typeof (IDatabase), Lifestyle = LifestyleType.Transient)]
     public class SqlServerDatabase : IDatabase {
         private readonly Database database;
 
@@ -86,6 +86,7 @@ namespace SqlServer {
             foreach (Table table in database.Tables) {
                 table.Indexes.Refresh();
                 foreach (Index index in table.Indexes) {
+                    if(index.IndexKeyType != IndexKeyType.None) continue;
                     indexes.Add(GetDescription(index, table.Schema, table.Name));
                 }
             }
@@ -126,7 +127,7 @@ namespace SqlServer {
 
             foreach (Table table in database.Tables) {
                 var primaryKey = GetPrimaryKey(new TableDescription {Schema = table.Schema, Name = table.Name});
-                primaryKeys.Add(primaryKey);
+                if(primaryKey != null) primaryKeys.Add(primaryKey);
             }
 
             return primaryKeys;

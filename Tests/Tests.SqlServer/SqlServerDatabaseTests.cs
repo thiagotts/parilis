@@ -389,6 +389,18 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenDatabaseHasNoIndexes_GetIndexesMustReturnAnEmptyList() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_3](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST_1 PRIMARY KEY (id),
+                CONSTRAINT FK_TEST_1 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
             var result = sqlServerDatabase.GetIndexes();
 
             Assert.IsNotNull(result);
@@ -442,6 +454,9 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenDatabaseHasNoPrimaryKeys_GetPrimaryKeysMustReturnAnEmptyList() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE](
+                [id] [bigint] NOT NULL);");
+
             var result = sqlServerDatabase.GetPrimaryKeys();
 
             Assert.IsNotNull(result);
