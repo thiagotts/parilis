@@ -8,6 +8,13 @@ namespace Core.Actions {
             this.DefaultDescription = defaultDescription;
         }
 
+        public override string Description {
+            get {
+                return string.Format("Creating default value constraint {0} in table {1}.",
+                    DefaultDescription.FullName, DefaultDescription.TableName);
+            }
+        }
+
         internal override void Execute() {
             Constraints.CreateDefault(DefaultDescription);
         }
