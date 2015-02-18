@@ -4,7 +4,7 @@ using Core.Interfaces;
 namespace Core.Actions {
     internal abstract class ColumnAction : Action {
         internal readonly IColumn Columns;
-        protected readonly ColumnDescription ColumnDescription;
+        internal readonly ColumnDescription ColumnDescription;
 
         protected ColumnAction(ConnectionInfo connectionInfo, ColumnDescription columnDescription) : base(connectionInfo) {
             ColumnDescription = columnDescription;

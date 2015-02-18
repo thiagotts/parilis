@@ -40,6 +40,10 @@ namespace Core {
                 actions.Add(indexRemoval);
             }
 
+            foreach (var columnRemoval in GetColumnRemovals()) {
+                actions.Add(columnRemoval);
+            }
+
             foreach (var tableRemoval in GetTableRemovals()) {
                 actions.Add(tableRemoval);
             }
@@ -95,6 +99,24 @@ namespace Core {
             }
 
             return indexRemovals;
+        }
+
+        private IEnumerable<Action> GetColumnRemovals() {
+            var columnRemovals = new List<ColumnRemoval>();
+
+            foreach (var table in actualDatabase.Tables) {
+                TableDescription referenceTable = referenceDatabase.Tables.SingleOrDefault(t => 
+                    t.FullName.Equals(table.FullName, StringComparison.InvariantCultureIgnoreCase));
+
+                if (referenceTable == null) continue;
+
+                foreach (var column in table.Columns ?? new List<ColumnDescription>()) {
+                    if (!referenceTable.Columns.Any(c => c.FullName.Equals(column.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                        columnRemovals.Add(new ColumnRemoval(connectionInfo, column));
+                }                
+            }
+
+            return columnRemovals;
         }
 
         private IEnumerable<Action> GetTableRemovals() {
