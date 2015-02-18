@@ -6,7 +6,7 @@ namespace Core.Actions {
         internal readonly IColumn Columns;
         internal readonly ColumnDescription ColumnDescription;
 
-        protected ColumnAction(ConnectionInfo connectionInfo, ColumnDescription columnDescription) : base(connectionInfo) {
+        protected ColumnAction(ConnectionInfo connectionInfo, ColumnDescription columnDescription) {
             ColumnDescription = columnDescription;
             Columns = Components.Instance.GetComponent<IColumn>(connectionInfo);
         }
