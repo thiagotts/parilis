@@ -91,6 +91,7 @@
     <Compile Include="DatabaseTest.cs" />
     <Compile Include="Facility.cs" />
     <Compile Include="MockTest.cs" />
+    <Compile Include="ParilisTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +102,10 @@
     <ProjectReference Include="..\..\Core\Core.csproj">
       <Project>{eededb5c-8e25-4555-a7da-143861fe4fd4}</Project>
       <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SqlServer\SqlServer.csproj">
+      <Project>{1418a2a9-7a5b-4e21-b5de-632b86e3d7fa}</Project>
+      <Name>SqlServer</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
