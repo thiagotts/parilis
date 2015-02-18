@@ -2,10 +2,10 @@
 
 namespace Core.Actions {
     internal class IndexCreation : IndexAction {
-        public IndexCreation(ConnectionInfo connectionInfo, IndexDescription tableDescription) : base(connectionInfo, tableDescription) {}
+        public IndexCreation(ConnectionInfo connectionInfo, IndexDescription indexDescription) : base(connectionInfo, indexDescription) {}
 
         internal override void Execute() {
-            Indexes.Create(TableDescription);
+            Indexes.Create(IndexDescription);
         }
     }
 }

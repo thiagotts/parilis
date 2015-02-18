@@ -36,6 +36,10 @@ namespace Core {
                 actions.Add(primaryKeyRemoval);
             }
 
+            foreach (var indexRemoval in GetIndexRemovals()) {
+                actions.Add(indexRemoval);
+            }
+
             foreach (var tableRemoval in GetTableRemovals()) {
                 actions.Add(tableRemoval);
             }
@@ -81,6 +85,16 @@ namespace Core {
             }
 
             return primaryKeyRemovals;
+        }
+
+        private IEnumerable<Action> GetIndexRemovals() {
+            var indexRemovals = new List<IndexRemoval>();
+            foreach (var index in actualDatabase.Indexes) {
+                if (!referenceDatabase.Indexes.Any(i => i.FullName.Equals(index.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                    indexRemovals.Add(new IndexRemoval(connectionInfo, index));
+            }
+
+            return indexRemovals;
         }
 
         private IEnumerable<Action> GetTableRemovals() {

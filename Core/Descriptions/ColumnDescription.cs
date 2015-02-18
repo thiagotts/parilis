@@ -6,5 +6,13 @@
         public string Type { get; set; }
         public bool AllowsNull { get; set; }
         public string MaximumSize { get; set; }
+
+        public string FullName {
+            get {
+                return string.IsNullOrWhiteSpace(Schema) ?
+                    string.Format("{0}.{1}", TableName, Name) :
+                    string.Format("{0}.{1}.{2}", Schema, TableName, Name);
+            }
+        }
     }
 }

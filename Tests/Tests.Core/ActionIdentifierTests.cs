@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Core;
 using Core.Actions;
@@ -6,6 +7,7 @@ using Core.Descriptions;
 using Core.Interfaces;
 using NSubstitute;
 using NUnit.Framework;
+using Action = Core.Actions.Action;
 
 namespace Tests.Core {
     [TestFixture]
@@ -19,6 +21,7 @@ namespace Tests.Core {
             base.InitializeClass();
             Mock<ITable>();
             Mock<IConstraint>();
+            Mock<IIndex>();
         }
 
         [SetUp]
@@ -122,6 +125,29 @@ namespace Tests.Core {
             Assert.AreEqual("dbo", (actions.Single() as PrimaryKeyRemoval).PrimaryKeyDescription.Schema);
             Assert.AreEqual("TEST_TABLE", (actions.Single() as PrimaryKeyRemoval).PrimaryKeyDescription.TableName);
             Assert.AreEqual("primary2", (actions.Single() as PrimaryKeyRemoval).PrimaryKeyDescription.Name);
+        }
+
+        [Test]
+        public void WhenActualDatabaseHasAnIndexThatReferenceDatabaseDoesNot_MustReturnAnIndexRemovalAction() {
+            actualDatabase.Indexes.Add(new IndexDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "index1" });
+            actualDatabase.Indexes.Add(new IndexDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "index2" });
+            referenceDatabase.Indexes.Add(new IndexDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "index1" });
+            referenceDatabase.Indexes.Add(new IndexDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "index2" });
+
+            actualDatabase.Indexes.Add(new IndexDescription { Schema = "dbo", TableName = "TEST_TABLE_2", Name = "index1" });
+            actualDatabase.Indexes.Add(new IndexDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "index2" });
+
+            IList<Action> actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(2, actions.Count);
+            Assert.IsTrue(actions.All(a => a is IndexRemoval));
+            Assert.IsTrue(actions.Cast<IndexRemoval>().Any(a => a.IndexDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Cast<IndexRemoval>().Any(a => a.IndexDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Cast<IndexRemoval>().Any(a => a.IndexDescription.Name.Equals("index2", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Cast<IndexRemoval>().Any(a => a.IndexDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Cast<IndexRemoval>().Any(a => a.IndexDescription.TableName.Equals("TEST_TABLE_2", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Cast<IndexRemoval>().Any(a => a.IndexDescription.Name.Equals("index1", StringComparison.InvariantCultureIgnoreCase)));
         }
 
         [Test]

@@ -4,11 +4,10 @@ using Core.Interfaces;
 namespace Core.Actions {
     internal abstract class IndexAction : Action {
         internal readonly IIndex Indexes;
-        protected readonly IndexDescription TableDescription;
+        internal readonly IndexDescription IndexDescription;
 
-
-        protected IndexAction(ConnectionInfo connectionInfo, IndexDescription tableDescription) : base(connectionInfo) {
-            this.TableDescription = tableDescription;
+        protected IndexAction(ConnectionInfo connectionInfo, IndexDescription indexDescription) : base(connectionInfo) {
+            this.IndexDescription = indexDescription;
             Indexes = Components.Instance.GetComponent<IIndex>(connectionInfo);
         }
     }
