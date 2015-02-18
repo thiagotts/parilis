@@ -408,5 +408,43 @@ namespace Tests.Core {
             Assert.AreEqual("TEST_TABLE", (actions.Single() as ForeignKeyCreation).ForeignKeyDescription.TableName);
             Assert.AreEqual("foreign2", (actions.Single() as ForeignKeyCreation).ForeignKeyDescription.Name);
         }
+
+        [Test]
+        public void WhenReferenceDatabaseHasAUniqueKeyThatActualDatabaseDoesNot_MustReturnAUniqueCreationAction() {
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1" });
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2" });
+            actualDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1" });
+            actualDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2" });
+
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "unique2" });
+
+            var actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(1, actions.Count);
+            Assert.IsTrue(actions.Single() is UniqueCreation);
+            Assert.AreEqual("dbo", (actions.Single() as UniqueCreation).UniqueDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (actions.Single() as UniqueCreation).UniqueDescription.TableName);
+            Assert.AreEqual("unique2", (actions.Single() as UniqueCreation).UniqueDescription.Name);
+        }
+
+        [Test]
+        public void WhenReferenceDatabaseHasADefaultThatActualDatabaseDoesNot_MustReturnADefaultCreationAction() {
+            referenceDatabase.Defaults.Add(new DefaultDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "default1" });
+            referenceDatabase.Defaults.Add(new DefaultDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "default2" });
+            actualDatabase.Defaults.Add(new DefaultDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "default1" });
+            actualDatabase.Defaults.Add(new DefaultDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "default2" });
+
+            referenceDatabase.Defaults.Add(new DefaultDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "default2" });
+
+            var actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(1, actions.Count);
+            Assert.IsTrue(actions.Single() is DefaultCreation);
+            Assert.AreEqual("dbo", (actions.Single() as DefaultCreation).DefaultDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (actions.Single() as DefaultCreation).DefaultDescription.TableName);
+            Assert.AreEqual("default2", (actions.Single() as DefaultCreation).DefaultDescription.Name);
+        }
     }
 }

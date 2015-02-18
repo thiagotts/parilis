@@ -2,14 +2,14 @@
 
 namespace Core.Actions {
     internal class UniqueCreation : ConstraintAction {
-        private readonly UniqueDescription uniqueDescription;
+        internal readonly UniqueDescription UniqueDescription;
 
         public UniqueCreation(ConnectionInfo connectionInfo, UniqueDescription uniqueDescription) : base(connectionInfo) {
-            this.uniqueDescription = uniqueDescription;
+            this.UniqueDescription = uniqueDescription;
         }
 
         internal override void Execute() {
-            Constraints.CreateUnique(uniqueDescription);
+            Constraints.CreateUnique(UniqueDescription);
         }
     }
 }

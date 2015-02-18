@@ -179,6 +179,12 @@ namespace Core {
 
             foreach (var foreignKeyCreation in GetForeignKeyCreations())
                 actions.Add(foreignKeyCreation);
+
+            foreach (var uniqueCreation in GetUniqueCreations())
+                actions.Add(uniqueCreation);
+
+            foreach (var defaultCreation in GetDefaultCreations())
+                actions.Add(defaultCreation);
         }
 
         private IEnumerable<Action> GetSchemaCreations() {
@@ -247,6 +253,26 @@ namespace Core {
             }
 
             return foreignKeyCreations;
+        }
+
+        private IEnumerable<Action> GetUniqueCreations() {
+            var uniqueCreations = new List<UniqueCreation>();
+            foreach (var uniqueKey in referenceDatabase.UniqueKeys) {
+                if (!actualDatabase.UniqueKeys.Any(u => u.FullName.Equals(uniqueKey.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                    uniqueCreations.Add(new UniqueCreation(connectionInfo, uniqueKey));
+            }
+
+            return uniqueCreations;
+        }
+
+        private IEnumerable<Action> GetDefaultCreations() {
+            var defaultCreations = new List<DefaultCreation>();
+            foreach (var defaultDescription in referenceDatabase.Defaults) {
+                if (!actualDatabase.Defaults.Any(d => d.FullName.Equals(defaultDescription.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                    defaultCreations.Add(new DefaultCreation(connectionInfo, defaultDescription));
+            }
+
+            return defaultCreations;
         }
     }
 }
