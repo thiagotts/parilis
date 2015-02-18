@@ -7,7 +7,6 @@ using Core.Descriptions;
 using Core.Interfaces;
 using NSubstitute;
 using NUnit.Framework;
-using Action = Core.Actions.Action;
 
 namespace Tests.Core {
     [TestFixture]
@@ -23,6 +22,7 @@ namespace Tests.Core {
             Mock<IConstraint>();
             Mock<IIndex>();
             Mock<IColumn>();
+            Mock<ISchema>();
         }
 
         [SetUp]
@@ -166,7 +166,7 @@ namespace Tests.Core {
             Assert.IsNotNull(actions);
             Assert.AreEqual(2, actions.Count);
             Assert.AreEqual(1, actions.Count(a => a is ColumnRemoval));
-            ColumnRemoval columnRemoval = actions.Single(a => a is ColumnRemoval) as ColumnRemoval;
+            var columnRemoval = actions.Single(a => a is ColumnRemoval) as ColumnRemoval;
             Assert.IsTrue(columnRemoval.ColumnDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase));
             Assert.IsTrue(columnRemoval.ColumnDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase));
             Assert.IsTrue(columnRemoval.ColumnDescription.Name.Equals("column2", StringComparison.InvariantCultureIgnoreCase));
@@ -184,6 +184,25 @@ namespace Tests.Core {
             Assert.AreEqual(1, actions.Count);
             Assert.IsTrue(actions.Single() is TableRemoval);
             Assert.AreEqual("TEST_TABLE_2", (actions.Single() as TableRemoval).TableDescription.Name);
+        }
+
+        [Test]
+        public void WhenActualDatabaseHasASchemaThatReferenceDatabaseDoesNot_MustReturnASchemaRemovalAction() {
+            actualDatabase.Schemas.Add("dbo");
+            actualDatabase.Schemas.Add("testschema");
+            actualDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
+            actualDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE"});
+            referenceDatabase.Schemas.Add("dbo");
+            referenceDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
+
+            var actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(2, actions.Count);
+            Assert.AreEqual(1, actions.Count(a => a is TableRemoval));
+            Assert.AreEqual(1, actions.Count(a => a is SchemaRemoval));
+            var schemaRemoval = actions.Single(a => a is SchemaRemoval) as SchemaRemoval;
+            Assert.AreEqual("testschema", schemaRemoval.SchemaName);
         }
     }
 }

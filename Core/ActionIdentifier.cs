@@ -48,6 +48,10 @@ namespace Core {
                 actions.Add(tableRemoval);
             }
 
+            foreach (var schemaRemoval in GetSchemaRemovals()) {
+                actions.Add(schemaRemoval);
+            }
+
             return actions;
         }
 
@@ -127,6 +131,16 @@ namespace Core {
             }
 
             return tableRemovals;
+        }
+
+        private IEnumerable<Action> GetSchemaRemovals() {
+            var schemaRemovals = new List<SchemaRemoval>();
+            foreach (var schema in actualDatabase.Schemas) {
+                if (!referenceDatabase.Schemas.Any(s => s.Equals(schema, StringComparison.InvariantCultureIgnoreCase)))
+                    schemaRemovals.Add(new SchemaRemoval(connectionInfo, schema));
+            }
+
+            return schemaRemovals;
         }
     }
 }
