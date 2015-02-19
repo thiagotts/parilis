@@ -22,7 +22,7 @@ namespace Core {
         public bool Run() {
             logger.Info("Parilis has started. Getting list of actions...");
             IList<Action> actions = actionIdentifier.GetActions();
-            logger.Info(string.Format("{0} actions were identified."));
+            logger.Info(string.Format("{0} actions were identified.", actions.Count));
 
             if (!actions.Any()) {
                 logger.Info("Parilis has finished with no pending actions.");
