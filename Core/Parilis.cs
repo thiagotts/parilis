@@ -9,8 +9,8 @@ namespace Core {
     public class Parilis {
         private DatabaseDescription actualDatabase;
         private DatabaseDescription referenceDatabase;
-        private ActionIdentifier actionIdentifier;
-        private Logger logger;
+        private readonly ActionIdentifier actionIdentifier;
+        private readonly Logger logger;
 
         public Parilis(DatabaseDescription actualDatabase, DatabaseDescription referenceDatabase) {
             this.actualDatabase = actualDatabase;
@@ -30,7 +30,10 @@ namespace Core {
             }
 
             bool actionsSuccessfullyExecuted = ExecuteActions(actions);
-            if (!actionsSuccessfullyExecuted) return false;
+            if (!actionsSuccessfullyExecuted) {
+                logger.Info("Parilis has finished with errors.");
+                return false;
+            }
 
             actions = GetRemainingActions();
             if (actions.Any()) {
@@ -43,10 +46,12 @@ namespace Core {
             }
         }
 
-        private bool ExecuteActions(IEnumerable<Action> actions) {
+        private bool ExecuteActions(IList<Action> actions) {
             try {
+                int totalActions = actions.Count();
+                int actionCount = 0;
                 foreach (var action in actions) {
-                    logger.Info(action.Description);
+                    logger.Info(string.Format("Action {0} of {1}: {2}", ++actionCount, totalActions, action.Description));
                     action.Execute();
                 }
             }
