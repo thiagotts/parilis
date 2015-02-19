@@ -6,6 +6,9 @@ namespace Core.Descriptions {
         internal readonly ConnectionInfo ConnectionInfo;
 
         public DatabaseDescription(ConnectionInfo connectionInfo) {
+            var logger = new Logger();
+            logger.Info(string.Format("Getting description of database {0} on {1}", connectionInfo.DatabaseName, connectionInfo.HostName));
+
             ConnectionInfo = connectionInfo;
             var database = Components.Instance.GetComponent<IDatabase>(connectionInfo);
             Schemas = database.GetSchemas();
