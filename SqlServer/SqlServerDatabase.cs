@@ -463,14 +463,16 @@ namespace SqlServer {
             return dataTypes.Any(t => t.Equals(dataType, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        internal bool ColumnHasDuplicatedValues(ColumnDescription column) {
-            if (!ColumnExists(column.Schema, column.TableName, column.Name))
-                throw new ArgumentException();
+        internal bool TableHasDuplicatedValuesForColumns(string schema, string tableName, IList<string> columnNames) {
+            foreach (var columnName in columnNames) {
+                if (!ColumnExists(schema, tableName, columnName))
+                    throw new ArgumentException();                
+            }
 
-            var query = string.Format(@"SELECT [{0}], COUNT(*)
-                                        FROM [{1}].[{2}]
-                                        GROUP BY [{0}]
-                                        HAVING COUNT(*) > 1", column.Name, column.Schema, column.TableName);
+            var query = string.Format(@"SELECT COUNT(*)
+                                        FROM [{0}].[{1}]
+                                        GROUP BY {2}
+                                        HAVING COUNT(*) > 1", schema, tableName, string.Join(",", columnNames));
 
             var dataSet = database.ExecuteWithResults(query);
             var results = GetResults(dataSet);

@@ -183,10 +183,10 @@ namespace SqlServer {
 
                 if (invalidTypes.Any(t => t.Equals(description.Type, StringComparison.InvariantCultureIgnoreCase)))
                     return false;
-
-                if (SqlServerDatabase.ColumnHasDuplicatedValues(description))
-                    return false;
             }
+
+            if (SqlServerDatabase.TableHasDuplicatedValuesForColumns(uniqueDescription.Schema, uniqueDescription.TableName, uniqueDescription.ColumnNames))
+                return false;
 
             return true;
         }
