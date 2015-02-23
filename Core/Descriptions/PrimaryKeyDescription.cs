@@ -13,6 +13,8 @@ namespace Core.Descriptions {
             if (!(other is PrimaryKeyDescription)) return false;
             var indexDescription = other as PrimaryKeyDescription;
             return base.Equals(other) &&
+                   ColumnNames != null &&
+                   ColumnNames.Count > 0 &&
                    ColumnNames.Count == indexDescription.ColumnNames.Count &&
                    ColumnNames.All(c => indexDescription.ColumnNames.Any(f => f.Equals(c)));
         }

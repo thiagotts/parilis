@@ -13,6 +13,8 @@ namespace Core.Descriptions {
             if (!(other is UniqueDescription)) return false;
             var uniqueDescription = other as UniqueDescription;
             return base.Equals(other) &&
+                   ColumnNames != null &&
+                   ColumnNames.Count > 0 &&
                    ColumnNames.Count == uniqueDescription.ColumnNames.Count &&
                    ColumnNames.All(c => uniqueDescription.ColumnNames.Any(f => f.Equals(c)));
         }
