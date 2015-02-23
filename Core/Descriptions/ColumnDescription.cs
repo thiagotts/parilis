@@ -14,5 +14,21 @@
                     string.Format("{0}.{1}.{2}", Schema, TableName, Name);
             }
         }
+
+        public override bool Equals(object other) {
+            if (!(other is ColumnDescription)) return false;
+            var columnDescription = other as ColumnDescription;
+            return base.Equals(other) &&
+                   Type.Equals(columnDescription.Type) &&
+                   MaximumSize.Equals(columnDescription.MaximumSize) &&
+                   AllowsNull.Equals(columnDescription.AllowsNull);
+        }
+
+        public override int GetHashCode() {
+            return base.GetHashCode() ^
+                   Type.GetHashCode() ^
+                   MaximumSize.GetHashCode() ^
+                   AllowsNull.GetHashCode();
+        }
     }
 }

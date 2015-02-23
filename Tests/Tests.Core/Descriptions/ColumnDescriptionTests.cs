@@ -18,11 +18,99 @@ namespace Tests.Core.Descriptions {
         }
 
         [Test]
-        public void WhenColumnsTheSameFullName_EqualsMustReturnTrue() {
-            var column1 = Substitute.For<ColumnDescription>();
-            column1.FullName.Returns("Name");
-            var column2 = Substitute.For<ColumnDescription>();
-            column2.FullName.Returns("Name");
+        public void WhenColumnsHaveDifferentTypes_EqualsMustReturnFalse() {
+            var column1 = new ColumnDescription {
+                Schema = "dbo",
+                TableName = "Table",
+                Name = "column",
+                Type = "varchar",
+                MaximumSize = "100",
+                AllowsNull = true
+            };
+
+            var column2 = new ColumnDescription {
+                Schema = "dbo",
+                TableName = "Table",
+                Name = "column",
+                Type = "nvarchar",
+                MaximumSize = "100",
+                AllowsNull = true
+            };
+
+            var result = column1.Equals(column2);
+
+            Assert.IsFalse(result);
+        }
+
+        [Test]
+        public void WhenColumnsHaveDifferentMaximumSizes_EqualsMustReturnFalse() {
+            var column1 = new ColumnDescription {
+                Schema = "dbo",
+                TableName = "Table",
+                Name = "column",
+                Type = "varchar",
+                MaximumSize = "100",
+                AllowsNull = true
+            };
+
+            var column2 = new ColumnDescription {
+                Schema = "dbo",
+                TableName = "Table",
+                Name = "column",
+                Type = "varchar",
+                MaximumSize = "150",
+                AllowsNull = true
+            };
+
+            var result = column1.Equals(column2);
+
+            Assert.IsFalse(result);
+        }
+
+        [Test]
+        public void WhenColumnsHaveDifferentNullableFlags_EqualsMustReturnFalse() {
+            var column1 = new ColumnDescription {
+                Schema = "dbo",
+                TableName = "Table",
+                Name = "column",
+                Type = "varchar",
+                MaximumSize = "100",
+                AllowsNull = true
+            };
+
+            var column2 = new ColumnDescription {
+                Schema = "dbo",
+                TableName = "Table",
+                Name = "column",
+                Type = "varchar",
+                MaximumSize = "100",
+                AllowsNull = false
+            };
+
+            var result = column1.Equals(column2);
+
+            Assert.IsFalse(result);
+        }
+
+        [Test]
+        public void WhenColumnsHaveTheSameFullNameAndTypeAndMaximumValueAndNullableFlag_EqualsMustReturnTrue() {
+            var column1 = new ColumnDescription {
+                Schema = "dbo",
+                TableName = "Table",
+                Name = "column",
+                Type = "varchar",
+                MaximumSize = "100",
+                AllowsNull = true
+            };
+
+            var column2 = new ColumnDescription {
+                Schema = "dbo",
+                TableName = "Table",
+                Name = "column",
+                Type = "varchar",
+                MaximumSize = "100",
+                AllowsNull = true
+            };
 
             var result = column1.Equals(column2);
 
