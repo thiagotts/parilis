@@ -119,8 +119,8 @@ namespace Tests.Core.Descriptions {
                 TableName = "Table",
                 Name = "Foreign",
                 Columns = new Dictionary<string, ColumnDescription> {
-                    {"column1", new ColumnDescription{Schema = "dbo", TableName = "table1", Name = "rcolumn1"}},
-                    {"column2", new ColumnDescription{Schema = "dbo", TableName = "table1", Name = "rcolumn2"}}
+                    {"column1", new ColumnDescription{Schema = "dbo", TableName = "table1", Name = "rcolumn1", Type = "int"}},
+                    {"column2", new ColumnDescription{Schema = "dbo", TableName = "table1", Name = "rcolumn2", Type = "int"}}
                 }
             };
 
@@ -129,8 +129,8 @@ namespace Tests.Core.Descriptions {
                 TableName = "Table",
                 Name = "Foreign",
                 Columns = new Dictionary<string, ColumnDescription> {
-                    {"column1", new ColumnDescription{Schema = "dbo", TableName = "table1", Name = "rcolumn1"}},
-                    {"column2", new ColumnDescription{Schema = "dbo", TableName = "table1", Name = "rcolumn2"}}
+                    {"column1", new ColumnDescription{Schema = "dbo", TableName = "table1", Name = "rcolumn1", Type = "int"}},
+                    {"column2", new ColumnDescription{Schema = "dbo", TableName = "table1", Name = "rcolumn2", Type = "int"}}
                 }
             };
 

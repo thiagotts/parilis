@@ -55,7 +55,7 @@ namespace Core {
         private IEnumerable<Action> GetDefaultRemovals() {
             var defaultRemovals = new List<DefaultRemoval>();
             foreach (var defaultDescription in actualDatabase.Defaults) {
-                if (!referenceDatabase.Defaults.Any(d => d.FullName.Equals(defaultDescription.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                if (!referenceDatabase.Defaults.Any(d => d.Equals(defaultDescription)))
                     defaultRemovals.Add(new DefaultRemoval(connectionInfo, defaultDescription));
             }
 
@@ -65,7 +65,7 @@ namespace Core {
         private IEnumerable<Action> GetUniqueRemovals() {
             var uniqueRemovals = new List<UniqueRemoval>();
             foreach (var uniqueKey in actualDatabase.UniqueKeys) {
-                if (!referenceDatabase.UniqueKeys.Any(u => u.FullName.Equals(uniqueKey.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                if (!referenceDatabase.UniqueKeys.Any(u => u.Equals(uniqueKey)))
                     uniqueRemovals.Add(new UniqueRemoval(connectionInfo, uniqueKey));
             }
 
@@ -75,7 +75,7 @@ namespace Core {
         private IEnumerable<Action> GetForeignKeyRemovals() {
             var foreignKeyRemovals = new List<ForeignKeyRemoval>();
             foreach (var foreignKey in actualDatabase.ForeignKeys) {
-                if (!referenceDatabase.ForeignKeys.Any(f => f.FullName.Equals(foreignKey.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                if (!referenceDatabase.ForeignKeys.Any(f => f.Equals(foreignKey)))
                     foreignKeyRemovals.Add(new ForeignKeyRemoval(connectionInfo, foreignKey));
             }
 
@@ -85,7 +85,7 @@ namespace Core {
         private IEnumerable<Action> GetPrimaryKeyRemovals() {
             var primaryKeyRemovals = new List<PrimaryKeyRemoval>();
             foreach (var primaryKey in actualDatabase.PrimaryKeys) {
-                if (!referenceDatabase.PrimaryKeys.Any(p => p.FullName.Equals(primaryKey.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                if (!referenceDatabase.PrimaryKeys.Any(p => p.Equals(primaryKey)))
                     primaryKeyRemovals.Add(new PrimaryKeyRemoval(connectionInfo, primaryKey));
             }
 
@@ -95,7 +95,7 @@ namespace Core {
         private IEnumerable<Action> GetIndexRemovals() {
             var indexRemovals = new List<IndexRemoval>();
             foreach (var index in actualDatabase.Indexes) {
-                if (!referenceDatabase.Indexes.Any(i => i.FullName.Equals(index.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                if (!referenceDatabase.Indexes.Any(i => i.Equals(index)))
                     indexRemovals.Add(new IndexRemoval(connectionInfo, index));
             }
 
@@ -152,11 +152,8 @@ namespace Core {
                         continue;
 
                     var referenceColumn = referenceTable.Columns.Single(c => c.FullName.Equals(column.FullName, StringComparison.InvariantCultureIgnoreCase));
-                    if (!column.Type.Equals(referenceColumn.Type, StringComparison.InvariantCultureIgnoreCase) ||
-                        (!string.IsNullOrWhiteSpace(column.MaximumSize) && !column.MaximumSize.Equals(referenceColumn.MaximumSize, StringComparison.InvariantCultureIgnoreCase)) ||
-                        !column.AllowsNull.Equals(referenceColumn.AllowsNull)) {
+                    if (!column.Equals(referenceColumn))
                         actions.Add(new ColumnModification(connectionInfo, column));
-                    }
                 }
             }
         }
@@ -228,7 +225,7 @@ namespace Core {
         private IEnumerable<Action> GetIndexCreations() {
             var indexCreations = new List<IndexCreation>();
             foreach (var index in referenceDatabase.Indexes) {
-                if (!actualDatabase.Indexes.Any(i => i.FullName.Equals(index.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                if (!actualDatabase.Indexes.Any(i => i.Equals(index)))
                     indexCreations.Add(new IndexCreation(connectionInfo, index));
             }
 
@@ -238,7 +235,7 @@ namespace Core {
         private IEnumerable<Action> GetPrimaryKeyCreations() {
             var primaryKeyCreations = new List<PrimaryKeyCreation>();
             foreach (var primaryKey in referenceDatabase.PrimaryKeys) {
-                if (!actualDatabase.PrimaryKeys.Any(p => p.FullName.Equals(primaryKey.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                if (!actualDatabase.PrimaryKeys.Any(p => p.Equals(primaryKey)))
                     primaryKeyCreations.Add(new PrimaryKeyCreation(connectionInfo, primaryKey));
             }
 
@@ -248,7 +245,7 @@ namespace Core {
         private IEnumerable<Action> GetForeignKeyCreations() {
             var foreignKeyCreations = new List<ForeignKeyCreation>();
             foreach (var foreignKey in referenceDatabase.ForeignKeys) {
-                if (!actualDatabase.ForeignKeys.Any(f => f.FullName.Equals(foreignKey.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                if (!actualDatabase.ForeignKeys.Any(f => f.Equals(foreignKey)))
                     foreignKeyCreations.Add(new ForeignKeyCreation(connectionInfo, foreignKey));
             }
 
@@ -258,7 +255,7 @@ namespace Core {
         private IEnumerable<Action> GetUniqueCreations() {
             var uniqueCreations = new List<UniqueCreation>();
             foreach (var uniqueKey in referenceDatabase.UniqueKeys) {
-                if (!actualDatabase.UniqueKeys.Any(u => u.FullName.Equals(uniqueKey.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                if (!actualDatabase.UniqueKeys.Any(u => u.Equals(uniqueKey)))
                     uniqueCreations.Add(new UniqueCreation(connectionInfo, uniqueKey));
             }
 
@@ -268,7 +265,7 @@ namespace Core {
         private IEnumerable<Action> GetDefaultCreations() {
             var defaultCreations = new List<DefaultCreation>();
             foreach (var defaultDescription in referenceDatabase.Defaults) {
-                if (!actualDatabase.Defaults.Any(d => d.FullName.Equals(defaultDescription.FullName, StringComparison.InvariantCultureIgnoreCase)))
+                if (!actualDatabase.Defaults.Any(d => d.Equals(defaultDescription)))
                     defaultCreations.Add(new DefaultCreation(connectionInfo, defaultDescription));
             }
 
