@@ -211,11 +211,7 @@ namespace SqlServer {
                     foreignKeys.Add(foreignKey);
                 }
 
-                foreignKey.Columns.Add(new KeyValuePair<string, ColumnDescription>(result[1], new ColumnDescription {
-                    Name = result[2],
-                    TableName = result[5],
-                    Schema = result[6]
-                }));
+                foreignKey.Columns.Add(new KeyValuePair<string, ColumnDescription>(result[1], GetColumn(result[6], result[5], result[2])));
             }
 
             return foreignKeys;
