@@ -89,6 +89,7 @@
     <Compile Include="Actions\ConstraintActionTests.cs" />
     <Compile Include="CastleExtension.cs" />
     <Compile Include="DatabaseTest.cs" />
+    <Compile Include="Descriptions\UniqueDescriptionTests.cs" />
     <Compile Include="Descriptions\TableDescriptionTests.cs" />
     <Compile Include="Descriptions\PrimaryKeyDescriptionTests.cs" />
     <Compile Include="Descriptions\IndexDescriptionTests.cs" />
