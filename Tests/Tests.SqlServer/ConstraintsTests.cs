@@ -675,18 +675,46 @@ namespace Tests.SqlServer {
         public void IfTargetTableHasDuplicatedValuesForAColumnReferrencedByTheUniqueKey_CreateMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
-                [description] [nvarchar](400) NULL,
+                [description1] [nvarchar](400) NULL,
+                [description2] [nvarchar](400) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-            Database.ExecuteNonQuery(@"INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description]) VALUES (1, 'test');
-                                       INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description]) VALUES (2, 'test');");
+            Database.ExecuteNonQuery(@"INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description1], [description2]) VALUES (1, 'test', 'test2');
+                                       INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description1], [description2]) VALUES (2, 'test', 'test2');");
 
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description"}
+                ColumnNames = new List<string> {"description1", "description2"}
             }));
+        }
+
+        [Test]
+        public void IfTargetTableDoesNotHaveDuplicatedValuesForAColumnReferrencedByTheUniqueKey_CreateMethodMustCreateTheUniqueKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description1] [nvarchar](400) NULL,
+                [description2] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description1], [description2]) VALUES (1, 'test', 'test2');
+                                       INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description1], [description2]) VALUES (2, 'test', 'test3');");
+
+            constraints.CreateUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                ColumnNames = new List<string> { "description1", "description2" }
+            });
+
+            var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+
+            Assert.AreEqual(1, uniqueKeys.Count);
+            Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
+            Assert.AreEqual(2, uniqueKeys.Single().ColumnNames.Count);
+            Assert.AreEqual("description1", uniqueKeys.Single().ColumnNames.First());
+            Assert.AreEqual("description2", uniqueKeys.Single().ColumnNames.Last());
         }
 
         [Test]
