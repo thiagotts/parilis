@@ -153,7 +153,7 @@ namespace Core {
 
                     var referenceColumn = referenceTable.Columns.Single(c => c.FullName.Equals(column.FullName, StringComparison.InvariantCultureIgnoreCase));
                     if (!column.Equals(referenceColumn))
-                        actions.Add(new ColumnModification(connectionInfo, column));
+                        actions.Add(new ColumnModification(connectionInfo, referenceColumn));
                 }
             }
         }

@@ -212,15 +212,18 @@ namespace Tests.Core {
 
         [Test]
         public void WhenActualDatabaseHasAColumnWithDifferentDataTypeWhenComparedToReferenceDatabase_MustReturnAColumnModificationAction() {
+            var actualColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "int"};
             actualDatabase.Tables.Add(new TableDescription {
                 Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
-                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "int"},
+                    actualColumn,
                     new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
                 }
             });
+
+            var referenceColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "bigint"};
             referenceDatabase.Tables.Add(new TableDescription {
                 Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
-                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "bigint"},
+                    referenceColumn,
                     new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
                 }
             });
@@ -231,22 +234,23 @@ namespace Tests.Core {
             Assert.AreEqual(1, actions.Count);
             Assert.AreEqual(1, actions.Count(a => a is ColumnModification));
             var columnModification = actions.Single(a => a is ColumnModification) as ColumnModification;
-            Assert.IsTrue(columnModification.ColumnDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase));
-            Assert.IsTrue(columnModification.ColumnDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase));
-            Assert.IsTrue(columnModification.ColumnDescription.Name.Equals("column1", StringComparison.InvariantCultureIgnoreCase));
+            Assert.IsTrue(columnModification.ColumnDescription.Equals(referenceColumn));
         }
 
         [Test]
         public void WhenActualDatabaseHasAColumnWithDifferentMaximumSizeWhenComparedToReferenceDatabase_MustReturnAColumnModificationAction() {
+            var actualColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "100"};
             actualDatabase.Tables.Add(new TableDescription {
                 Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
-                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "100"},
+                    actualColumn,
                     new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
                 }
             });
+
+            var referenceColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "255"};
             referenceDatabase.Tables.Add(new TableDescription {
                 Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
-                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "255"},
+                    referenceColumn,
                     new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
                 }
             });
@@ -257,26 +261,27 @@ namespace Tests.Core {
             Assert.AreEqual(1, actions.Count);
             Assert.AreEqual(1, actions.Count(a => a is ColumnModification));
             var columnModification = actions.Single(a => a is ColumnModification) as ColumnModification;
-            Assert.IsTrue(columnModification.ColumnDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase));
-            Assert.IsTrue(columnModification.ColumnDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase));
-            Assert.IsTrue(columnModification.ColumnDescription.Name.Equals("column1", StringComparison.InvariantCultureIgnoreCase));
+            Assert.IsTrue(columnModification.ColumnDescription.Equals(referenceColumn));
         }
 
         [Test]
         public void WhenActualDatabaseHasAColumnAllowingNullAndReferenceDatabaseDoesNot_MustReturnAColumnModificationAction() {
+            var actualColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "255", AllowsNull = true};
             actualDatabase.Tables.Add(new TableDescription {
                 Schema = "dbo",
                 Name = "TEST_TABLE",
                 Columns = new List<ColumnDescription> {
-                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "255", AllowsNull = true},
+                    actualColumn,
                     new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
                 }
             });
+
+            var referenceColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "255", AllowsNull = false};
             referenceDatabase.Tables.Add(new TableDescription {
                 Schema = "dbo",
                 Name = "TEST_TABLE",
                 Columns = new List<ColumnDescription> {
-                    new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "255", AllowsNull = false},
+                    referenceColumn,
                     new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
                 }
             });
@@ -287,9 +292,7 @@ namespace Tests.Core {
             Assert.AreEqual(1, actions.Count);
             Assert.AreEqual(1, actions.Count(a => a is ColumnModification));
             var columnModification = actions.Single(a => a is ColumnModification) as ColumnModification;
-            Assert.IsTrue(columnModification.ColumnDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase));
-            Assert.IsTrue(columnModification.ColumnDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase));
-            Assert.IsTrue(columnModification.ColumnDescription.Name.Equals("column1", StringComparison.InvariantCultureIgnoreCase));
+            Assert.IsTrue(columnModification.ColumnDescription.Equals(referenceColumn));
         }
 
         [Test]
