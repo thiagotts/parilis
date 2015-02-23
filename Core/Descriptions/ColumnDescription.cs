@@ -1,5 +1,5 @@
 ﻿namespace Core.Descriptions {
-    public class ColumnDescription {
+    public class ColumnDescription : Description {
         public string Schema { get; set; }
         public string TableName { get; set; }
         public string Name { get; set; }
@@ -7,7 +7,7 @@
         public bool AllowsNull { get; set; }
         public string MaximumSize { get; set; }
 
-        public string FullName {
+        public override string FullName {
             get {
                 return string.IsNullOrWhiteSpace(Schema) ?
                     string.Format("{0}.{1}", TableName, Name) :

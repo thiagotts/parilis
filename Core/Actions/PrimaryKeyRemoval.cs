@@ -16,6 +16,8 @@ namespace Core.Actions {
         }
 
         internal override void Execute() {
+            //TODO: Remove foreign keys and add re-creation to action queue.
+
             Constraints.RemovePrimaryKey(PrimaryKeyDescription);
         }
     }
