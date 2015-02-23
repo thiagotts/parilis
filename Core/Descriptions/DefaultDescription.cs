@@ -13,7 +13,9 @@ namespace Core.Descriptions {
             if (!(other is DefaultDescription)) return false;
             var defaultDescription = other as DefaultDescription;
             return base.Equals(other) &&
+                   !string.IsNullOrWhiteSpace(ColumnName) &&
                    ColumnName.Equals(defaultDescription.ColumnName, StringComparison.InvariantCultureIgnoreCase) &&
+                   !string.IsNullOrWhiteSpace(DefaultValue) &&
                    DefaultValue.Equals(defaultDescription.DefaultValue, StringComparison.InvariantCultureIgnoreCase);
         }
 

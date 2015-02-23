@@ -85,8 +85,8 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 Name = "Table1",
                 Columns = new List<ColumnDescription> {
-                    new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1"},
-                    new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column2"}
+                    new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1", Type = "int"},
+                    new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column2", Type = "int"}
                 }
             };
 
@@ -94,8 +94,8 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 Name = "Table1",
                 Columns = new List<ColumnDescription> {
-                    new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1"},
-                    new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column2"}
+                    new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1", Type = "int"},
+                    new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column2", Type = "int"}
                 }
             };
 
