@@ -26,9 +26,10 @@ namespace SqlServer {
             if (primaryKey != null) throw new InvalidConstraintNameException();
 
             Database.ExecuteNonQuery(string.Format(@"
-                ALTER TABLE {0}
-                ADD CONSTRAINT {1} PRIMARY KEY ({2})",
-                primaryKeyDescription.TableName, primaryKeyDescription.Name, string.Join(",", primaryKeyDescription.ColumnNames)));
+                ALTER TABLE {0}.{1}
+                ADD CONSTRAINT {2} PRIMARY KEY ({3})",
+                primaryKeyDescription.Schema, primaryKeyDescription.TableName,
+                primaryKeyDescription.Name, string.Join(",", primaryKeyDescription.ColumnNames)));
         }
 
         public void RemovePrimaryKey(PrimaryKeyDescription primaryKeyDescription) {

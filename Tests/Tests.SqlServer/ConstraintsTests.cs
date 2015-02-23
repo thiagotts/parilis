@@ -40,12 +40,12 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenTargetTableDoesNotHaveAPrimaryKey_CreateMethodMustCreateThePrimaryKey() {
-            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL)");
 
             var primaryKey = new PrimaryKeyDescription {
-                Schema = "dbo",
+                Schema = "testschema",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE",
                 ColumnNames = new List<string> {"id"}
@@ -53,7 +53,7 @@ namespace Tests.SqlServer {
 
             constraints.CreatePrimaryKey(primaryKey);
 
-            var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
+            var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "testschema", Name = "TEST_TABLE"});
             Assert.IsNotNull(result);
             Assert.AreEqual("PK_dbo_TEST_TABLE", result.Name);
         }
