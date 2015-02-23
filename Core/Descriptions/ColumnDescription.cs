@@ -19,8 +19,10 @@
             if (!(other is ColumnDescription)) return false;
             var columnDescription = other as ColumnDescription;
             return base.Equals(other) &&
+                   !string.IsNullOrWhiteSpace(Type) &&
                    Type.Equals(columnDescription.Type) &&
-                   MaximumSize.Equals(columnDescription.MaximumSize) &&
+                   ((string.IsNullOrWhiteSpace(MaximumSize) && string.IsNullOrWhiteSpace(columnDescription.MaximumSize)) ||
+                    MaximumSize.Equals(columnDescription.MaximumSize)) &&
                    AllowsNull.Equals(columnDescription.AllowsNull);
         }
 
