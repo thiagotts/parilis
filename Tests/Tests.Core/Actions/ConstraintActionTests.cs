@@ -1,4 +1,6 @@
-﻿using Core.Actions;
+﻿using System.Collections.Generic;
+using Core;
+using Core.Actions;
 using Core.Descriptions;
 using Core.Interfaces;
 using NSubstitute;
@@ -11,6 +13,7 @@ namespace Tests.Core.Actions {
         public override void InitializeClass() {
             base.InitializeClass();
             Mock<IConstraint>();
+            Mock<ActionQueue>();
         }
 
         [Test]
@@ -93,11 +96,32 @@ namespace Tests.Core.Actions {
         [Test]
         public void PrimaryKeyRemovalMustCallConstraintsRemoveMethod() {
             var primaryKeyDescription = new PrimaryKeyDescription { Name = "test_name" };
-            var uniqueCreation = new PrimaryKeyRemoval(ConnectionInfo, primaryKeyDescription);
+            var primaryKeyRemoval = new PrimaryKeyRemoval(ConnectionInfo, primaryKeyDescription);
+            primaryKeyRemoval.Constraints.ClearReceivedCalls();
 
-            uniqueCreation.Execute();
+            primaryKeyRemoval.Execute();
 
-            uniqueCreation.Constraints.Received(1).RemovePrimaryKey(Arg.Is<PrimaryKeyDescription>(
+            primaryKeyRemoval.Constraints.Received(1).RemovePrimaryKey(Arg.Is<PrimaryKeyDescription>(
+                d => d.Name.Equals(primaryKeyDescription.Name)));
+        }
+
+        [Test]
+        public void IfPrimaryKeyIsReferencedByForeignKeys_PrimaryKeyRemovalMustRemoveTheForeignKeysAndSetThemUpForLaterCreation() {
+            var actionQueue = Components.Instance.GetComponent<ActionQueue>();
+            var database = Components.Instance.GetComponent<IDatabase>();
+            var primaryKeyDescription = new PrimaryKeyDescription { Name = "test_name" };
+            var primaryKeyRemoval = new PrimaryKeyRemoval(ConnectionInfo, primaryKeyDescription);
+            primaryKeyRemoval.Constraints.ClearReceivedCalls();
+            database.GetForeignKeysReferencing(Arg.Any<PrimaryKeyDescription>()).Returns(new List<ForeignKeyDescription> {
+                new ForeignKeyDescription(),
+                new ForeignKeyDescription()
+            });
+
+            primaryKeyRemoval.Execute();
+
+            primaryKeyRemoval.Constraints.Received(2).RemoveForeignKey(Arg.Any<ForeignKeyDescription>());
+            actionQueue.Received(2).Push(Arg.Any<ForeignKeyCreation>());
+            primaryKeyRemoval.Constraints.Received(1).RemovePrimaryKey(Arg.Is<PrimaryKeyDescription>(
                 d => d.Name.Equals(primaryKeyDescription.Name)));
         }
     }
