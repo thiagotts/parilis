@@ -20,7 +20,7 @@ namespace Core {
         public bool Run() {
             logger.Info("Parilis has started. Getting list of actions...");
             var actionQueue = actionIdentifier.GetActions();
-            logger.Info(string.Format("{0} actions were identified.", actionQueue.Count));
+            logger.Info(string.Format("{0} actions were initially identified.", actionQueue.Count));
 
             if (actionQueue.Count <= 0) {
                 logger.Info("Parilis has finished with no pending actions.");
