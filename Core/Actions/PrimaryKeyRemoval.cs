@@ -3,9 +3,11 @@
 namespace Core.Actions {
     internal class PrimaryKeyRemoval : ConstraintAction {
         internal readonly PrimaryKeyDescription PrimaryKeyDescription;
+        private readonly ConnectionInfo connectionInfo;
 
         public PrimaryKeyRemoval(ConnectionInfo connectionInfo, PrimaryKeyDescription primaryKeyDescription) : base(connectionInfo) {
-            this.PrimaryKeyDescription = primaryKeyDescription;
+            PrimaryKeyDescription = primaryKeyDescription;
+            this.connectionInfo = connectionInfo;
         }
 
         public override string Description {
@@ -16,7 +18,13 @@ namespace Core.Actions {
         }
 
         internal override void Execute() {
-            //TODO: Remove foreign keys and add re-creation to action queue.
+            var foreignKeys = Database.GetForeignKeysReferencing(PrimaryKeyDescription);
+            var actionQueue = Components.Instance.GetComponent<ActionQueue>();
+
+            foreach (var foreignKey in foreignKeys) {
+                Constraints.RemoveForeignKey(foreignKey);
+                actionQueue.Push(new ForeignKeyCreation(connectionInfo, foreignKey));
+            }
 
             Constraints.RemovePrimaryKey(PrimaryKeyDescription);
         }
