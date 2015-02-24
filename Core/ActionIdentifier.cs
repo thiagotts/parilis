@@ -17,39 +17,40 @@ namespace Core {
             connectionInfo = actualDatabase.ConnectionInfo;
         }
 
-        internal IList<Action> GetActions() {
-            var actions = new List<Action>();
-            GetRemovals(actions);
-            GetModifications(actions);
-            GetCreations(actions);
+        internal ActionQueue GetActions() {
+            var actionQueue = Components.Instance.GetComponent<ActionQueue>();
+            actionQueue.Clear();
+            GetRemovals(actionQueue);
+            GetModifications(actionQueue);
+            GetCreations(actionQueue);
 
-            return actions;
+            return actionQueue;
         }
 
-        private void GetRemovals(List<Action> actions) {
+        private void GetRemovals(ActionQueue actions) {
             foreach (var defaultRemoval in GetDefaultRemovals())
-                actions.Add(defaultRemoval);
+                actions.Push(defaultRemoval);
 
             foreach (var uniqueRemoval in GetUniqueRemovals())
-                actions.Add(uniqueRemoval);
+                actions.Push(uniqueRemoval);
 
             foreach (var foreignKeyRemoval in GetForeignKeyRemovals())
-                actions.Add(foreignKeyRemoval);
+                actions.Push(foreignKeyRemoval);
 
             foreach (var primaryKeyRemoval in GetPrimaryKeyRemovals())
-                actions.Add(primaryKeyRemoval);
+                actions.Push(primaryKeyRemoval);
 
             foreach (var indexRemoval in GetIndexRemovals())
-                actions.Add(indexRemoval);
+                actions.Push(indexRemoval);
 
             foreach (var columnRemoval in GetColumnRemovals())
-                actions.Add(columnRemoval);
+                actions.Push(columnRemoval);
 
             foreach (var tableRemoval in GetTableRemovals())
-                actions.Add(tableRemoval);
+                actions.Push(tableRemoval);
 
             foreach (var schemaRemoval in GetSchemaRemovals())
-                actions.Add(schemaRemoval);
+                actions.Push(schemaRemoval);
         }
 
         private IEnumerable<Action> GetDefaultRemovals() {
@@ -140,7 +141,7 @@ namespace Core {
             return schemaRemovals;
         }
 
-        private void GetModifications(List<Action> actions) {
+        private void GetModifications(ActionQueue actions) {
             foreach (var table in actualDatabase.Tables) {
                 var referenceTable = referenceDatabase.Tables.SingleOrDefault(t =>
                     t.FullName.Equals(table.FullName, StringComparison.InvariantCultureIgnoreCase));
@@ -153,35 +154,35 @@ namespace Core {
 
                     var referenceColumn = referenceTable.Columns.Single(c => c.FullName.Equals(column.FullName, StringComparison.InvariantCultureIgnoreCase));
                     if (!column.Equals(referenceColumn))
-                        actions.Add(new ColumnModification(connectionInfo, referenceColumn));
+                        actions.Push(new ColumnModification(connectionInfo, referenceColumn));
                 }
             }
         }
 
-        private void GetCreations(List<Action> actions) {
+        private void GetCreations(ActionQueue actions) {
             foreach (var schemaCreation in GetSchemaCreations())
-                actions.Add(schemaCreation);
+                actions.Push(schemaCreation);
 
             foreach (var tableCreation in GetTableCreations())
-                actions.Add(tableCreation);
+                actions.Push(tableCreation);
 
             foreach (var columnCreation in GetColumnCreations())
-                actions.Add(columnCreation);
+                actions.Push(columnCreation);
 
             foreach (var indexCreation in GetIndexCreations())
-                actions.Add(indexCreation);
+                actions.Push(indexCreation);
 
             foreach (var primaryKeyCreation in GetPrimaryKeyCreations())
-                actions.Add(primaryKeyCreation);
+                actions.Push(primaryKeyCreation);
 
             foreach (var foreignKeyCreation in GetForeignKeyCreations())
-                actions.Add(foreignKeyCreation);
+                actions.Push(foreignKeyCreation);
 
             foreach (var uniqueCreation in GetUniqueCreations())
-                actions.Add(uniqueCreation);
+                actions.Push(uniqueCreation);
 
             foreach (var defaultCreation in GetDefaultCreations())
-                actions.Add(defaultCreation);
+                actions.Push(defaultCreation);
         }
 
         private IEnumerable<Action> GetSchemaCreations() {
