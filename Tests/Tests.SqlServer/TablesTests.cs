@@ -93,6 +93,32 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void IfTableHasAnIndentityColumn_CreateMethodMustCreateTableWithTheCorrespondingIdentityColumn() {
+            tables.Create(new TableDescription {
+                Schema = "dbo",
+                Name = "TEST_TABLE",
+                Columns = new List<ColumnDescription> {
+                    new ColumnDescription {
+                        Name = "id",
+                        Type = "bigint",
+                        AllowsNull = false,
+                        IsIdentity = true
+                    }
+                }
+            });
+
+            var table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE");
+
+            Assert.IsNotNull(table);
+            Assert.AreEqual("TEST_TABLE", table.Name);
+            Assert.AreEqual(1, table.Columns.Count);
+            Assert.AreEqual("id", table.Columns.Single().Name);
+            Assert.AreEqual("bigint", table.Columns.Single().Type);
+            Assert.IsFalse(table.Columns.Single().AllowsNull);
+            Assert.IsTrue(table.Columns.Single().IsIdentity);
+        }
+
+        [Test]
         public void IfThereIsAnotherTableWithTheSameNameInTheSameSchema_CreateMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
