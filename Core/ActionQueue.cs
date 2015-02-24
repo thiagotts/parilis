@@ -7,22 +7,24 @@ using Action = Core.Actions.Action;
 namespace Core {
     [CastleComponent("Core.ActionQueue", typeof (ActionQueue), Lifestyle = LifestyleType.Singleton)]
     public class ActionQueue {
-        private readonly Queue<Action> queue;
+        internal readonly Queue<Action> Queue;
 
         public ActionQueue() {
-            queue = new Queue<Action>();
+            Queue = new Queue<Action>();
         }
 
-        public int Count { get { return queue.Count; } }
+        public int Count {
+            get { return Queue.Count; }
+        }
 
         internal void Push(Action action) {
             if (action == null) throw new InvalidActionException();
-            queue.Enqueue(action);
+            Queue.Enqueue(action);
         }
 
         internal Action Pop() {
             try {
-                return queue.Dequeue();
+                return Queue.Dequeue();
             }
             catch (InvalidOperationException) {
                 return null;
@@ -30,7 +32,7 @@ namespace Core {
         }
 
         internal void Clear() {
-            queue.Clear();
+            Queue.Clear();
         }
     }
 }
