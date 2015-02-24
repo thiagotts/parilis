@@ -23,6 +23,7 @@ namespace SqlServer {
 
             server.Databases.Refresh();
             database = server.Databases[connectionInfo.DatabaseName];
+            database.Refresh();
         }
 
         public IList<string> GetSchemas() {
@@ -57,7 +58,7 @@ namespace SqlServer {
         public ColumnDescription GetColumn(string schema, string tableName, string columnName) {
             if (!ColumnExists(schema, tableName, columnName)) return null;
 
-            var query = string.Format(@"SELECT IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
+            var query = string.Format(@"SELECT IS_NULLABLE, columnproperty(object_id('{1}.{0}'),'{2}','IsIdentity'), DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
                                         FROM INFORMATION_SCHEMA.COLUMNS
                                         WHERE TABLE_NAME = '{0}'
                                         AND TABLE_SCHEMA = '{1}'
@@ -72,9 +73,10 @@ namespace SqlServer {
                 TableName = tableName,
                 Name = columnName,
                 AllowsNull = results[0][0].Equals("YES", StringComparison.InvariantCultureIgnoreCase),
-                Type = results[0][1],
-                MaximumSize = results[0].Count > 2 ?
-                    results[0][2].Equals("-1") ? "max" : results[0][2]
+                IsIdentity = results[0][1].Equals("1", StringComparison.InvariantCultureIgnoreCase),
+                Type = results[0][2],
+                MaximumSize = results[0].Count > 3 ?
+                    results[0][3].Equals("-1") ? "max" : results[0][3]
                     : null,
             };
         }
