@@ -19,9 +19,9 @@ namespace SqlServer {
 
             var columns = new List<string>();
             foreach (var column in tableDescription.Columns ?? new List<ColumnDescription>()) {
-                columns.Add(string.Format("[{0}] [{1}]{2} {3}", column.Name, column.Type,
+                columns.Add(string.Format("[{0}] [{1}]{2} {3} {4}", column.Name, column.Type,
                     string.IsNullOrWhiteSpace(column.MaximumSize) ? string.Empty : string.Format("({0})", column.MaximumSize),
-                    column.AllowsNull ? "NULL" : "NOT NULL"));
+                    column.IsIdentity ? "IDENTITY(1,1)" : string.Empty, column.AllowsNull ? "NULL" : "NOT NULL"));
             }
 
             Database.ExecuteNonQuery(string.Format(@"CREATE TABLE [{0}].[{1}]({2})",
