@@ -33,7 +33,6 @@ namespace Core {
                 return false;
             }
 
-            actionQueue = GetRemainingActions();
             if (actionQueue.Count > 0) {
                 logger.Info(string.Format("Parilis has finished with {0} pending actions.", actionQueue.Count));
                 return false;
@@ -46,12 +45,10 @@ namespace Core {
 
         private bool ExecuteActions(ActionQueue actionQueue) {
             try {
-                var totalActions = actionQueue.Count;
                 var actionCount = 0;
-
                 Action action;
                 while ((action = actionQueue.Pop()) != null) {
-                    logger.Info(string.Format("Action {0} of {1}: {2}", ++actionCount, totalActions, action.Description));
+                    logger.Info(string.Format("Action {0} of {1}: {2}", ++actionCount, actionQueue.TotalCount, action.Description));
                     action.Execute();
                 }
             }
