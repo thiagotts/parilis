@@ -44,7 +44,7 @@ namespace SqlServer {
 
             foreach (Table table in database.Tables) {
                 tables.Add(GetDescription(table));
-            } 
+            }
 
             return tables;
         }
@@ -88,7 +88,7 @@ namespace SqlServer {
             foreach (Table table in database.Tables) {
                 table.Indexes.Refresh();
                 foreach (Index index in table.Indexes) {
-                    if(index.IndexKeyType != IndexKeyType.None) continue;
+                    if (index.IndexKeyType != IndexKeyType.None) continue;
                     indexes.Add(GetDescription(index, table.Schema, table.Name));
                 }
             }
@@ -129,7 +129,7 @@ namespace SqlServer {
 
             foreach (Table table in database.Tables) {
                 var primaryKey = GetPrimaryKey(new TableDescription {Schema = table.Schema, Name = table.Name});
-                if(primaryKey != null) primaryKeys.Add(primaryKey);
+                if (primaryKey != null) primaryKeys.Add(primaryKey);
             }
 
             return primaryKeys;
@@ -238,7 +238,7 @@ namespace SqlServer {
                  DEFERRABILITY nvarchar(max))                 
                 INSERT INTO #TempTable
                 EXEC sp_fkeys @pktable_name = N'{0}', @pktable_owner = N'{1}'                
-                SELECT FKTABLE_OWNER, FKTABLE_NAME, FK_NAME, FKCOLUMN_NAME, PKCOLUMN_NAME
+                SELECT FKTABLE_OWNER, FKTABLE_NAME, FK_NAME, FKCOLUMN_NAME, PKCOLUMN_NAME, PKTABLE_OWNER, PKTABLE_NAME
                 FROM #TempTable
                 WHERE PK_NAME = '{2}'
                 DROP TABLE #TempTable
@@ -255,17 +255,7 @@ namespace SqlServer {
                     Schema = result[0],
                     TableName = result[1],
                     Name = result[2],
-                    Columns = new Dictionary<string, ColumnDescription> {
-                        {
-                            result[3],
-                            new ColumnDescription {
-                                Name = result[4],
-                                AllowsNull = false,
-                                Schema = primaryKeyDescription.Schema,
-                                TableName = primaryKeyDescription.TableName
-                            }
-                        }
-                    }
+                    Columns = new Dictionary<string, ColumnDescription> {{result[3], GetColumn(result[5], result[6], result[4])}}
                 });
             }
 
@@ -464,7 +454,7 @@ namespace SqlServer {
         internal bool TableHasDuplicatedValuesForColumns(string schema, string tableName, IList<string> columnNames) {
             foreach (var columnName in columnNames) {
                 if (!ColumnExists(schema, tableName, columnName))
-                    throw new ArgumentException();                
+                    throw new ArgumentException();
             }
 
             var query = string.Format(@"SELECT COUNT(*)
