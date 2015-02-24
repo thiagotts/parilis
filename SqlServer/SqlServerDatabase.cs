@@ -219,7 +219,7 @@ namespace SqlServer {
             return foreignKeys;
         }
 
-        public IList<ForeignKeyDescription> GetForeignKeysReferencing(ConstraintDescription primaryKeyDescription) {
+        public IList<ForeignKeyDescription> GetForeignKeysReferencing(ConstraintDescription constraintDescription) {
             var dataSet = database.ExecuteWithResults(string.Format(@"
                 CREATE TABLE #TempTable (
                  PKTABLE_QUALIFIER nvarchar(max),
@@ -243,7 +243,7 @@ namespace SqlServer {
                 WHERE PK_NAME = '{2}'
                 DROP TABLE #TempTable
                 ",
-                primaryKeyDescription.TableName, primaryKeyDescription.Schema, primaryKeyDescription.Name));
+                constraintDescription.TableName, constraintDescription.Schema, constraintDescription.Name));
 
             var foreignKeys = new List<ForeignKeyDescription>();
 

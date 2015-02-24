@@ -61,6 +61,27 @@ namespace Tests.Core.Actions {
         }
 
         [Test]
+        public void IfPUniqueKeyIsReferencedByForeignKeys_UniqueKeyRemovalMustRemoveTheForeignKeysAndSetThemUpForLaterCreation() {
+            var actionQueue = Components.Instance.GetComponent<ActionQueue>();
+            actionQueue.ClearReceivedCalls();
+            var database = Components.Instance.GetComponent<IDatabase>();
+            var uniqueDescription = new UniqueDescription { Name = "test_name" };
+            var uniqueRemoval = new UniqueRemoval(ConnectionInfo, uniqueDescription);
+            uniqueRemoval.Constraints.ClearReceivedCalls();
+            database.GetForeignKeysReferencing(Arg.Any<UniqueDescription>()).Returns(new List<ForeignKeyDescription> {
+                new ForeignKeyDescription(),
+                new ForeignKeyDescription()
+            });
+
+            uniqueRemoval.Execute();
+
+            uniqueRemoval.Constraints.Received(2).RemoveForeignKey(Arg.Any<ForeignKeyDescription>());
+            actionQueue.Received(2).Push(Arg.Any<ForeignKeyCreation>());
+            uniqueRemoval.Constraints.Received(1).RemoveUnique(Arg.Is<UniqueDescription>(
+                d => d.Name.Equals(uniqueDescription.Name)));
+        }
+
+        [Test]
         public void ForeignKeyCreationMustCallConstraintsCreateMethod() {
             var foreignKeyDescription = new ForeignKeyDescription { Name = "test_name" };
             var uniqueCreation = new ForeignKeyCreation(ConnectionInfo, foreignKeyDescription);
@@ -108,6 +129,7 @@ namespace Tests.Core.Actions {
         [Test]
         public void IfPrimaryKeyIsReferencedByForeignKeys_PrimaryKeyRemovalMustRemoveTheForeignKeysAndSetThemUpForLaterCreation() {
             var actionQueue = Components.Instance.GetComponent<ActionQueue>();
+            actionQueue.ClearReceivedCalls();
             var database = Components.Instance.GetComponent<IDatabase>();
             var primaryKeyDescription = new PrimaryKeyDescription { Name = "test_name" };
             var primaryKeyRemoval = new PrimaryKeyRemoval(ConnectionInfo, primaryKeyDescription);
