@@ -8,9 +8,11 @@ namespace Core {
     [CastleComponent("Core.ActionQueue", typeof (ActionQueue), Lifestyle = LifestyleType.Singleton)]
     public class ActionQueue {
         internal readonly Queue<Action> Queue;
+        internal int TotalCount;
 
         public ActionQueue() {
             Queue = new Queue<Action>();
+            TotalCount = 0;
         }
 
         public int Count {
@@ -19,6 +21,7 @@ namespace Core {
 
         public virtual void Push(Action action) {
             if (action == null) throw new InvalidActionException();
+            TotalCount += 1;
             Queue.Enqueue(action);
         }
 
@@ -32,6 +35,7 @@ namespace Core {
         }
 
         internal void Clear() {
+            TotalCount = 0;
             Queue.Clear();
         }
     }
