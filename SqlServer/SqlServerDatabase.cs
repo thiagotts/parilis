@@ -23,7 +23,6 @@ namespace SqlServer {
 
             server.Databases.Refresh();
             database = server.Databases[connectionInfo.DatabaseName];
-            database.Refresh();
         }
 
         public IList<string> GetSchemas() {
