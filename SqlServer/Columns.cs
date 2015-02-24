@@ -16,6 +16,9 @@ namespace SqlServer {
         }
 
         public void Create(ColumnDescription column) {
+            if (column.AllowsNull && column.IsIdentity)
+                throw new InvalidDescriptionException();
+
             if (SqlServerDatabase.GetTable(column.Schema, column.TableName) == null)
                 throw new TableNotFoundException();
 
@@ -31,10 +34,10 @@ namespace SqlServer {
             if (!MaximumSizeIsValid(column))
                 throw new InvalidDataTypeException();
 
-            Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD {2} {3}{4} {5}",
+            Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD {2} {3}{4} {5} {6}",
                 column.Schema, column.TableName, column.Name, column.Type,
                 string.IsNullOrWhiteSpace(column.MaximumSize) ? string.Empty : string.Format("({0})", column.MaximumSize),
-                column.AllowsNull ? "NULL" : "NOT NULL"));
+                column.IsIdentity ? "IDENTITY(1,1)" : string.Empty, column.AllowsNull ? "NULL" : "NOT NULL"));
         }
 
         public void Remove(ColumnDescription column) {
