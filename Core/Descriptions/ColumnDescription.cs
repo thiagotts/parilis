@@ -4,7 +4,7 @@
         public string TableName { get; set; }
         public string Name { get; set; }
         public string Type { get; set; }
-        public string MaximumSize { get; set; }
+        public string Length { get; set; }
         public bool AllowsNull { get; set; }
         public bool IsIdentity { get; set; }
 
@@ -22,8 +22,8 @@
             return base.Equals(other) &&
                    !string.IsNullOrWhiteSpace(Type) &&
                    Type.Equals(columnDescription.Type) &&
-                   ((string.IsNullOrWhiteSpace(MaximumSize) && string.IsNullOrWhiteSpace(columnDescription.MaximumSize)) ||
-                    MaximumSize.Equals(columnDescription.MaximumSize)) &&
+                   ((string.IsNullOrWhiteSpace(Length) && string.IsNullOrWhiteSpace(columnDescription.Length)) ||
+                    Length.Equals(columnDescription.Length)) &&
                    AllowsNull.Equals(columnDescription.AllowsNull) &&
                    IsIdentity.Equals(columnDescription.IsIdentity);
         }
@@ -31,7 +31,7 @@
         public override int GetHashCode() {
             return base.GetHashCode() ^
                    Type.GetHashCode() ^
-                   MaximumSize.GetHashCode() ^
+                   Length.GetHashCode() ^
                    AllowsNull.GetHashCode();
         }
     }

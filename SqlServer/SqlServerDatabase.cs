@@ -74,7 +74,7 @@ namespace SqlServer {
                 AllowsNull = results[0][0].Equals("YES", StringComparison.InvariantCultureIgnoreCase),
                 IsIdentity = results[0][1].Equals("1", StringComparison.InvariantCultureIgnoreCase),
                 Type = results[0][2],
-                MaximumSize = results[0].Count > 3 ?
+                Length = results[0].Count > 3 ?
                     results[0][3].Equals("-1") ? "max" : results[0][3]
                     : null,
             };

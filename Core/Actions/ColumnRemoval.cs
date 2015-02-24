@@ -10,7 +10,7 @@ namespace Core.Actions {
                     ColumnDescription.FullName,
                     string.Format("{0}{1} ({2})",
                         ColumnDescription.Type,
-                        string.IsNullOrWhiteSpace(ColumnDescription.MaximumSize) ? string.Empty : string.Format("({0})", ColumnDescription.MaximumSize),
+                        string.IsNullOrWhiteSpace(ColumnDescription.Length) ? string.Empty : string.Format("({0})", ColumnDescription.Length),
                         ColumnDescription.AllowsNull ? "Allows null values" : "Does not allow null values"));
             }
         }

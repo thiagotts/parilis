@@ -244,7 +244,7 @@ namespace Tests.Core {
 
         [Test]
         public void WhenActualDatabaseHasAColumnWithDifferentMaximumSizeWhenComparedToReferenceDatabase_MustReturnAColumnModificationAction() {
-            var actualColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "100"};
+            var actualColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", Length = "100"};
             actualDatabase.Tables.Add(new TableDescription {
                 Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
                     actualColumn,
@@ -252,7 +252,7 @@ namespace Tests.Core {
                 }
             });
 
-            var referenceColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "255"};
+            var referenceColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", Length = "255"};
             referenceDatabase.Tables.Add(new TableDescription {
                 Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
                     referenceColumn,
@@ -271,7 +271,7 @@ namespace Tests.Core {
 
         [Test]
         public void WhenActualDatabaseHasAColumnAllowingNullAndReferenceDatabaseDoesNot_MustReturnAColumnModificationAction() {
-            var actualColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "255", AllowsNull = true};
+            var actualColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", Length = "255", AllowsNull = true};
             actualDatabase.Tables.Add(new TableDescription {
                 Schema = "dbo",
                 Name = "TEST_TABLE",
@@ -281,7 +281,7 @@ namespace Tests.Core {
                 }
             });
 
-            var referenceColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", MaximumSize = "255", AllowsNull = false};
+            var referenceColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", Length = "255", AllowsNull = false};
             referenceDatabase.Tables.Add(new TableDescription {
                 Schema = "dbo",
                 Name = "TEST_TABLE",

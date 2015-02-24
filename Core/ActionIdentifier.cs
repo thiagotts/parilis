@@ -124,7 +124,7 @@ namespace Core {
         private IEnumerable<Action> GetTableRemovals() {
             var tableRemovals = new List<TableRemoval>();
             foreach (var table in actualDatabase.Tables) {
-                if (!referenceDatabase.Tables.Any(t => t.FullName.Equals(table.FullName)))
+                if (!referenceDatabase.Tables.Any(t => t.FullName.Equals(table.FullName, StringComparison.InvariantCultureIgnoreCase)))
                     tableRemovals.Add(new TableRemoval(connectionInfo, table));
             }
 
@@ -198,7 +198,7 @@ namespace Core {
         private IEnumerable<Action> GetTableCreations() {
             var tableCreations = new List<TableCreation>();
             foreach (var table in referenceDatabase.Tables) {
-                if (!actualDatabase.Tables.Any(t => t.FullName.Equals(table.FullName)))
+                if (!actualDatabase.Tables.Any(t => t.FullName.Equals(table.FullName, StringComparison.InvariantCultureIgnoreCase)))
                     tableCreations.Add(new TableCreation(connectionInfo, table));
             }
 

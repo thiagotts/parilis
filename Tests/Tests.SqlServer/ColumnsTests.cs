@@ -210,8 +210,9 @@ namespace Tests.SqlServer {
             Assert.IsTrue(column.IsIdentity);
         }
 
-        [Test]
-        public void WhenMaximumValueIsDefinedWithAnInvalidType_CreateMethodMustThrowException() {
+        [TestCase("bigint", "255")]
+        [TestCase("text", "255")]
+        public void WhenLengthIsDefinedWithAnInvalidType_CreateMethodMustThrowException(string dataType, string length) {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL)");
@@ -220,8 +221,8 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "id2",
-                Type = "bigint",
-                MaximumSize = "255"
+                Type = dataType,
+                Length = length
             }));
         }
 
@@ -229,7 +230,14 @@ namespace Tests.SqlServer {
         [TestCase("nvarchar", "4000")]
         [TestCase("varchar", "max")]
         [TestCase("nvarchar", "max")]
-        public void WhenMaximumValueIsDefinedWithAValidType_CreateMethodMustCreateAColumnWithTheMaximumSize(string dataType, string maximumValue) {
+        [TestCase("char", "8000")]
+        [TestCase("nchar", "4000")]
+        [TestCase("float", "53")]
+        [TestCase("real", "53")]
+        [TestCase("binary", "8000")]
+        [TestCase("varbinary", "8000")]
+        [TestCase("varbinary", "max")]
+        public void WhenLengthIsDefinedWithAValidType_CreateMethodMustCreateAColumnWithTheLength(string dataType, string length) {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL)");
@@ -240,14 +248,14 @@ namespace Tests.SqlServer {
                 Name = "id2",
                 Type = dataType,
                 AllowsNull = false,
-                MaximumSize = maximumValue
+                Length = length
             });
 
             var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id2");
 
             Assert.IsNotNull(column);
             Assert.AreEqual(dataType, column.Type);
-            Assert.AreEqual(maximumValue, column.MaximumSize);
+            Assert.AreEqual(length, column.Length);
         }
 
         [TestCase("varchar", "8001")]
@@ -258,7 +266,30 @@ namespace Tests.SqlServer {
         [TestCase("nvarchar", "-1")]
         [TestCase("varchar", "abc")]
         [TestCase("nvarchar", "abc")]
-        public void WhenMaximumValueIsOutOfBounds_CreateMethodMustThrowException(string dataType, string maximumValue) {
+        [TestCase("char", "8001")]
+        [TestCase("nchar", "4001")]
+        [TestCase("char", "0")]
+        [TestCase("nchar", "0")]
+        [TestCase("char", "-1")]
+        [TestCase("nchar", "-1")]
+        [TestCase("char", "max")]
+        [TestCase("nchar", "max")]
+        [TestCase("float", "54")]
+        [TestCase("real", "54")]
+        [TestCase("float", "0")]
+        [TestCase("real", "0")]
+        [TestCase("float", "-1")]
+        [TestCase("real", "-1")]
+        [TestCase("float", "max")]
+        [TestCase("real", "max")]
+        [TestCase("binary", "8001")]
+        [TestCase("binary", "0")]
+        [TestCase("binary", "-1")]
+        [TestCase("binary", "max")]
+        [TestCase("varbinary", "8001")]
+        [TestCase("varbinary", "0")]
+        [TestCase("varbinary", "-1")]
+        public void WhenLengthIsOutOfBounds_CreateMethodMustThrowException(string dataType, string length) {
             Database.ExecuteNonQuery(string.Format(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL)"));
@@ -268,7 +299,7 @@ namespace Tests.SqlServer {
                 TableName = "TEST_TABLE",
                 Name = "id2",
                 Type = dataType,
-                MaximumSize = maximumValue
+                Length = length
             }));
         }
 
@@ -429,7 +460,7 @@ namespace Tests.SqlServer {
                 TableName = "TEST_TABLE",
                 Name = "id2",
                 Type = "varchar",
-                MaximumSize = "100"
+                Length = "100"
             });
 
             var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id2");
@@ -437,7 +468,7 @@ namespace Tests.SqlServer {
             Assert.IsNotNull(column);
             Assert.AreEqual("id2", column.Name);
             Assert.AreEqual("varchar", column.Type);
-            Assert.AreEqual("100", column.MaximumSize);
+            Assert.AreEqual("100", column.Length);
         }
 
         [Test]
@@ -637,8 +668,9 @@ namespace Tests.SqlServer {
             Assert.IsFalse(column.AllowsNull);
         }
 
-        [Test]
-        public void WhenMaximumValueIsDefinedWithAnInvalidType_ChangeTypeMethodMustThrowException() {
+        [TestCase("bigint", "255")]
+        [TestCase("text", "255")]
+        public void WhenLengthIsDefinedWithAnInvalidType_ChangeTypeMethodMustThrowException(string dataType, string length) {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL)");
@@ -647,8 +679,8 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "id",
-                Type = "int",
-                MaximumSize = "255"
+                Type = dataType,
+                Length = length
             }));
         }
 
@@ -656,7 +688,14 @@ namespace Tests.SqlServer {
         [TestCase("nvarchar", "4000")]
         [TestCase("varchar", "max")]
         [TestCase("nvarchar", "max")]
-        public void WhenMaximumValueIsDefinedWithAValidType_ChangeTypeMethodMustChangeDataTypeWithTheMaximumSize(string dataType, string maximumValue) {
+        [TestCase("char", "8000")]
+        [TestCase("nchar", "4000")]
+        [TestCase("float", "53")]
+        [TestCase("real", "53")]
+        [TestCase("binary", "8000")]
+        [TestCase("varbinary", "8000")]
+        [TestCase("varbinary", "max")]
+        public void WhenLengthIsDefinedWithAValidType_ChangeTypeMethodMustChangeDataTypeWithTheLength(string dataType, string length) {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL)");
@@ -667,14 +706,14 @@ namespace Tests.SqlServer {
                 Name = "id",
                 Type = dataType,
                 AllowsNull = false,
-                MaximumSize = maximumValue
+                Length = length
             });
 
             var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id");
 
             Assert.IsNotNull(column);
             Assert.AreEqual(dataType, column.Type);
-            Assert.AreEqual(maximumValue, column.MaximumSize);
+            Assert.AreEqual(length, column.Length);
         }
 
         [TestCase("varchar", "8001")]
@@ -685,7 +724,30 @@ namespace Tests.SqlServer {
         [TestCase("nvarchar", "-1")]
         [TestCase("varchar", "abc")]
         [TestCase("nvarchar", "abc")]
-        public void WhenMaximumValueIsOutOfBounds_ChangeTypeMethodMustThrowException(string dataType, string maximumValue) {
+        [TestCase("char", "8001")]
+        [TestCase("nchar", "4001")]
+        [TestCase("char", "0")]
+        [TestCase("nchar", "0")]
+        [TestCase("char", "-1")]
+        [TestCase("nchar", "-1")]
+        [TestCase("char", "max")]
+        [TestCase("nchar", "max")]
+        [TestCase("float", "54")]
+        [TestCase("real", "54")]
+        [TestCase("float", "0")]
+        [TestCase("real", "0")]
+        [TestCase("float", "-1")]
+        [TestCase("real", "-1")]
+        [TestCase("float", "max")]
+        [TestCase("real", "max")]
+        [TestCase("binary", "8001")]
+        [TestCase("binary", "0")]
+        [TestCase("binary", "-1")]
+        [TestCase("binary", "max")]
+        [TestCase("varbinary", "8001")]
+        [TestCase("varbinary", "0")]
+        [TestCase("varbinary", "-1")]
+        public void WhenLengthIsOutOfBounds_ChangeTypeMethodMustThrowException(string dataType, string length) {
             Database.ExecuteNonQuery(string.Format(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL)"));
@@ -695,7 +757,7 @@ namespace Tests.SqlServer {
                 TableName = "TEST_TABLE",
                 Name = "id",
                 Type = dataType,
-                MaximumSize = maximumValue
+                Length = length
             }));
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using SqlServer.Attributes;
 
 namespace SqlServer.Enums {
     public static class Enums {
@@ -42,6 +43,16 @@ namespace SqlServer.Enums {
             }
 
             return descriptions.ToArray();
+        }
+
+        public static AllowsLengthAttribute GetAllowsLength(object value) {
+            if (value == null) return null;
+
+            var fieldInfo = value.GetType().GetField(value.ToString());
+            if (fieldInfo == null) return null;
+
+            var attributes = (AllowsLengthAttribute[])fieldInfo.GetCustomAttributes(typeof(AllowsLengthAttribute), false);
+            return attributes.Length > 0 ? attributes[0] : null;
         }
     }
 }

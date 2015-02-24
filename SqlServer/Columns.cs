@@ -36,7 +36,7 @@ namespace SqlServer {
 
             Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD {2} {3}{4} {5} {6}",
                 column.Schema, column.TableName, column.Name, column.Type,
-                string.IsNullOrWhiteSpace(column.MaximumSize) ? string.Empty : string.Format("({0})", column.MaximumSize),
+                string.IsNullOrWhiteSpace(column.Length) ? string.Empty : string.Format("({0})", column.Length),
                 column.IsIdentity ? "IDENTITY(1,1)" : string.Empty, column.AllowsNull ? "NULL" : "NOT NULL"));
         }
 
@@ -74,7 +74,7 @@ namespace SqlServer {
             try {
                 Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ALTER COLUMN {2} {3}{4} {5}",
                     column.Schema, column.TableName, column.Name, column.Type,
-                    string.IsNullOrWhiteSpace(column.MaximumSize) ? string.Empty : string.Format("({0})", column.MaximumSize),
+                    string.IsNullOrWhiteSpace(column.Length) ? string.Empty : string.Format("({0})", column.Length),
                     column.AllowsNull ? "NULL" : "NOT NULL"));
             }
             catch (FailedOperationException ex) {
@@ -89,17 +89,17 @@ namespace SqlServer {
         }
 
         private bool MaximumSizeIsValid(ColumnDescription column) {
-            if (string.IsNullOrWhiteSpace(column.MaximumSize)) return true;
+            if (string.IsNullOrWhiteSpace(column.Length)) return true;
 
             if (!column.Type.Equals("varchar", StringComparison.InvariantCultureIgnoreCase) &&
                 !column.Type.Equals("nvarchar", StringComparison.InvariantCultureIgnoreCase))
                 return false;
 
-            if (column.MaximumSize.Equals("max", StringComparison.InvariantCultureIgnoreCase))
+            if (column.Length.Equals("max", StringComparison.InvariantCultureIgnoreCase))
                 return true;
 
             int maximumSize;
-            var parsedSuccessfully = Int32.TryParse(column.MaximumSize, out maximumSize);
+            var parsedSuccessfully = Int32.TryParse(column.Length, out maximumSize);
             if (!parsedSuccessfully || maximumSize <= 0) return false;
 
             if (column.Type.Equals("varchar", StringComparison.InvariantCultureIgnoreCase)) {

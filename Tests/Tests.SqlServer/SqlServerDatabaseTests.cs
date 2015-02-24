@@ -382,7 +382,7 @@ namespace Tests.SqlServer {
             Assert.AreEqual("TEST_TABLE", result.First().Columns.Single().TableName);
             Assert.AreEqual("id", result.First().Columns.Single().Name);
             Assert.AreEqual("nvarchar", result.First().Columns.Single().Type);
-            Assert.AreEqual("100", result.First().Columns.Single().MaximumSize);
+            Assert.AreEqual("100", result.First().Columns.Single().Length);
             Assert.IsFalse(result.First().Columns.Single().AllowsNull);
         }
 
@@ -407,7 +407,7 @@ namespace Tests.SqlServer {
             Assert.AreEqual("TEST_TABLE", table.Columns.Single().TableName);
             Assert.AreEqual("id", table.Columns.Single().Name);
             Assert.AreEqual("nvarchar", table.Columns.Single().Type);
-            Assert.AreEqual("100", table.Columns.Single().MaximumSize);
+            Assert.AreEqual("100", table.Columns.Single().Length);
             Assert.IsFalse(table.Columns.Single().AllowsNull);
         }
 

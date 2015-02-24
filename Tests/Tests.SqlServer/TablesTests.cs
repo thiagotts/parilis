@@ -48,7 +48,7 @@ namespace Tests.SqlServer {
                     new ColumnDescription {
                         Name = "id",
                         Type = "varchar",
-                        MaximumSize = "150",
+                        Length = "150",
                         AllowsNull = true
                     }
                 }
@@ -61,7 +61,7 @@ namespace Tests.SqlServer {
             Assert.AreEqual(1, table.Columns.Count);
             Assert.AreEqual("id", table.Columns.Single().Name);
             Assert.AreEqual("varchar", table.Columns.Single().Type);
-            Assert.AreEqual("150", table.Columns.Single().MaximumSize);
+            Assert.AreEqual("150", table.Columns.Single().Length);
             Assert.IsTrue(table.Columns.Single().AllowsNull);
         }
 

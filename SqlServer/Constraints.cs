@@ -174,11 +174,11 @@ namespace SqlServer {
                 if (description == null) return false;
 
                 if (description.Type.Equals("varchar", StringComparison.InvariantCultureIgnoreCase) &&
-                    int.Parse(description.MaximumSize) > 900)
+                    int.Parse(description.Length) > 900)
                     return false;
 
                 if (description.Type.Equals("nvarchar", StringComparison.InvariantCultureIgnoreCase) &&
-                    int.Parse(description.MaximumSize) > 400)
+                    int.Parse(description.Length) > 400)
                     return false;
 
                 if (invalidTypes.Any(t => t.Equals(description.Type, StringComparison.InvariantCultureIgnoreCase)))

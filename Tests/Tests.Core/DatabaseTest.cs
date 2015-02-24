@@ -9,7 +9,7 @@ namespace Tests.Core {
         private const string ServerHostname = @"localhost\sqlexpress";
         private const string DatabaseName = "TESTS_PARILIS";
         private const string User = "parilis";
-        private const string Password = "parilis";
+        private const string Password = "yourpassword";
         private Server server;
         protected Database Database;
         protected ConnectionInfo ConnectionInfo;

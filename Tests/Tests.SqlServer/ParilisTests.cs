@@ -6,20 +6,20 @@ namespace Tests.SqlServer {
     [TestFixture]
     public class ParilisTests {
 
-        [Ignore]
+        //[Ignore]
         [Test]
         public void TestParilis() {
             DatabaseDescription actual = new DatabaseDescription(new ConnectionInfo {
-                DatabaseName = "actual",
+                DatabaseName = "actualcateb",
                 HostName = @"localhost\SQLEXPRESS",
-                User = "sa",
+                User = "parilis",
                 Password = "yourpassword"
             });
 
             DatabaseDescription reference = new DatabaseDescription(new ConnectionInfo {
                 DatabaseName = "reference",
                 HostName = @"localhost\SQLEXPRESS",
-                User = "sa",
+                User = "parilis",
                 Password = "yourpassword"
             });
 

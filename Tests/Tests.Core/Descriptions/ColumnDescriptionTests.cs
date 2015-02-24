@@ -24,7 +24,7 @@ namespace Tests.Core.Descriptions {
                 TableName = "Table",
                 Name = "column",
                 Type = "varchar",
-                MaximumSize = "100",
+                Length = "100",
                 AllowsNull = true
             };
 
@@ -33,7 +33,7 @@ namespace Tests.Core.Descriptions {
                 TableName = "Table",
                 Name = "column",
                 Type = "nvarchar",
-                MaximumSize = "100",
+                Length = "100",
                 AllowsNull = true
             };
 
@@ -49,7 +49,7 @@ namespace Tests.Core.Descriptions {
                 TableName = "Table",
                 Name = "column",
                 Type = "varchar",
-                MaximumSize = "100",
+                Length = "100",
                 AllowsNull = true
             };
 
@@ -58,7 +58,7 @@ namespace Tests.Core.Descriptions {
                 TableName = "Table",
                 Name = "column",
                 Type = "varchar",
-                MaximumSize = "150",
+                Length = "150",
                 AllowsNull = true
             };
 
@@ -74,7 +74,7 @@ namespace Tests.Core.Descriptions {
                 TableName = "Table",
                 Name = "column",
                 Type = "varchar",
-                MaximumSize = "100",
+                Length = "100",
                 AllowsNull = true
             };
 
@@ -83,7 +83,7 @@ namespace Tests.Core.Descriptions {
                 TableName = "Table",
                 Name = "column",
                 Type = "varchar",
-                MaximumSize = "100",
+                Length = "100",
                 AllowsNull = false
             };
 
@@ -99,7 +99,7 @@ namespace Tests.Core.Descriptions {
                 TableName = "Table",
                 Name = "column",
                 Type = "varchar",
-                MaximumSize = "100",
+                Length = "100",
                 AllowsNull = true
             };
 
@@ -108,7 +108,7 @@ namespace Tests.Core.Descriptions {
                 TableName = "Table",
                 Name = "column",
                 Type = "varchar",
-                MaximumSize = "100",
+                Length = "100",
                 AllowsNull = true
             };
 

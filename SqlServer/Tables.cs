@@ -20,7 +20,7 @@ namespace SqlServer {
             var columns = new List<string>();
             foreach (var column in tableDescription.Columns ?? new List<ColumnDescription>()) {
                 columns.Add(string.Format("[{0}] [{1}]{2} {3} {4}", column.Name, column.Type,
-                    string.IsNullOrWhiteSpace(column.MaximumSize) ? string.Empty : string.Format("({0})", column.MaximumSize),
+                    string.IsNullOrWhiteSpace(column.Length) ? string.Empty : string.Format("({0})", column.Length),
                     column.IsIdentity ? "IDENTITY(1,1)" : string.Empty, column.AllowsNull ? "NULL" : "NOT NULL"));
             }
 
