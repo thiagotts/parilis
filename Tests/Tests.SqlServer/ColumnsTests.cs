@@ -153,6 +153,64 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void WhenColumnIsNotIdentity_CreateMethodMustCreateColumnThatIsNotIdentity() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            columns.Create(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id2",
+                Type = "bigint",
+                AllowsNull = false,
+                IsIdentity = false
+            });
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id2");
+
+            Assert.IsNotNull(column);
+            Assert.IsFalse(column.IsIdentity);
+        }
+
+        [Test]
+        public void WhenColumnIsIdentityAndAllowsNullIsSetToTrue_CreateMethodMustThrowException() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            Assert.Throws<InvalidDescriptionException>(() => columns.Create(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id2",
+                Type = "bigint",
+                AllowsNull = true,
+                IsIdentity = true
+            }));
+        }
+
+        [Test]
+        public void WhenColumnIsIdentity_CreateMethodMustCreateColumnThatIsIdentity() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            columns.Create(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id2",
+                Type = "bigint",
+                AllowsNull = false,
+                IsIdentity = true
+            });
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id2");
+
+            Assert.IsNotNull(column);
+            Assert.IsTrue(column.IsIdentity);
+        }
+
+        [Test]
         public void WhenMaximumValueIsDefinedWithAnInvalidType_CreateMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
