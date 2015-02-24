@@ -17,7 +17,7 @@ namespace Core {
             get { return Queue.Count; }
         }
 
-        internal void Push(Action action) {
+        public virtual void Push(Action action) {
             if (action == null) throw new InvalidActionException();
             Queue.Enqueue(action);
         }
