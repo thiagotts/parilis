@@ -65,10 +65,11 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.IsTrue(actions.Single() is DefaultRemoval);
-            Assert.AreEqual("dbo", (actions.Single() as DefaultRemoval).DefaultDescription.Schema);
-            Assert.AreEqual("TEST_TABLE", (actions.Single() as DefaultRemoval).DefaultDescription.TableName);
-            Assert.AreEqual("default2", (actions.Single() as DefaultRemoval).DefaultDescription.Name);
+            var action = actions.Pop();
+            Assert.IsTrue(action is DefaultRemoval);
+            Assert.AreEqual("dbo", (action as DefaultRemoval).DefaultDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (action as DefaultRemoval).DefaultDescription.TableName);
+            Assert.AreEqual("default2", (action as DefaultRemoval).DefaultDescription.Name);
         }
 
         [Test]
@@ -84,10 +85,11 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.IsTrue(actions.Single() is UniqueRemoval);
-            Assert.AreEqual("dbo", (actions.Single() as UniqueRemoval).UniqueDescription.Schema);
-            Assert.AreEqual("TEST_TABLE", (actions.Single() as UniqueRemoval).UniqueDescription.TableName);
-            Assert.AreEqual("unique2", (actions.Single() as UniqueRemoval).UniqueDescription.Name);
+            var action = actions.Pop();
+            Assert.IsTrue(action is UniqueRemoval);
+            Assert.AreEqual("dbo", (action as UniqueRemoval).UniqueDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (action as UniqueRemoval).UniqueDescription.TableName);
+            Assert.AreEqual("unique2", (action as UniqueRemoval).UniqueDescription.Name);
         }
 
         [Test]
@@ -104,10 +106,11 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.IsTrue(actions.Single() is ForeignKeyRemoval);
-            Assert.AreEqual("dbo", (actions.Single() as ForeignKeyRemoval).ForeignKeyDescription.Schema);
-            Assert.AreEqual("TEST_TABLE", (actions.Single() as ForeignKeyRemoval).ForeignKeyDescription.TableName);
-            Assert.AreEqual("foreign2", (actions.Single() as ForeignKeyRemoval).ForeignKeyDescription.Name);
+            var action = actions.Pop();
+            Assert.IsTrue(action is ForeignKeyRemoval);
+            Assert.AreEqual("dbo", (action as ForeignKeyRemoval).ForeignKeyDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (action as ForeignKeyRemoval).ForeignKeyDescription.TableName);
+            Assert.AreEqual("foreign2", (action as ForeignKeyRemoval).ForeignKeyDescription.Name);
         }
 
         [Test]
@@ -123,10 +126,11 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.IsTrue(actions.Single() is PrimaryKeyRemoval);
-            Assert.AreEqual("dbo", (actions.Single() as PrimaryKeyRemoval).PrimaryKeyDescription.Schema);
-            Assert.AreEqual("TEST_TABLE", (actions.Single() as PrimaryKeyRemoval).PrimaryKeyDescription.TableName);
-            Assert.AreEqual("primary2", (actions.Single() as PrimaryKeyRemoval).PrimaryKeyDescription.Name);
+            var action = actions.Pop();
+            Assert.IsTrue(action is PrimaryKeyRemoval);
+            Assert.AreEqual("dbo", (action as PrimaryKeyRemoval).PrimaryKeyDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (action as PrimaryKeyRemoval).PrimaryKeyDescription.TableName);
+            Assert.AreEqual("primary2", (action as PrimaryKeyRemoval).PrimaryKeyDescription.Name);
         }
 
         [Test]
@@ -143,13 +147,13 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(2, actions.Count);
-            Assert.IsTrue(actions.All(a => a is IndexRemoval));
-            Assert.IsTrue(actions.Cast<IndexRemoval>().Any(a => a.IndexDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)));
-            Assert.IsTrue(actions.Cast<IndexRemoval>().Any(a => a.IndexDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase)));
-            Assert.IsTrue(actions.Cast<IndexRemoval>().Any(a => a.IndexDescription.Name.Equals("index2", StringComparison.InvariantCultureIgnoreCase)));
-            Assert.IsTrue(actions.Cast<IndexRemoval>().Any(a => a.IndexDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)));
-            Assert.IsTrue(actions.Cast<IndexRemoval>().Any(a => a.IndexDescription.TableName.Equals("TEST_TABLE_2", StringComparison.InvariantCultureIgnoreCase)));
-            Assert.IsTrue(actions.Cast<IndexRemoval>().Any(a => a.IndexDescription.Name.Equals("index1", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Queue.All(a => a is IndexRemoval));
+            Assert.IsTrue(actions.Queue.Cast<IndexRemoval>().Any(a => a.IndexDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Queue.Cast<IndexRemoval>().Any(a => a.IndexDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Queue.Cast<IndexRemoval>().Any(a => a.IndexDescription.Name.Equals("index2", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Queue.Cast<IndexRemoval>().Any(a => a.IndexDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Queue.Cast<IndexRemoval>().Any(a => a.IndexDescription.TableName.Equals("TEST_TABLE_2", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Queue.Cast<IndexRemoval>().Any(a => a.IndexDescription.Name.Equals("index1", StringComparison.InvariantCultureIgnoreCase)));
         }
 
         [Test]
@@ -170,8 +174,8 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(2, actions.Count);
-            Assert.AreEqual(1, actions.Count(a => a is ColumnRemoval));
-            var columnRemoval = actions.Single(a => a is ColumnRemoval) as ColumnRemoval;
+            Assert.AreEqual(1, actions.Queue.Count(a => a is ColumnRemoval));
+            var columnRemoval = actions.Queue.Single(a => a is ColumnRemoval) as ColumnRemoval;
             Assert.IsTrue(columnRemoval.ColumnDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase));
             Assert.IsTrue(columnRemoval.ColumnDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase));
             Assert.IsTrue(columnRemoval.ColumnDescription.Name.Equals("column2", StringComparison.InvariantCultureIgnoreCase));
@@ -187,8 +191,9 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.IsTrue(actions.Single() is TableRemoval);
-            Assert.AreEqual("TEST_TABLE_2", (actions.Single() as TableRemoval).TableDescription.Name);
+            var action = actions.Pop();
+            Assert.IsTrue(action is TableRemoval);
+            Assert.AreEqual("TEST_TABLE_2", (action as TableRemoval).TableDescription.Name);
         }
 
         [Test]
@@ -204,9 +209,9 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(2, actions.Count);
-            Assert.AreEqual(1, actions.Count(a => a is TableRemoval));
-            Assert.AreEqual(1, actions.Count(a => a is SchemaRemoval));
-            var schemaRemoval = actions.Single(a => a is SchemaRemoval) as SchemaRemoval;
+            Assert.AreEqual(1, actions.Queue.Count(a => a is TableRemoval));
+            Assert.AreEqual(1, actions.Queue.Count(a => a is SchemaRemoval));
+            var schemaRemoval = actions.Queue.Single(a => a is SchemaRemoval) as SchemaRemoval;
             Assert.AreEqual("testschema", schemaRemoval.SchemaName);
         }
 
@@ -232,8 +237,8 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.AreEqual(1, actions.Count(a => a is ColumnModification));
-            var columnModification = actions.Single(a => a is ColumnModification) as ColumnModification;
+            Assert.AreEqual(1, actions.Queue.Count(a => a is ColumnModification));
+            var columnModification = actions.Queue.Single(a => a is ColumnModification) as ColumnModification;
             Assert.IsTrue(columnModification.ColumnDescription.Equals(referenceColumn));
         }
 
@@ -259,8 +264,8 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.AreEqual(1, actions.Count(a => a is ColumnModification));
-            var columnModification = actions.Single(a => a is ColumnModification) as ColumnModification;
+            Assert.AreEqual(1, actions.Queue.Count(a => a is ColumnModification));
+            var columnModification = actions.Queue.Single(a => a is ColumnModification) as ColumnModification;
             Assert.IsTrue(columnModification.ColumnDescription.Equals(referenceColumn));
         }
 
@@ -290,8 +295,8 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.AreEqual(1, actions.Count(a => a is ColumnModification));
-            var columnModification = actions.Single(a => a is ColumnModification) as ColumnModification;
+            Assert.AreEqual(1, actions.Queue.Count(a => a is ColumnModification));
+            var columnModification = actions.Queue.Single(a => a is ColumnModification) as ColumnModification;
             Assert.IsTrue(columnModification.ColumnDescription.Equals(referenceColumn));
         }
 
@@ -309,9 +314,9 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(2, actions.Count);
-            Assert.AreEqual(1, actions.Count(a => a is TableCreation));
-            Assert.AreEqual(1, actions.Count(a => a is SchemaCreation));
-            var schemaCreation = actions.Single(a => a is SchemaCreation) as SchemaCreation;
+            Assert.AreEqual(1, actions.Queue.Count(a => a is TableCreation));
+            Assert.AreEqual(1, actions.Queue.Count(a => a is SchemaCreation));
+            var schemaCreation = actions.Queue.Single(a => a is SchemaCreation) as SchemaCreation;
             Assert.AreEqual("testschema", schemaCreation.SchemaName);
         }
 
@@ -326,8 +331,9 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.IsTrue(actions.Single() is TableCreation);
-            Assert.AreEqual("TEST_TABLE_2", (actions.Single() as TableCreation).TableDescription.Name);
+            var action = actions.Pop();
+            Assert.IsTrue(action is TableCreation);
+            Assert.AreEqual("TEST_TABLE_2", (action as TableCreation).TableDescription.Name);
         }
 
         [Test]
@@ -348,9 +354,9 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(2, actions.Count);
-            Assert.AreEqual(1, actions.Count(a => a is TableCreation));
-            Assert.AreEqual(1, actions.Count(a => a is ColumnCreation));
-            var columnCreation = actions.Single(a => a is ColumnCreation) as ColumnCreation;
+            Assert.AreEqual(1, actions.Queue.Count(a => a is TableCreation));
+            Assert.AreEqual(1, actions.Queue.Count(a => a is ColumnCreation));
+            var columnCreation = actions.Queue.Single(a => a is ColumnCreation) as ColumnCreation;
             Assert.IsTrue(columnCreation.ColumnDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase));
             Assert.IsTrue(columnCreation.ColumnDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase));
             Assert.IsTrue(columnCreation.ColumnDescription.Name.Equals("column2", StringComparison.InvariantCultureIgnoreCase));
@@ -370,13 +376,13 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(2, actions.Count);
-            Assert.IsTrue(actions.All(a => a is IndexCreation));
-            Assert.IsTrue(actions.Cast<IndexCreation>().Any(a => a.IndexDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)));
-            Assert.IsTrue(actions.Cast<IndexCreation>().Any(a => a.IndexDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase)));
-            Assert.IsTrue(actions.Cast<IndexCreation>().Any(a => a.IndexDescription.Name.Equals("index2", StringComparison.InvariantCultureIgnoreCase)));
-            Assert.IsTrue(actions.Cast<IndexCreation>().Any(a => a.IndexDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)));
-            Assert.IsTrue(actions.Cast<IndexCreation>().Any(a => a.IndexDescription.TableName.Equals("TEST_TABLE_2", StringComparison.InvariantCultureIgnoreCase)));
-            Assert.IsTrue(actions.Cast<IndexCreation>().Any(a => a.IndexDescription.Name.Equals("index1", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Queue.All(a => a is IndexCreation));
+            Assert.IsTrue(actions.Queue.Cast<IndexCreation>().Any(a => a.IndexDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Queue.Cast<IndexCreation>().Any(a => a.IndexDescription.TableName.Equals("TEST_TABLE", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Queue.Cast<IndexCreation>().Any(a => a.IndexDescription.Name.Equals("index2", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Queue.Cast<IndexCreation>().Any(a => a.IndexDescription.Schema.Equals("dbo", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Queue.Cast<IndexCreation>().Any(a => a.IndexDescription.TableName.Equals("TEST_TABLE_2", StringComparison.InvariantCultureIgnoreCase)));
+            Assert.IsTrue(actions.Queue.Cast<IndexCreation>().Any(a => a.IndexDescription.Name.Equals("index1", StringComparison.InvariantCultureIgnoreCase)));
         }
 
         [Test]
@@ -392,10 +398,11 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.IsTrue(actions.Single() is PrimaryKeyCreation);
-            Assert.AreEqual("dbo", (actions.Single() as PrimaryKeyCreation).PrimaryKeyDescription.Schema);
-            Assert.AreEqual("TEST_TABLE", (actions.Single() as PrimaryKeyCreation).PrimaryKeyDescription.TableName);
-            Assert.AreEqual("primary2", (actions.Single() as PrimaryKeyCreation).PrimaryKeyDescription.Name);
+            var action = actions.Pop();
+            Assert.IsTrue(action is PrimaryKeyCreation);
+            Assert.AreEqual("dbo", (action as PrimaryKeyCreation).PrimaryKeyDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (action as PrimaryKeyCreation).PrimaryKeyDescription.TableName);
+            Assert.AreEqual("primary2", (action as PrimaryKeyCreation).PrimaryKeyDescription.Name);
         }
 
         [Test]
@@ -412,10 +419,11 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.IsTrue(actions.Single() is ForeignKeyCreation);
-            Assert.AreEqual("dbo", (actions.Single() as ForeignKeyCreation).ForeignKeyDescription.Schema);
-            Assert.AreEqual("TEST_TABLE", (actions.Single() as ForeignKeyCreation).ForeignKeyDescription.TableName);
-            Assert.AreEqual("foreign2", (actions.Single() as ForeignKeyCreation).ForeignKeyDescription.Name);
+            var action = actions.Pop();
+            Assert.IsTrue(action is ForeignKeyCreation);
+            Assert.AreEqual("dbo", (action as ForeignKeyCreation).ForeignKeyDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (action as ForeignKeyCreation).ForeignKeyDescription.TableName);
+            Assert.AreEqual("foreign2", (action as ForeignKeyCreation).ForeignKeyDescription.Name);
         }
 
         [Test]
@@ -431,10 +439,11 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.IsTrue(actions.Single() is UniqueCreation);
-            Assert.AreEqual("dbo", (actions.Single() as UniqueCreation).UniqueDescription.Schema);
-            Assert.AreEqual("TEST_TABLE", (actions.Single() as UniqueCreation).UniqueDescription.TableName);
-            Assert.AreEqual("unique2", (actions.Single() as UniqueCreation).UniqueDescription.Name);
+            var action = actions.Pop();
+            Assert.IsTrue(action is UniqueCreation);
+            Assert.AreEqual("dbo", (action as UniqueCreation).UniqueDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (action as UniqueCreation).UniqueDescription.TableName);
+            Assert.AreEqual("unique2", (action as UniqueCreation).UniqueDescription.Name);
         }
 
         [Test]
@@ -450,10 +459,11 @@ namespace Tests.Core {
 
             Assert.IsNotNull(actions);
             Assert.AreEqual(1, actions.Count);
-            Assert.IsTrue(actions.Single() is DefaultCreation);
-            Assert.AreEqual("dbo", (actions.Single() as DefaultCreation).DefaultDescription.Schema);
-            Assert.AreEqual("TEST_TABLE", (actions.Single() as DefaultCreation).DefaultDescription.TableName);
-            Assert.AreEqual("default2", (actions.Single() as DefaultCreation).DefaultDescription.Name);
+            var action = actions.Pop();
+            Assert.IsTrue(action is DefaultCreation);
+            Assert.AreEqual("dbo", (action as DefaultCreation).DefaultDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (action as DefaultCreation).DefaultDescription.TableName);
+            Assert.AreEqual("default2", (action as DefaultCreation).DefaultDescription.Name);
         }
     }
 }
