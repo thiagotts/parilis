@@ -40,6 +40,30 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void WhenColumnIsNotIdentity_GetColumnMustReturnColumnWithIsIdentityPropertySetToFalse() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id");
+
+            Assert.IsFalse(column.IsIdentity);
+        }
+
+        [Test]
+        public void WhenColumnIsIdentity_GetColumnMustReturnColumnWithIsIdentityPropertySetToTrue() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] IDENTITY(1,1) NOT NULL,
+                [description] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id");
+
+            Assert.True(column.IsIdentity);
+        }
+
+        [Test]
         public void WhenTableHasAPrimaryKeyReferringASingleColumn_MustReturnThePrimaryKeyDescriptionWithTheColumnName() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
