@@ -5,14 +5,10 @@ using Action = Core.Actions.Action;
 
 namespace Core {
     public class Parilis {
-        private DatabaseDescription actualDatabase;
-        private DatabaseDescription referenceDatabase;
         private readonly ActionIdentifier actionIdentifier;
         private readonly Logger logger;
 
         public Parilis(DatabaseDescription actualDatabase, DatabaseDescription referenceDatabase) {
-            this.actualDatabase = actualDatabase;
-            this.referenceDatabase = referenceDatabase;
             actionIdentifier = new ActionIdentifier(actualDatabase, referenceDatabase);
             logger = new Logger();
         }
@@ -62,12 +58,6 @@ namespace Core {
             }
 
             return true;
-        }
-
-        private ActionQueue GetRemainingActions() {
-            actualDatabase = new DatabaseDescription(actualDatabase.ConnectionInfo);
-            referenceDatabase = new DatabaseDescription(referenceDatabase.ConnectionInfo);
-            return actionIdentifier.GetActions();
         }
     }
 }

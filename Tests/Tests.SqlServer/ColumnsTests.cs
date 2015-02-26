@@ -22,7 +22,7 @@ namespace Tests.SqlServer {
         }
 
         [SetUp]
-        public void FinishTest() {
+        public void InitializeTest() {
             Database.Tables.Refresh();
             DropTable("TEST_TABLE_2");
             DropTable("TEST_TABLE");
@@ -232,8 +232,6 @@ namespace Tests.SqlServer {
         [TestCase("nvarchar", "max")]
         [TestCase("char", "8000")]
         [TestCase("nchar", "4000")]
-        [TestCase("float", "53")]
-        [TestCase("real", "53")]
         [TestCase("binary", "8000")]
         [TestCase("varbinary", "8000")]
         [TestCase("varbinary", "max")]
@@ -690,8 +688,6 @@ namespace Tests.SqlServer {
         [TestCase("nvarchar", "max")]
         [TestCase("char", "8000")]
         [TestCase("nchar", "4000")]
-        [TestCase("float", "53")]
-        [TestCase("real", "53")]
         [TestCase("binary", "8000")]
         [TestCase("varbinary", "8000")]
         [TestCase("varbinary", "max")]
@@ -732,14 +728,6 @@ namespace Tests.SqlServer {
         [TestCase("nchar", "-1")]
         [TestCase("char", "max")]
         [TestCase("nchar", "max")]
-        [TestCase("float", "54")]
-        [TestCase("real", "54")]
-        [TestCase("float", "0")]
-        [TestCase("real", "0")]
-        [TestCase("float", "-1")]
-        [TestCase("real", "-1")]
-        [TestCase("float", "max")]
-        [TestCase("real", "max")]
         [TestCase("binary", "8001")]
         [TestCase("binary", "0")]
         [TestCase("binary", "-1")]

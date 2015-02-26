@@ -40,11 +40,11 @@ namespace SqlServer.Enums {
         Money,
 
         [DefaultValue("float")]
-        [AllowsLength(true, 1, 53, false)]
+        [AllowsLength(false)]
         Float,
 
         [DefaultValue("real")]
-        [AllowsLength(true, 1, 53, false)]
+        [AllowsLength(false)]
         Real,
 
         [DefaultValue("date")]

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using Castle.Core;
@@ -7,12 +8,16 @@ using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
 using Microsoft.SqlServer.Management.Smo;
+using SqlServer.Attributes;
 
 namespace SqlServer {
     [CastleComponent("SqlServer.Columns", typeof (IColumn), Lifestyle = LifestyleType.Transient)]
     public class Columns : SqlServerEntity, IColumn {
+        private IDictionary<string, AllowsLengthAttribute> dataTypeLengthProperties;
+
         public Columns(ConnectionInfo database) {
             Initialize(database);
+            dataTypeLengthProperties = GetDataTypeLengthProperties();
         }
 
         public void Create(ColumnDescription column) {
@@ -31,7 +36,7 @@ namespace SqlServer {
             if (!SqlServerDatabase.DataTypeIsValid(column.Type))
                 throw new InvalidDataTypeException();
 
-            if (!MaximumSizeIsValid(column))
+            if (!LengthIsValid(column))
                 throw new InvalidDataTypeException();
 
             Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD {2} {3}{4} {5} {6}",
@@ -68,7 +73,7 @@ namespace SqlServer {
             if (ColumnIsReferencedByAConstraint(column))
                 throw new ReferencedColumnException();
 
-            if (!MaximumSizeIsValid(column))
+            if (!LengthIsValid(column))
                 throw new InvalidDataTypeException();
 
             try {
@@ -88,28 +93,33 @@ namespace SqlServer {
             }
         }
 
-        private bool MaximumSizeIsValid(ColumnDescription column) {
+        private bool LengthIsValid(ColumnDescription column) {
             if (string.IsNullOrWhiteSpace(column.Length)) return true;
 
-            if (!column.Type.Equals("varchar", StringComparison.InvariantCultureIgnoreCase) &&
-                !column.Type.Equals("nvarchar", StringComparison.InvariantCultureIgnoreCase))
+            if (!dataTypeLengthProperties[column.Type].AllowsLength)
                 return false;
 
             if (column.Length.Equals("max", StringComparison.InvariantCultureIgnoreCase))
-                return true;
+                return dataTypeLengthProperties[column.Type].AllowsMax;
 
             int maximumSize;
             var parsedSuccessfully = Int32.TryParse(column.Length, out maximumSize);
-            if (!parsedSuccessfully || maximumSize <= 0) return false;
+            if (!parsedSuccessfully) return false;
 
-            if (column.Type.Equals("varchar", StringComparison.InvariantCultureIgnoreCase)) {
-                return maximumSize < 8001;
-            }
-            else if (column.Type.Equals("nvarchar", StringComparison.InvariantCultureIgnoreCase)) {
-                return maximumSize < 4001;
+            return maximumSize <= dataTypeLengthProperties[column.Type].MaximumValue &&
+                   maximumSize >= dataTypeLengthProperties[column.Type].MinimumValue;
+        }
+
+        private IDictionary<string, AllowsLengthAttribute> GetDataTypeLengthProperties() {
+            Array values = Enum.GetValues(typeof (Enums.DataType));
+
+            var result = new Dictionary<string, AllowsLengthAttribute>();
+            foreach (var value in values) {
+                var allowsLengthAttribute = Enums.Enums.GetAllowsLength(value);
+                result.Add(Enums.Enums.GetDefaultValue(value), allowsLengthAttribute);
             }
 
-            return true;
+            return result;
         }
 
         private bool ColumnIsReferencedByAConstraint(ColumnDescription column) {

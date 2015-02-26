@@ -6,7 +6,7 @@ namespace Tests.SqlServer {
     [TestFixture]
     public class ParilisTests {
 
-        //[Ignore]
+        [Ignore]
         [Test]
         public void TestParilis() {
             DatabaseDescription actual = new DatabaseDescription(new ConnectionInfo {
