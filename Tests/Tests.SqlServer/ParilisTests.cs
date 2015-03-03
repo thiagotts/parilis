@@ -5,48 +5,46 @@ using NUnit.Framework;
 namespace Tests.SqlServer {
     [TestFixture]
     public class ParilisTests {
-
         [Ignore]
         [Test]
         public void TestParilis() {
-            DatabaseDescription actual = new DatabaseDescription(new ConnectionInfo {
+            var actual = new DatabaseDescription(new ConnectionInfo {
                 DatabaseName = "actualcateb",
                 HostName = @"localhost\SQLEXPRESS",
                 User = "parilis",
                 Password = "yourpassword"
             });
 
-            DatabaseDescription reference = new DatabaseDescription(new ConnectionInfo {
+            var reference = new DatabaseDescription(new ConnectionInfo {
                 DatabaseName = "reference",
                 HostName = @"localhost\SQLEXPRESS",
                 User = "parilis",
                 Password = "yourpassword"
             });
 
-            Parilis parilis = new Parilis(actual, reference);
+            var parilis = new Parilis(actual, reference);
             parilis.Run();
         }
 
         [Ignore]
         [Test]
         public void TestParilisBySchema() {
-            DatabaseDescription actual = new DatabaseDescription(new ConnectionInfo {
+            var actual = new DatabaseDescription(new ConnectionInfo {
                 DatabaseName = "actualcateb",
                 HostName = @"localhost\SQLEXPRESS",
                 User = "parilis",
                 Password = "yourpassword"
             }, "dbo");
 
-            DatabaseDescription reference = new DatabaseDescription(new ConnectionInfo {
+            var reference = new DatabaseDescription(new ConnectionInfo {
                 DatabaseName = "reference",
                 HostName = @"localhost\SQLEXPRESS",
                 User = "parilis",
                 Password = "yourpassword"
             }, "dbo");
 
-            Parilis parilis = new Parilis(actual, reference);
+            var parilis = new Parilis(actual, reference);
             parilis.Run();
         }
-    }
     }
 }
