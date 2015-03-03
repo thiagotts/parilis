@@ -34,7 +34,7 @@ namespace Core {
                 return false;
             }
             else {
-                logger.Info("Parilis has finished with no pending actions.");
+                logger.Info("Parilis has finished successfully with no pending actions.");
                 return true;
             }
         }

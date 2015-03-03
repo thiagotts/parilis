@@ -22,23 +22,16 @@ namespace Core.Descriptions {
             LoadDescription();
         }
 
-        public DatabaseDescription(ConnectionInfo connectionInfo, string schema) {
-            var logger = new Logger();
-            logger.Info(string.Format("Getting description of schema {0} from database {1} on {2}", schema, connectionInfo.DatabaseName, connectionInfo.HostName));
-
-            ConnectionInfo = connectionInfo;
-            LoadDescription();
-            FilterBySchema(schema);
-        }
-
-        private void FilterBySchema(string schema) {
-            Schemas = Schemas.Where(s => s.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList();
-            Tables = Tables.Where(t => !string.IsNullOrWhiteSpace(t.Schema) && t.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList();
-            Indexes = Indexes.Where(i => !string.IsNullOrWhiteSpace(i.Schema) && i.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList();
-            PrimaryKeys = PrimaryKeys.Where(p => !string.IsNullOrWhiteSpace(p.Schema) && p.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList();
-            ForeignKeys = ForeignKeys.Where(f => !string.IsNullOrWhiteSpace(f.Schema) && f.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList();
-            UniqueKeys = UniqueKeys.Where(u => !string.IsNullOrWhiteSpace(u.Schema) && u.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList();
-            Defaults = Defaults.Where(d => !string.IsNullOrWhiteSpace(d.Schema) && d.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList();
+        public DatabaseDescription FilterBySchema(string schema) {
+            return new DatabaseDescription(ConnectionInfo) {
+                Schemas = Schemas.Where(s => s.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList(),
+                Tables = Tables.Where(t => !string.IsNullOrWhiteSpace(t.Schema) && t.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList(),
+                Indexes = Indexes.Where(i => !string.IsNullOrWhiteSpace(i.Schema) && i.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList(),
+                PrimaryKeys = PrimaryKeys.Where(p => !string.IsNullOrWhiteSpace(p.Schema) && p.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList(),
+                ForeignKeys = ForeignKeys.Where(f => !string.IsNullOrWhiteSpace(f.Schema) && f.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList(),
+                UniqueKeys = UniqueKeys.Where(u => !string.IsNullOrWhiteSpace(u.Schema) && u.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList(),
+                Defaults = Defaults.Where(d => !string.IsNullOrWhiteSpace(d.Schema) && d.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList()
+            };
         }
 
         private void LoadDescription() {
