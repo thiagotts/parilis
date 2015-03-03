@@ -29,14 +29,8 @@ namespace Core {
                 return false;
             }
 
-            if (actionQueue.Count > 0) {
-                logger.Info(string.Format("Parilis has finished with {0} pending actions.", actionQueue.Count));
-                return false;
-            }
-            else {
-                logger.Info("Parilis has finished successfully with no pending actions.");
-                return true;
-            }
+            logger.Info("Parilis has finished successfully with no pending actions.");
+            return true;
         }
 
         private bool ExecuteActions(ActionQueue actionQueue) {

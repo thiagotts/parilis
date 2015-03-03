@@ -27,7 +27,7 @@ namespace Tests.SqlServer {
         }
 
         [Ignore]
-        [Test]
+        [Test] 
         public void TestParilisBySchema() {
             var actual = new DatabaseDescription(new ConnectionInfo {
                 DatabaseName = "actual",
