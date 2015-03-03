@@ -5,19 +5,19 @@ using NUnit.Framework;
 namespace Tests.SqlServer {
     [TestFixture]
     public class ParilisTests {
-        //[Ignore]
+        [Ignore]
         [Test]
         public void TestParilis() {
             var actual = new DatabaseDescription(new ConnectionInfo {
-                DatabaseName = "actualsidneuma",
-                HostName = @"pcdesvm",
+                DatabaseName = "actual",
+                HostName = @"localhost",
                 User = "parilis",
                 Password = "yourpassword"
             });
 
             var reference = new DatabaseDescription(new ConnectionInfo {
                 DatabaseName = "reference",
-                HostName = @"pcdesvm",
+                HostName = @"localhost",
                 User = "parilis",
                 Password = "yourpassword"
             });
@@ -30,15 +30,15 @@ namespace Tests.SqlServer {
         [Test]
         public void TestParilisBySchema() {
             var actual = new DatabaseDescription(new ConnectionInfo {
-                DatabaseName = "actualsidneuma",
-                HostName = @"pcdesvm",
+                DatabaseName = "actual",
+                HostName = @"localhost",
                 User = "parilis",
                 Password = "yourpassword"
             }).FilterBySchema("dbo");
 
             var reference = new DatabaseDescription(new ConnectionInfo {
                 DatabaseName = "reference",
-                HostName = @"pcdesvm",
+                HostName = @"localhost",
                 User = "parilis",
                 Password = "yourpassword"
             }).FilterBySchema("dbo");
