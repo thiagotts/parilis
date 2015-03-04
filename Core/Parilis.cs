@@ -53,5 +53,9 @@ namespace Core {
 
             return true;
         }
+
+        public bool AreAlreadyEqual(){
+            return actionIdentifier.GetActions().Count == 0;
+        }
     }
 }
