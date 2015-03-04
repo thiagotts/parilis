@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Castle.Core.Internal;
 using Core.Interfaces;
 
 namespace Core.Descriptions {
@@ -22,15 +23,18 @@ namespace Core.Descriptions {
             LoadDescription();
         }
 
-        public DatabaseDescription FilterBySchema(string schema) {
+        public DatabaseDescription FilterBySchema(params string[] schemas){
+            if (schemas.IsNullOrEmpty())
+                return this;
+
             return new DatabaseDescription(ConnectionInfo) {
-                Schemas = Schemas.Where(s => s.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList(),
-                Tables = Tables.Where(t => !string.IsNullOrWhiteSpace(t.Schema) && t.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList(),
-                Indexes = Indexes.Where(i => !string.IsNullOrWhiteSpace(i.Schema) && i.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList(),
-                PrimaryKeys = PrimaryKeys.Where(p => !string.IsNullOrWhiteSpace(p.Schema) && p.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList(),
-                ForeignKeys = ForeignKeys.Where(f => !string.IsNullOrWhiteSpace(f.Schema) && f.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList(),
-                UniqueKeys = UniqueKeys.Where(u => !string.IsNullOrWhiteSpace(u.Schema) && u.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList(),
-                Defaults = Defaults.Where(d => !string.IsNullOrWhiteSpace(d.Schema) && d.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase)).ToList()
+                Schemas = Schemas.Where(s => schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && schema.Equals(s, StringComparison.InvariantCultureIgnoreCase))).ToList(),
+                Tables = Tables.Where(t => !string.IsNullOrWhiteSpace(t.Schema) && schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && t.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList(),
+                Indexes = Indexes.Where(i => !string.IsNullOrWhiteSpace(i.Schema) && schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && i.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList(),
+                PrimaryKeys = PrimaryKeys.Where(p => !string.IsNullOrWhiteSpace(p.Schema) && schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && p.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList(),
+                ForeignKeys = ForeignKeys.Where(f => !string.IsNullOrWhiteSpace(f.Schema) && schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && f.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList(),
+                UniqueKeys = UniqueKeys.Where(u => !string.IsNullOrWhiteSpace(u.Schema) && schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && u.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList(),
+                Defaults = Defaults.Where(d => !string.IsNullOrWhiteSpace(d.Schema) && schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && d.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList()
             };
         }
 
@@ -43,6 +47,18 @@ namespace Core.Descriptions {
             ForeignKeys = database.GetForeignKeys();
             UniqueKeys = database.GetUniqueKeys();
             Defaults = database.GetDefaults();
+        }
+
+        public bool IsEmpty{
+            get{
+                return Schemas.IsNullOrEmpty()
+                       && Tables.IsNullOrEmpty()
+                       && Indexes.IsNullOrEmpty()
+                       && PrimaryKeys.IsNullOrEmpty()
+                       && ForeignKeys.IsNullOrEmpty()
+                       && UniqueKeys.IsNullOrEmpty()
+                       && Defaults.IsNullOrEmpty();
+            }
         }
     }
 }
