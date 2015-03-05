@@ -7,7 +7,7 @@ using Core.Interfaces;
 namespace Core.Descriptions {
     public class DatabaseDescription {
         internal readonly ConnectionInfo ConnectionInfo;
-        internal IList<string> Schemas { get; private set; }
+        public IList<string> Schemas { get; private set; }
         internal IList<TableDescription> Tables { get; private set; }
         internal IList<IndexDescription> Indexes { get; private set; }
         internal IList<PrimaryKeyDescription> PrimaryKeys { get; private set; }
