@@ -10,6 +10,7 @@ Parilis only understands structure. I **does not perform** any semantic modifica
 
 First of all, create the description of each database:
 
+```csharp
     var actualConnection = new ConnectionInfo {
     	DatabaseName = "actual_database_name",
     	HostName = "uri_to_actual_database_instance",
@@ -25,19 +26,26 @@ First of all, create the description of each database:
     	Password = "password"
     };
     var referenceDatabase = new DatabaseDescription(referenceConnection);
+```
 
 Then simply run Parilis:
 
+```csharp
     var parilis = new Parilis(actualDatabase, referenceDatabase);
     parilis.Run();
+```
 
 You can just get a list of modifications that need to be performed without actually performing them:
 
+```csharp
     var actionsToBePerformed = parilis.GetActions();
+```
 
 Finally, if your database has multiple schemas and you just want to make modifications to a single one, you can filter the database description like so:
 
+```csharp
     var actualDatabase = new DatabaseDescription(actualConnection).FilterBySchema("schema_name");
+```
 
 ## Extensions
 
