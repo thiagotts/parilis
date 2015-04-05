@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Core.Descriptions;
 using Core.Exceptions;
 using Action = Core.Actions.Action;
@@ -31,6 +34,11 @@ namespace Core {
 
             logger.Info("Parilis has finished successfully with no pending actions.");
             return true;
+        }
+
+        public IList<Action> GetActions() {
+            var actionQueue = actionIdentifier.GetActions();
+            return actionQueue.Queue.ToList();
         }
 
         private bool ExecuteActions(ActionQueue actionQueue) {
