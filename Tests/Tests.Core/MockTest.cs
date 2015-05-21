@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace Tests.Core {
     [TestFixture]
-    public class MockTest {
+    public class MockTest : Test {
         protected ConnectionInfo ConnectionInfo;
 
         [TestFixtureSetUp]

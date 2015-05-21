@@ -281,7 +281,7 @@ namespace Tests.SqlServer {
                 }
             });
 
-            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "testschema", Name = "TEST_TABLE_2" });
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = "testschema", Name = "TEST_TABLE_2"});
 
             Assert.AreEqual(1, foreignKeys.Count);
             Assert.AreEqual("FK_TEST", foreignKeys.Single().Name);
@@ -579,7 +579,7 @@ namespace Tests.SqlServer {
                 ColumnNames = new List<string> {"description"}
             });
 
-            var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.AreEqual(1, uniqueKeys.Count);
             Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
@@ -705,10 +705,10 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> { "description1", "description2" }
+                ColumnNames = new List<string> {"description1", "description2"}
             });
 
-            var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST_TABLE" });
+            var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.AreEqual(1, uniqueKeys.Count);
             Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
@@ -776,11 +776,13 @@ namespace Tests.SqlServer {
                 [description] [nvarchar](max) NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));");
 
+            var column = CreateColumnDescription("description");
+
             constraints.CreateDefault(new DefaultDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "DEFAULT_TEST_TABLE_description",
-                ColumnName = "description",
+                Column = column,
                 DefaultValue = "'test'"
             });
 
@@ -797,11 +799,13 @@ namespace Tests.SqlServer {
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));
                 ALTER TABLE [dbo].[TEST_TABLE] ADD CONSTRAINT [DEFAULT_TEST_TABLE_description] DEFAULT 'test' FOR [description]");
 
+            var column = CreateColumnDescription("description", "nvarchar", "max", false);
+
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateDefault(new DefaultDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "DEFAULT_TEST_TABLE_description_2",
-                ColumnName = "description",
+                Column = column,
                 DefaultValue = "'test'"
             }));
         }
@@ -823,7 +827,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "DEFAULT_TEST_TABLE_description",
-                ColumnName = "description",
+                Column = CreateColumnDescription(),
                 DefaultValue = "'test'"
             }));
         }
@@ -840,12 +844,14 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id));");
+            
+            var column = CreateColumnDescription("description");
 
             constraints.CreateDefault(new DefaultDescription {
                 Schema = "testschema",
                 TableName = "TEST_TABLE_2",
                 Name = "DEFAULT_TEST_TABLE_description",
-                ColumnName = "description",
+                Column = column,
                 DefaultValue = "'test'"
             });
 
@@ -855,7 +861,7 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void IfTargetColumnAreadyHasValues_CreateMethodMustCreateTheDefaultValue() {
+        public void IfTargetColumnAlreadyHasValues_CreateMethodMustCreateTheDefaultValue() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NOT NULL,
@@ -864,11 +870,13 @@ namespace Tests.SqlServer {
             Database.ExecuteNonQuery(@"INSERT INTO [dbo].[TEST_TABLE] ([id], [description]) VALUES (1, 'test 1')");
             Database.ExecuteNonQuery(@"INSERT INTO [dbo].[TEST_TABLE] ([id], [description]) VALUES (2, 'test 2')");
 
+            var column = CreateColumnDescription("description");
+
             constraints.CreateDefault(new DefaultDescription {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "DEFAULT_TEST_TABLE_description",
-                ColumnName = "description",
+                Column = column,
                 DefaultValue = "'test 3'"
             });
 

@@ -539,8 +539,9 @@ namespace Tests.SqlServer {
             }));
         }
 
-        [Test]
-        public void WhenColumnsExistsAndIsReferencedByAUniqueKey_ChangeTypeMethodMustThrowException() {
+        [TestCase("bigint", true)]
+        [TestCase("nvarchar", false)]
+        public void WhenColumnsExistsAndIsReferencedByAUniqueKey_ChangeTypeMethodMustThrowException(string newType, bool allowsNull) {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](400) NULL,
@@ -551,7 +552,8 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "description",
-                Type = "bigint"
+                Type = newType,
+                AllowsNull = allowsNull
             }));
         }
 

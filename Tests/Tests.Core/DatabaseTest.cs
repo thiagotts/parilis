@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace Tests.Core {
     [TestFixture]
-    public class DatabaseTest {
+    public class DatabaseTest : Test {
         private const string ServerHostname = @"localhost\sqlexpress";
         private const string DatabaseName = "TESTS_PARILIS";
         private const string User = "parilis";

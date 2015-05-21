@@ -17,7 +17,7 @@ namespace Core.Descriptions {
                    Columns.Count > 0 &&
                    Columns.Count == foreignKeyDescription.Columns.Count &&
                    Columns.Keys.All(c => foreignKeyDescription.Columns.Keys.Any(f => f.Equals(c))) &&
-                   Columns.Values.All(c => foreignKeyDescription.Columns.Values.Count(f => f.Equals(c)) == 1);
+                   Columns.Values.All(c => foreignKeyDescription.Columns.Values.Any(f => f.Equals(c)));
         }
     }
 }

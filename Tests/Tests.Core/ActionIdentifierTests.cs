@@ -54,12 +54,13 @@ namespace Tests.Core {
 
         [Test]
         public void WhenActualDatabaseHasADefaultThatReferenceDatabaseDoesNot_MustReturnADefaultRemovalAction() {
-            actualDatabase.Defaults.Add(new DefaultDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "default1", ColumnName = "column", DefaultValue = "0"});
-            actualDatabase.Defaults.Add(new DefaultDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "default2", ColumnName = "column", DefaultValue = "0"});
-            referenceDatabase.Defaults.Add(new DefaultDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "default1", ColumnName = "column", DefaultValue = "0"});
-            referenceDatabase.Defaults.Add(new DefaultDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "default2", ColumnName = "column", DefaultValue = "0"});
+            var column = CreateColumnDescription();
+            actualDatabase.Defaults.Add(new DefaultDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "default1", Column = column, DefaultValue = "0"});
+            actualDatabase.Defaults.Add(new DefaultDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "default2", Column = column, DefaultValue = "0"});
+            referenceDatabase.Defaults.Add(new DefaultDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "default1", Column = column, DefaultValue = "0"});
+            referenceDatabase.Defaults.Add(new DefaultDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "default2", Column = column, DefaultValue = "0"});
 
-            actualDatabase.Defaults.Add(new DefaultDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "default2", ColumnName = "column", DefaultValue = "0"});
+            actualDatabase.Defaults.Add(new DefaultDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "default2", Column = column, DefaultValue = "0"});
 
             var actions = actionIdentifier.GetActions();
 
@@ -448,12 +449,13 @@ namespace Tests.Core {
 
         [Test]
         public void WhenReferenceDatabaseHasADefaultThatActualDatabaseDoesNot_MustReturnADefaultCreationAction() {
-            referenceDatabase.Defaults.Add(new DefaultDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "default1", ColumnName = "column", DefaultValue = "0"});
-            referenceDatabase.Defaults.Add(new DefaultDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "default2", ColumnName = "column", DefaultValue = "0"});
-            actualDatabase.Defaults.Add(new DefaultDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "default1", ColumnName = "column", DefaultValue = "0"});
-            actualDatabase.Defaults.Add(new DefaultDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "default2", ColumnName = "column", DefaultValue = "0"});
+            var column = CreateColumnDescription();
+            referenceDatabase.Defaults.Add(new DefaultDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "default1", Column = column, DefaultValue = "0"});
+            referenceDatabase.Defaults.Add(new DefaultDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "default2", Column = column, DefaultValue = "0"});
+            actualDatabase.Defaults.Add(new DefaultDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "default1", Column = column, DefaultValue = "0"});
+            actualDatabase.Defaults.Add(new DefaultDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "default2", Column = column, DefaultValue = "0"});
 
-            referenceDatabase.Defaults.Add(new DefaultDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "default2", ColumnName = "column", DefaultValue = "0"});
+            referenceDatabase.Defaults.Add(new DefaultDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "default2", Column = column, DefaultValue = "0"});
 
             var actions = actionIdentifier.GetActions();
 

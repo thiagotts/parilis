@@ -2,7 +2,7 @@
 
 namespace Core.Descriptions {
     public class DefaultDescription : ConstraintDescription {
-        public string ColumnName { get; set; }
+        public ColumnDescription Column { get; set; }
         public string DefaultValue { get; set; }
 
         public override string FullName {
@@ -13,15 +13,15 @@ namespace Core.Descriptions {
             if (!(other is DefaultDescription)) return false;
             var defaultDescription = other as DefaultDescription;
             return base.Equals(other) &&
-                   !string.IsNullOrWhiteSpace(ColumnName) &&
-                   ColumnName.Equals(defaultDescription.ColumnName, StringComparison.InvariantCultureIgnoreCase) &&
+                   Column != null &&
+                   Column.Equals(defaultDescription.Column) &&
                    !string.IsNullOrWhiteSpace(DefaultValue) &&
                    DefaultValue.Equals(defaultDescription.DefaultValue, StringComparison.InvariantCultureIgnoreCase);
         }
 
         public override int GetHashCode() {
             return base.GetHashCode() ^
-                   ColumnName.GetHashCode() ^
+                   Column.GetHashCode() ^
                    DefaultValue.GetHashCode();
         }
     }

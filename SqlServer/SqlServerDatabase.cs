@@ -359,7 +359,7 @@ namespace SqlServer {
                 defaults.Add(new DefaultDescription {
                     Schema = result[0],
                     TableName = result[1],
-                    ColumnName = result[2],
+                    Column = GetColumn(result[0], result[1], result[2]),
                     Name = result[3],
                     DefaultValue = result[4]
                 });
@@ -384,7 +384,7 @@ namespace SqlServer {
             return new DefaultDescription {
                 Schema = schema,
                 TableName = results[0][0],
-                ColumnName = results[0][1],
+                Column = GetColumn(schema, results[0][0], results[0][1]),
                 DefaultValue = results[0][2],
                 Name = defaultName
             };

@@ -3,14 +3,21 @@ using NUnit.Framework;
 
 namespace Tests.Core.Descriptions {
     [TestFixture]
-    public class DefaultDescriptionTests {
+    public class DefaultDescriptionTests : Test {
+        private ColumnDescription column;
+
+        [TestFixtureSetUp]
+        public void InitializeClass() {
+            this.column = CreateColumnDescription();
+        }
+
         [Test]
         public void WhenDefaultsHaveDifferentFullNames_EqualsMustReturnFalse() {
             var default1 = new DefaultDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "Default1",
-                ColumnName = "Column1",
+                Column = column,
                 DefaultValue = "1"
             };
 
@@ -18,7 +25,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "Default2",
-                ColumnName = "Column1",
+                Column = column,
                 DefaultValue = "1"
             };
 
@@ -28,12 +35,16 @@ namespace Tests.Core.Descriptions {
         }
 
         [Test]
-        public void WhenDefaultsHaveDifferentColumnNames_EqualsMustReturnFalse() {
+        public void WhenDefaultsHaveDifferentColumns_EqualsMustReturnFalse() {
+            var column1 = CreateColumnDescription();
+            var column2 = CreateColumnDescription();
+            column2.AllowsNull = !column1.AllowsNull;
+
             var default1 = new DefaultDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "Default1",
-                ColumnName = "Column1",
+                Column = column1,
                 DefaultValue = "1"
             };
 
@@ -41,7 +52,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "Default1",
-                ColumnName = "Column2",
+                Column = column2,
                 DefaultValue = "1"
             };
 
@@ -56,7 +67,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "Default1",
-                ColumnName = "Column1",
+                Column = column,
                 DefaultValue = "1"
             };
 
@@ -64,7 +75,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "Default1",
-                ColumnName = "Column1",
+                Column = column,
                 DefaultValue = "0"
             };
 
@@ -79,7 +90,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "Default1",
-                ColumnName = "Column1",
+                Column = column,
                 DefaultValue = "1"
             };
 
@@ -87,7 +98,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "Default1",
-                ColumnName = "Column1",
+                Column = column,
                 DefaultValue = "1"
             };
 
@@ -102,7 +113,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "Default1",
-                ColumnName = "Column1",
+                Column = column,
                 DefaultValue = "1"
             };
 
@@ -117,7 +128,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "Default1",
-                ColumnName = "Column1",
+                Column = column,
                 DefaultValue = "1"
             };
 

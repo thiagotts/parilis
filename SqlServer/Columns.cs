@@ -166,7 +166,7 @@ namespace SqlServer {
             foreach (var defaultDescription in defaults) {
                 if (defaultDescription.Schema.Equals(column.Schema, StringComparison.InvariantCultureIgnoreCase) &&
                     defaultDescription.TableName.Equals(column.TableName, StringComparison.InvariantCultureIgnoreCase) &&
-                    defaultDescription.ColumnName.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase))
+                    defaultDescription.Column.FullName.Equals(column.FullName, StringComparison.InvariantCultureIgnoreCase))
                     return true;
             }
 

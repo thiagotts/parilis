@@ -104,14 +104,14 @@ namespace SqlServer {
                                   d.Schema.Equals(defaultDescription.Schema, StringComparison.InvariantCultureIgnoreCase)))
                 throw new InvalidConstraintNameException();
 
-            if (defaults.Any(d => d.ColumnName.Equals(defaultDescription.ColumnName, StringComparison.InvariantCultureIgnoreCase) &&
+            if (defaults.Any(d => d.Column.Equals(defaultDescription.Column) &&
                                   d.Schema.Equals(defaultDescription.Schema, StringComparison.InvariantCultureIgnoreCase) &&
                                   d.TableName.Equals(defaultDescription.TableName, StringComparison.InvariantCultureIgnoreCase)))
                 throw new InvalidReferenceColumnException();
 
             Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD CONSTRAINT {2} DEFAULT {3} FOR {4}",
                 defaultDescription.Schema, defaultDescription.TableName, defaultDescription.Name,
-                defaultDescription.DefaultValue, defaultDescription.ColumnName));
+                defaultDescription.DefaultValue, defaultDescription.Column.Name));
         }
 
         public void RemoveDefault(DefaultDescription defaultDescription) {
