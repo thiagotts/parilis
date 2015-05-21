@@ -23,7 +23,7 @@ namespace SqlServer {
 
             Database.ExecuteNonQuery(string.Format(@"CREATE {0} INDEX {1} ON {2}.{3} ({4})",
                 indexDescription.Unique ? "UNIQUE" : string.Empty, indexDescription.Name, indexDescription.Schema,
-                indexDescription.TableName, string.Join(",", indexDescription.ColumnNames)));
+                indexDescription.TableName, string.Join(",", indexDescription.Columns.Select(c => c.Name))));
         }
 
         public void Remove(IndexDescription indexDescription) {
@@ -40,14 +40,14 @@ namespace SqlServer {
             if (table == null) return false;
 
             var invalidTypes = new List<string> {"text", "ntext", "image", "xml", "geography", "geometry"};
-            foreach (var columnName in indexDescription.ColumnNames) {
-                if (indexDescription.ColumnNames.Count(name => name.Equals(columnName, StringComparison.InvariantCultureIgnoreCase)) > 1)
+            foreach (var columnDescription in indexDescription.Columns) {
+                if (indexDescription.Columns.Count(c => c.Name.Equals(columnDescription.Name, StringComparison.InvariantCultureIgnoreCase)) > 1)
                     return false;
 
-                var column = table.Columns[columnName];
+                var column = table.Columns[columnDescription.Name];
                 if (column == null) return false;
 
-                var description = SqlServerDatabase.GetColumn(indexDescription.Schema, indexDescription.TableName, columnName);
+                var description = SqlServerDatabase.GetColumn(indexDescription.Schema, indexDescription.TableName, columnDescription.Name);
                 if (description == null) return false;
 
                 if (description.Type.Equals("varchar", StringComparison.InvariantCultureIgnoreCase) &&

@@ -4,7 +4,14 @@ using NUnit.Framework;
 
 namespace Tests.Core.Descriptions {
     [TestFixture]
-    public class UniqueDescriptionTests {
+    public class UniqueDescriptionTests : Test {
+        private ColumnDescription column1, column2;
+
+        [TestFixtureSetUp]
+        public void InitializeClass() {
+            column1 = column2 = CreateColumnDescription();
+        }
+
         [Test]
         public void WhenUniquesHaveDifferentFullNames_EqualsMustReturnFalse() {
             var unique1 = new UniqueDescription {
@@ -116,7 +123,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2},
                 Unique = true
             };
 

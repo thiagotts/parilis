@@ -176,7 +176,7 @@ namespace SqlServer {
         private bool ColumnIsReferencedByAnIndex(ColumnDescription column) {
             var indexes = SqlServerDatabase.GetIndexes(column.Schema, column.TableName);
             foreach (var index in indexes) {
-                if (index.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
+                if (index.Columns.Any(c => c.FullName.Equals(column.FullName, StringComparison.InvariantCultureIgnoreCase)))
                     return true;
             }
 

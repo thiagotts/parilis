@@ -6,7 +6,7 @@ namespace Core.Descriptions {
         public string Schema { get; set; }
         public string TableName { get; set; }
         public string Name { get; set; }
-        public IList<string> ColumnNames { get; set; }
+        public IList<ColumnDescription> Columns { get; set; }
         public bool Unique { get; set; }
 
         public override string FullName {
@@ -21,16 +21,16 @@ namespace Core.Descriptions {
             if (!(other is IndexDescription)) return false;
             var indexDescription = other as IndexDescription;
             return base.Equals(other) &&
-                   ColumnNames != null &&
-                   ColumnNames.Count > 0 &&
-                   ColumnNames.Count == indexDescription.ColumnNames.Count &&
-                   ColumnNames.All(c => indexDescription.ColumnNames.Any(f => f.Equals(c))) &&
+                   Columns != null &&
+                   Columns.Count > 0 &&
+                   Columns.Count == indexDescription.Columns.Count &&
+                   Columns.All(c => indexDescription.Columns.Any(f => f.Equals(c))) &&
                    Unique.Equals(indexDescription.Unique);
         }
 
         public override int GetHashCode() {
             int hashCode = base.GetHashCode() ^ Unique.GetHashCode();
-            foreach (var columnName in ColumnNames) {
+            foreach (var columnName in Columns) {
                 hashCode ^= columnName.GetHashCode();
             }
 

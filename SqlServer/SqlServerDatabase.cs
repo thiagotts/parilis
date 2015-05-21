@@ -411,12 +411,13 @@ namespace SqlServer {
                 TableName = tableName,
                 Name = index.Name,
                 Unique = index.IsUnique,
-                ColumnNames = new List<string>()
+                Columns = new List<ColumnDescription>()
             };
 
             index.IndexedColumns.Refresh();
             foreach (IndexedColumn indexedColumn in index.IndexedColumns) {
-                indexDescription.ColumnNames.Add(indexedColumn.Name);
+                var columnDescription = GetColumn(schema, tableName, indexedColumn.Name);
+                indexDescription.Columns.Add(columnDescription);
             }
 
             return indexDescription;

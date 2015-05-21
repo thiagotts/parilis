@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Core;
 using Core.Descriptions;
 using Core.Interfaces;
@@ -337,9 +336,9 @@ namespace Tests.SqlServer {
 
             Assert.IsNotNull(index);
             Assert.AreEqual("index_name", index.Name);
-            Assert.AreEqual(2, index.ColumnNames.Count);
-            Assert.IsTrue(index.ColumnNames.Any(c => c.Equals("id")));
-            Assert.IsTrue(index.ColumnNames.Any(c => c.Equals("id2")));
+            Assert.AreEqual(2, index.Columns.Count);
+            Assert.IsTrue(index.Columns.Any(c => c.Name.Equals("id")));
+            Assert.IsTrue(index.Columns.Any(c => c.Name.Equals("id2")));
         }
 
         [Test]
@@ -448,8 +447,8 @@ namespace Tests.SqlServer {
             Assert.AreEqual("dbo", result.First().Schema);
             Assert.AreEqual("TEST_TABLE", result.First().TableName);
             Assert.AreEqual("index_name", result.First().Name);
-            Assert.AreEqual(1, result.First().ColumnNames.Count);
-            Assert.AreEqual("id", result.First().ColumnNames.Single());
+            Assert.AreEqual(1, result.First().Columns.Count);
+            Assert.AreEqual("id", result.First().Columns.Single().Name);
             Assert.IsFalse(result.First().Unique);
         }
 
@@ -471,8 +470,8 @@ namespace Tests.SqlServer {
             Assert.AreEqual("testschema", index.Schema);
             Assert.AreEqual("TEST_TABLE", index.TableName);
             Assert.AreEqual("index_name", index.Name);
-            Assert.AreEqual(1, index.ColumnNames.Count);
-            Assert.AreEqual("id", index.ColumnNames.Single());
+            Assert.AreEqual(1, index.Columns.Count);
+            Assert.AreEqual("id", index.Columns.Single().Name);
             Assert.IsFalse(index.Unique);
         }
 
@@ -671,7 +670,7 @@ namespace Tests.SqlServer {
         public void WhenDatabaseHasASingleSchema_GetSchemasMustReturnTheSchemaName() {
             Database.ExecuteNonQuery(@"DROP SCHEMA testschema");
 
-            IList<string> schemas = sqlServerDatabase.GetSchemas();
+            var schemas = sqlServerDatabase.GetSchemas();
 
             Assert.IsNotNull(schemas);
             Assert.AreEqual(1, schemas.Count);
@@ -680,13 +679,12 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenDatabaseHasMultipleSchemas_GetSchemasMustReturnAllSchemaNames() {
-            IList<string> schemas = sqlServerDatabase.GetSchemas();
+            var schemas = sqlServerDatabase.GetSchemas();
 
             Assert.IsNotNull(schemas);
             Assert.AreEqual(2, schemas.Count);
             Assert.IsTrue(schemas.Any(s => s.Equals("dbo")));
             Assert.IsTrue(schemas.Any(s => s.Equals("testschema")));
         }
-      
     }
 }

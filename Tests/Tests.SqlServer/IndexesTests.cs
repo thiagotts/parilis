@@ -11,6 +11,8 @@ namespace Tests.SqlServer {
     public class IndexesTests : DatabaseTest {
         private IIndex indexes;
         private IDatabase sqlServerDatabase;
+        private ColumnDescription column, column2, column3;
+
 
         [TestFixtureSetUp]
         public override void InitializeClass() {
@@ -18,6 +20,10 @@ namespace Tests.SqlServer {
             indexes = Components.Instance.GetComponent<IIndex>(ConnectionInfo);
             sqlServerDatabase = Components.Instance.GetComponent<IDatabase>(ConnectionInfo);
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
+
+            column = CreateColumnDescription("id");
+            column2 = CreateColumnDescription("id2");
+            column3 = CreateColumnDescription("id3");
         }
 
         [TearDown]
@@ -40,7 +46,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_id2",
-                ColumnNames = new List<string> {"id", "id2"}
+                Columns = new List<ColumnDescription> {column, column2}
             });
 
             var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "idx_TEST_TABLE_id_id2");
@@ -68,7 +74,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_id2",
-                ColumnNames = new List<string> {"id", "id2"}
+                Columns = new List<ColumnDescription> {column, column2}
             }));
         }
 
@@ -83,7 +89,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_id2",
-                ColumnNames = new List<string> {"id", "id"}
+                Columns = new List<ColumnDescription> {column, column}
             }));
         }
 
@@ -98,7 +104,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_id2",
-                ColumnNames = new List<string> {"id", "id3"}
+                Columns = new List<ColumnDescription> {column, column3}
             }));
         }
 
@@ -114,7 +120,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_id2",
-                ColumnNames = new List<string> {"id2"}
+                Columns = new List<ColumnDescription> {column2}
             }));
         }
 
@@ -130,7 +136,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id2",
-                ColumnNames = new List<string> {"id2"}
+                Columns = new List<ColumnDescription> {column2}
             });
 
             var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "idx_TEST_TABLE_id2");
@@ -154,7 +160,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE_2",
                 Name = "idx_TEST_TABLE_id",
-                ColumnNames = new List<string> {"id"}
+                Columns = new List<ColumnDescription> {column}
             });
 
             var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE_2", "idx_TEST_TABLE_id");
@@ -175,7 +181,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_2",
-                ColumnNames = new List<string> {"id"}
+                Columns = new List<ColumnDescription> {column}
             });
 
             var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "idx_TEST_TABLE_id_2");
@@ -196,7 +202,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_2",
-                ColumnNames = new List<string> {"id2", "id3"}
+                Columns = new List<ColumnDescription> {column2, column3}
             });
 
             var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "idx_TEST_TABLE_id_2");
@@ -217,7 +223,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_2",
-                ColumnNames = new List<string> {"id2", "id3"}
+                Columns = new List<ColumnDescription> {column2, column3}
             });
 
             var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "idx_TEST_TABLE_id_2");
@@ -236,7 +242,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id_2",
-                ColumnNames = new List<string> {"id"},
+                Columns = new List<ColumnDescription> {column},
                 Unique = true
             });
 
@@ -252,7 +258,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "idx_TEST_TABLE_id",
-                ColumnNames = new List<string> {"id2"}
+                Columns = new List<ColumnDescription> {column2}
             }));
         }
 

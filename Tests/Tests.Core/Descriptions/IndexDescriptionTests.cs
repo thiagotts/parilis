@@ -4,14 +4,22 @@ using NUnit.Framework;
 
 namespace Tests.Core.Descriptions {
     [TestFixture]
-    public class IndexDescriptionTests {
+    public class IndexDescriptionTests : Test {
+        private ColumnDescription column1, column2;
+
+        [TestFixtureSetUp]
+        public void InitializeClass() {
+            column1 = CreateColumnDescription("c1");
+            column2 = CreateColumnDescription("c2");
+        }
+
         [Test]
         public void WhenIndexesHaveDifferentFullNames_EqualsMustReturnFalse() {
             var index1 = new IndexDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                ColumnNames = new List<string> {"column1", "column2"},
+                Columns = new List<ColumnDescription> {column1, column2},
                 Unique = true
             };
 
@@ -19,7 +27,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index2",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2},
                 Unique = true
             };
 
@@ -34,7 +42,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2},
                 Unique = true
             };
 
@@ -42,7 +50,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                ColumnNames = new List<string> {"column1"},
+                Columns = new List<ColumnDescription> {column1},
                 Unique = true
             };
 
@@ -52,20 +60,21 @@ namespace Tests.Core.Descriptions {
         }
 
         [Test]
-        public void WhenIndexesHaveDifferentColumnNames_EqualsMustReturnFalse() {
+        public void WhenIndexesHaveDifferentColumns_EqualsMustReturnFalse() {
             var index1 = new IndexDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2},
                 Unique = true
             };
 
+            var column3 = CreateColumnDescription(allowsNull: !column2.AllowsNull);
             var index2 = new IndexDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                ColumnNames = new List<string> { "column1", "column3" },
+                Columns = new List<ColumnDescription> {column1, column3},
                 Unique = true
             };
 
@@ -80,7 +89,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2},
                 Unique = true
             };
 
@@ -88,7 +97,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2},
                 Unique = false
             };
 
@@ -103,7 +112,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2},
                 Unique = true
             };
 
@@ -111,7 +120,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2},
                 Unique = true
             };
 
@@ -126,7 +135,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2},
                 Unique = true
             };
 
@@ -141,7 +150,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2},
                 Unique = true
             };
 

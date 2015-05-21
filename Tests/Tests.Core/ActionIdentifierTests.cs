@@ -136,13 +136,14 @@ namespace Tests.Core {
 
         [Test]
         public void WhenActualDatabaseHasAnIndexThatReferenceDatabaseDoesNot_MustReturnAnIndexRemovalAction() {
-            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", ColumnNames = new List<string> {"column"}});
-            actualDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", ColumnNames = new List<string> {"column"}});
-            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", ColumnNames = new List<string> {"column"}});
-            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", ColumnNames = new List<string> {"column"}});
+            var column = CreateColumnDescription();
+            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", Columns = new List<ColumnDescription> {column}});
 
-            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE_2", Name = "index1", ColumnNames = new List<string> {"column"}});
-            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index2", ColumnNames = new List<string> {"column"}});
+            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE_2", Name = "index1", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index2", Columns = new List<ColumnDescription> {column}});
 
             var actions = actionIdentifier.GetActions();
 
@@ -365,13 +366,14 @@ namespace Tests.Core {
 
         [Test]
         public void WhenReferenceDatabaseHasAnIndexThatActualDatabaseDoesNot_MustReturnAnIndexCreationAction() {
-            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", ColumnNames = new List<string> {"column"}});
-            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", ColumnNames = new List<string> {"column"}});
-            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", ColumnNames = new List<string> {"column"}});
-            actualDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", ColumnNames = new List<string> {"column"}});
+            var column = CreateColumnDescription();
+            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", Columns = new List<ColumnDescription> {column}});
 
-            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE_2", Name = "index1", ColumnNames = new List<string> {"column"}});
-            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index2", ColumnNames = new List<string> {"column"}});
+            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE_2", Name = "index1", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index2", Columns = new List<ColumnDescription> {column}});
 
             var actions = actionIdentifier.GetActions();
 
