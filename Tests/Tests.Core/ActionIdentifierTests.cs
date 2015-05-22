@@ -95,6 +95,32 @@ namespace Tests.Core {
         }
 
         [Test]
+        public void WhenActualDatabaseHasAUniqueKeyWithTheSameNameButDifferentColumnDescription_MustReturnAUniqueRemovalAndAUniqueCreationAction() {
+            var column1 = CreateColumnDescription();
+            var column2 = CreateColumnDescription(allowsNull: false);
+            actualDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns = new List<ColumnDescription> { column1 } });
+            actualDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> { column1 } });
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns = new List<ColumnDescription> { column2 } });
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> { column1 } });
+
+            var actions = actionIdentifier.GetActions();
+
+            Assert.IsNotNull(actions);
+            Assert.AreEqual(2, actions.Count);
+            var action1 = actions.Pop();
+            Assert.IsTrue(action1 is UniqueRemoval);
+            Assert.AreEqual("dbo", (action1 as UniqueRemoval).UniqueDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (action1 as UniqueRemoval).UniqueDescription.TableName);
+            Assert.AreEqual("unique1", (action1 as UniqueRemoval).UniqueDescription.Name);
+
+            var action2 = actions.Pop();
+            Assert.IsTrue(action2 is UniqueCreation);
+            Assert.AreEqual("dbo", (action2 as UniqueCreation).UniqueDescription.Schema);
+            Assert.AreEqual("TEST_TABLE", (action2 as UniqueCreation).UniqueDescription.TableName);
+            Assert.AreEqual("unique1", (action2 as UniqueCreation).UniqueDescription.Name);
+        }
+
+        [Test]
         public void WhenActualDatabaseHasAForeignKeyThatReferenceDatabaseDoesNot_MustReturnAForeignKeyRemovalAction() {
             var mockColumn = new ColumnDescription {Schema = "dbo", TableName = "table", Type = "int"};
             actualDatabase.ForeignKeys.Add(new ForeignKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "foreign1", Columns = new Dictionary<string, ColumnDescription> {{"column", mockColumn}}});
