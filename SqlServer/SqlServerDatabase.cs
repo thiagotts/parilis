@@ -150,10 +150,10 @@ namespace SqlServer {
             if (!results.Any()) return null;
 
             var primaryKey = new PrimaryKeyDescription {Schema = table.Schema, TableName = table.Name, Name = results[0][0]};
-            primaryKey.ColumnNames = new List<string>();
+            primaryKey.Columns = new List<ColumnDescription>();
 
             foreach (var result in results) {
-                primaryKey.ColumnNames.Add(result[1]);
+                primaryKey.Columns.Add(GetColumn(table.Schema, table.Name, result[1]));
             }
 
             return primaryKey;
@@ -437,10 +437,10 @@ namespace SqlServer {
             if (!results.Any()) return null;
 
             var primaryKey = new PrimaryKeyDescription {Schema = schema, TableName = results[0][0], Name = primaryKeyName};
-            primaryKey.ColumnNames = new List<string>();
+            primaryKey.Columns = new List<ColumnDescription>();
 
             foreach (var result in results) {
-                primaryKey.ColumnNames.Add(result[1]);
+                primaryKey.Columns.Add(GetColumn(schema, results[0][0], result[1]));
             }
 
             return primaryKey;

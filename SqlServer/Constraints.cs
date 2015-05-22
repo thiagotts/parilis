@@ -29,7 +29,7 @@ namespace SqlServer {
                 ALTER TABLE {0}.{1}
                 ADD CONSTRAINT {2} PRIMARY KEY ({3})",
                 primaryKeyDescription.Schema, primaryKeyDescription.TableName,
-                primaryKeyDescription.Name, string.Join(",", primaryKeyDescription.ColumnNames)));
+                primaryKeyDescription.Name, string.Join(",", primaryKeyDescription.Columns.Select(k => k.Name))));
         }
 
         public void RemovePrimaryKey(PrimaryKeyDescription primaryKeyDescription) {
@@ -150,7 +150,7 @@ namespace SqlServer {
                     Name = column.TableName
                 });
 
-                if (primaryKey == null || !primaryKey.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
+                if (primaryKey == null || !primaryKey.Columns.Any(c => c.FullName.Equals(column.FullName, StringComparison.InvariantCultureIgnoreCase)))
                     return false;
             }
 

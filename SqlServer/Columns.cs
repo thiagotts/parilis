@@ -138,7 +138,7 @@ namespace SqlServer {
         private bool ColumnIsReferencedByAPrimaryKey(TableDescription tableDescription, ColumnDescription column) {
             var primaryKey = SqlServerDatabase.GetPrimaryKey(tableDescription);
             return primaryKey != null &&
-                   primaryKey.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase));
+                   primaryKey.Columns.Any(c => c.Name.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase));
         }
 
         private bool ColumnIsReferencedByAForeignKey(TableDescription tableDescription, ColumnDescription column) {

@@ -116,12 +116,13 @@ namespace Tests.Core {
 
         [Test]
         public void WhenActualDatabaseHasAPrimaryKeyThatReferenceDatabaseDoesNot_MustReturnAPrimaryKeyRemovalAction() {
-            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", ColumnNames = new List<string> {"column"}});
-            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", ColumnNames = new List<string> {"column"}});
-            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", ColumnNames = new List<string> {"column"}});
-            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", ColumnNames = new List<string> {"column"}});
+            var column = CreateColumnDescription();
+            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", Columns = new List<ColumnDescription> {column}});
 
-            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary2", ColumnNames = new List<string> {"column"}});
+            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary2", Columns = new List<ColumnDescription> {column}});
 
             var actions = actionIdentifier.GetActions();
 
@@ -390,12 +391,13 @@ namespace Tests.Core {
 
         [Test]
         public void WhenReferenceDatabaseHasAPrimaryKeyThatActualDatabaseDoesNot_MustReturnAPrimaryKeyCreationAction() {
-            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", ColumnNames = new List<string> {"column"}});
-            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", ColumnNames = new List<string> {"column"}});
-            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", ColumnNames = new List<string> {"column"}});
-            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", ColumnNames = new List<string> {"column"}});
+            var column = CreateColumnDescription();
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", Columns = new List<ColumnDescription> {column}});
 
-            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary2", ColumnNames = new List<string> {"column"}});
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary2", Columns = new List<ColumnDescription> {column}});
 
             var actions = actionIdentifier.GetActions();
 

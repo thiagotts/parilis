@@ -4,21 +4,30 @@ using NUnit.Framework;
 
 namespace Tests.Core.Descriptions {
     [TestFixture]
-    public class PrimaryKeyDescriptionTests {
+    public class PrimaryKeyDescriptionTests : Test {
+        private ColumnDescription column1, column2a, column2b;
+
+        [TestFixtureSetUp]
+        public void InitializeClass() {
+            column1 = CreateColumnDescription("id1");
+            column2a = CreateColumnDescription("id2", allowsNull: true);
+            column2b = CreateColumnDescription("id2", allowsNull: false);
+        }
+
         [Test]
         public void WhenPrimaryKeysHaveDifferentFullNames_EqualsMustReturnFalse() {
             var primaryKey1 = new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                ColumnNames = new List<string> {"column1", "column2"}
+                Columns = new List<ColumnDescription> {column1, column2a}
             };
 
             var primaryKey2 = new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary2",
-                ColumnNames = new List<string> { "column1", "column2" }
+                Columns = new List<ColumnDescription> {column1, column2a}
             };
 
             var result = primaryKey1.Equals(primaryKey2);
@@ -27,19 +36,19 @@ namespace Tests.Core.Descriptions {
         }
 
         [Test]
-        public void WhenPrimaryKeysHaveADifferentAmountOfColumnNames_EqualsMustReturnFalse() {
+        public void WhenPrimaryKeysHaveADifferentAmountOfColumns_EqualsMustReturnFalse() {
             var primaryKey1 = new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                ColumnNames = new List<string> { "column1", "column2" }
+                Columns = new List<ColumnDescription> {column1, column2a}
             };
 
             var primaryKey2 = new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                ColumnNames = new List<string> { "column1" }
+                Columns = new List<ColumnDescription> {column1}
             };
 
             var result = primaryKey1.Equals(primaryKey2);
@@ -48,19 +57,19 @@ namespace Tests.Core.Descriptions {
         }
 
         [Test]
-        public void WhenPrimaryKeysHaveDifferentColumnNames_EqualsMustReturnFalse() {
+        public void WhenPrimaryKeysHaveDifferentColumns_EqualsMustReturnFalse() {
             var primaryKey1 = new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                ColumnNames = new List<string> {"column1", "column2"}
+                Columns = new List<ColumnDescription> {column1, column2a}
             };
 
             var primaryKey2 = new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                ColumnNames = new List<string> {"column1", "column3"}
+                Columns = new List<ColumnDescription> {column1, column2b}
             };
 
             var result = primaryKey1.Equals(primaryKey2);
@@ -69,19 +78,19 @@ namespace Tests.Core.Descriptions {
         }
 
         [Test]
-        public void WhenPrimaryKeysHaveTheSameFullNameAndColumnNames_EqualsMustReturnTrue() {
+        public void WhenPrimaryKeysHaveTheSameFullNameAndColumns_EqualsMustReturnTrue() {
             var primaryKey1 = new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                ColumnNames = new List<string> { "column1", "column2" }
+                Columns = new List<ColumnDescription> {column1, column2a}
             };
 
             var primaryKey2 = new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                ColumnNames = new List<string> { "column1", "column2" }
+                Columns = new List<ColumnDescription> {column1, column2a}
             };
 
             var result = primaryKey1.Equals(primaryKey2);
@@ -95,7 +104,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                ColumnNames = new List<string> { "column1", "column2" }
+                Columns = new List<ColumnDescription> {column1, column2a}
             };
 
             var result = primaryKey1.Equals(null);
@@ -109,7 +118,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                ColumnNames = new List<string> { "column1", "column2" }
+                Columns = new List<ColumnDescription> {column1, column2a}
             };
 
             var unique = new UniqueDescription {

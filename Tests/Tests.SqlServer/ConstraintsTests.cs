@@ -13,6 +13,7 @@ namespace Tests.SqlServer {
     public class ConstraintsTests : DatabaseTest {
         private IConstraint constraints;
         private SqlServerDatabase sqlServerDatabase;
+        private ColumnDescription column;
 
         [TestFixtureSetUp]
         public override void InitializeClass() {
@@ -20,6 +21,7 @@ namespace Tests.SqlServer {
             constraints = Components.Instance.GetComponent<IConstraint>(ConnectionInfo);
             sqlServerDatabase = Components.Instance.GetComponent<IDatabase>(ConnectionInfo) as SqlServerDatabase;
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
+            column = CreateColumnDescription("id", "bigint", allowsNull: false);
         }
 
         [SetUp]
@@ -48,7 +50,7 @@ namespace Tests.SqlServer {
                 Schema = "testschema",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE",
-                ColumnNames = new List<string> {"id"}
+                Columns = new List<ColumnDescription> {column}
             };
 
             constraints.CreatePrimaryKey(primaryKey);
@@ -69,7 +71,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE",
-                ColumnNames = new List<string> {"id"}
+                Columns = new List<ColumnDescription> {column}
             };
 
             Assert.Throws<MultiplePrimaryKeysException>(() => constraints.CreatePrimaryKey(primaryKey));
@@ -90,7 +92,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                ColumnNames = new List<string> {"id"}
+                Columns = new List<ColumnDescription> {column}
             };
 
             Assert.Throws<InvalidConstraintNameException>(() => constraints.CreatePrimaryKey(primaryKey));
@@ -111,7 +113,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                ColumnNames = new List<string> {"id"}
+                Columns = new List<ColumnDescription> {column}
             };
 
             constraints.CreatePrimaryKey(primaryKey);
@@ -133,7 +135,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_TEST",
-                ColumnNames = new List<string> {"id"}
+                Columns = new List<ColumnDescription> {column}
             };
 
             Assert.Throws<ConstraintNotFoundException>(() => constraints.RemovePrimaryKey(primaryKey));
@@ -150,7 +152,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                ColumnNames = new List<string> {"id"}
+                Columns = new List<ColumnDescription> {column}
             };
 
             constraints.RemovePrimaryKey(primaryKey);
@@ -176,7 +178,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                ColumnNames = new List<string> {"id"}
+                Columns = new List<ColumnDescription> {column}
             };
 
             Assert.Throws<ReferencedConstraintException>(() => constraints.RemovePrimaryKey(primaryKey));
@@ -844,7 +846,7 @@ namespace Tests.SqlServer {
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id));");
-            
+
             var column = CreateColumnDescription("description");
 
             constraints.CreateDefault(new DefaultDescription {

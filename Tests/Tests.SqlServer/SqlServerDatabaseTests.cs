@@ -63,7 +63,7 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void WhenTableHasAPrimaryKeyReferringASingleColumn_MustReturnThePrimaryKeyDescriptionWithTheColumnName() {
+        public void WhenTableHasAPrimaryKeyReferringASingleColumn_MustReturnThePrimaryKeyDescriptionWithTheColumn() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL,
@@ -75,12 +75,12 @@ namespace Tests.SqlServer {
             Assert.AreEqual("dbo", result.Schema);
             Assert.AreEqual("TEST_TABLE", result.TableName);
             Assert.AreEqual("PK_dbo_TEST_TABLE_id", result.Name);
-            Assert.AreEqual(1, result.ColumnNames.Count());
-            Assert.AreEqual("id", result.ColumnNames.Single());
+            Assert.AreEqual(1, result.Columns.Count());
+            Assert.AreEqual("id", result.Columns.Single().Name);
         }
 
         [Test]
-        public void WhenTableHasAPrimaryKeyReferringMultipleColumns_MustReturnThePrimaryKeyDescriptionWithAllColumnNames() {
+        public void WhenTableHasAPrimaryKeyReferringMultipleColumns_MustReturnThePrimaryKeyDescriptionWithAllColumns() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [id2] [bigint] NOT NULL,
@@ -93,9 +93,9 @@ namespace Tests.SqlServer {
             Assert.AreEqual("dbo", result.Schema);
             Assert.AreEqual("TEST_TABLE", result.TableName);
             Assert.AreEqual("PK_dbo_TEST_TABLE_id", result.Name);
-            Assert.AreEqual(2, result.ColumnNames.Count());
-            Assert.AreEqual("id", result.ColumnNames.First());
-            Assert.AreEqual("id2", result.ColumnNames.Last());
+            Assert.AreEqual(2, result.Columns.Count());
+            Assert.AreEqual("id", result.Columns.First().Name);
+            Assert.AreEqual("id2", result.Columns.Last().Name);
         }
 
         [Test]
@@ -487,7 +487,7 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void WhenDatabaseHasPrimaryKeysOnASingleSchema_GetPrimaryKeysMustAllPrimaryKeys() {
+        public void WhenDatabaseHasPrimaryKeysOnASingleSchema_GetPrimaryKeysMustReturnAllPrimaryKeys() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
@@ -504,12 +504,12 @@ namespace Tests.SqlServer {
             Assert.AreEqual("dbo", primaryKey.Schema);
             Assert.AreEqual("TEST_TABLE", primaryKey.TableName);
             Assert.AreEqual("PK_dbo_TEST_TABLE_id", primaryKey.Name);
-            Assert.AreEqual(1, primaryKey.ColumnNames.Count);
-            Assert.AreEqual("id", primaryKey.ColumnNames.Single());
+            Assert.AreEqual(1, primaryKey.Columns.Count);
+            Assert.AreEqual("id", primaryKey.Columns.Single().Name);
         }
 
         [Test]
-        public void WhenDatabaseHasPrimaryKeysOnMultipleSchemas_GetPrimaryKeysMustAllPrimaryKeys() {
+        public void WhenDatabaseHasPrimaryKeysOnMultipleSchemas_GetPrimaryKeysMustReturnAllPrimaryKeys() {
             Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
@@ -526,8 +526,8 @@ namespace Tests.SqlServer {
             Assert.AreEqual("testschema", primaryKey.Schema);
             Assert.AreEqual("TEST_TABLE", primaryKey.TableName);
             Assert.AreEqual("PK_dbo_TEST_TABLE_id", primaryKey.Name);
-            Assert.AreEqual(1, primaryKey.ColumnNames.Count);
-            Assert.AreEqual("id", primaryKey.ColumnNames.Single());
+            Assert.AreEqual(1, primaryKey.Columns.Count);
+            Assert.AreEqual("id", primaryKey.Columns.Single().Name);
         }
 
         [Test]
