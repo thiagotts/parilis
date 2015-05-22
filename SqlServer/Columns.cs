@@ -154,7 +154,7 @@ namespace SqlServer {
         private bool ColumnIsReferencedByAUniqueKey(TableDescription tableDescription, ColumnDescription column) {
             var uniqueKeys = SqlServerDatabase.GetUniqueKeys(tableDescription);
             foreach (var uniqueKey in uniqueKeys) {
-                if (uniqueKey.ColumnNames.Any(c => c.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
+                if (uniqueKey.Columns.Any(c => c.Name.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
                     return true;
             }
 

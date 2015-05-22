@@ -29,7 +29,7 @@ namespace SqlServer {
                 ALTER TABLE {0}.{1}
                 ADD CONSTRAINT {2} PRIMARY KEY ({3})",
                 primaryKeyDescription.Schema, primaryKeyDescription.TableName,
-                primaryKeyDescription.Name, string.Join(",", primaryKeyDescription.Columns.Select(k => k.Name))));
+                primaryKeyDescription.Name, string.Join(",", primaryKeyDescription.Columns.Select(c => c.Name))));
         }
 
         public void RemovePrimaryKey(PrimaryKeyDescription primaryKeyDescription) {
@@ -83,7 +83,7 @@ namespace SqlServer {
 
             Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD CONSTRAINT {2} UNIQUE ({3})",
                 uniqueDescription.Schema, uniqueDescription.TableName, uniqueDescription.Name,
-                string.Join(",", uniqueDescription.ColumnNames)));
+                string.Join(",", uniqueDescription.Columns.Select(c => c.Name))));
         }
 
         public void RemoveUnique(UniqueDescription uniqueDescription) {
@@ -162,15 +162,15 @@ namespace SqlServer {
             var table = Database.Tables[uniqueDescription.TableName, uniqueDescription.Schema];
             if (table == null) return false;
 
-            var invalidTypes = new List<string> {"text", "ntext", "image", "xml", "geography", "geometry"};
-            foreach (var columnName in uniqueDescription.ColumnNames) {
-                if (uniqueDescription.ColumnNames.Count(name => name.Equals(columnName, StringComparison.InvariantCultureIgnoreCase)) > 1)
+            var invalidTypes = new List<string> { "text", "ntext", "image", "xml", "geography", "geometry" };
+            foreach (var columnDescription in uniqueDescription.Columns) {
+                if (uniqueDescription.Columns.Count(c => c.FullName.Equals(columnDescription.FullName, StringComparison.InvariantCultureIgnoreCase)) > 1)
                     return false;
 
-                var column = table.Columns[columnName];
+                var column = table.Columns[columnDescription.Name];
                 if (column == null) return false;
 
-                var description = SqlServerDatabase.GetColumn(uniqueDescription.Schema, uniqueDescription.TableName, columnName);
+                var description = SqlServerDatabase.GetColumn(uniqueDescription.Schema, uniqueDescription.TableName, columnDescription.Name);
                 if (description == null) return false;
 
                 if (description.Type.Equals("varchar", StringComparison.InvariantCultureIgnoreCase) &&
@@ -185,7 +185,8 @@ namespace SqlServer {
                     return false;
             }
 
-            if (SqlServerDatabase.TableHasDuplicatedValuesForColumns(uniqueDescription.Schema, uniqueDescription.TableName, uniqueDescription.ColumnNames))
+            if (SqlServerDatabase.TableHasDuplicatedValuesForColumns(uniqueDescription.Schema, uniqueDescription.TableName, 
+                uniqueDescription.Columns.Select(c => c.Name).ToList()))
                 return false;
 
             return true;

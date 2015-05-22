@@ -291,9 +291,9 @@ namespace Tests.SqlServer {
 
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual("UQ_TEST_description", result.Single().Name);
-            Assert.AreEqual(2, result.Single().ColumnNames.Count());
-            Assert.AreEqual("description", result.Single().ColumnNames.First());
-            Assert.AreEqual("description2", result.Single().ColumnNames.Last());
+            Assert.AreEqual(2, result.Single().Columns.Count());
+            Assert.AreEqual("description", result.Single().Columns.First().Name);
+            Assert.AreEqual("description2", result.Single().Columns.Last().Name);
         }
 
         [Test]
@@ -636,8 +636,8 @@ namespace Tests.SqlServer {
             Assert.AreEqual("dbo", foreignKey.Schema);
             Assert.AreEqual("TEST_TABLE", foreignKey.TableName);
             Assert.AreEqual("UQ_TEST_description", foreignKey.Name);
-            Assert.AreEqual(1, foreignKey.ColumnNames.Count);
-            Assert.AreEqual("description", foreignKey.ColumnNames.Single());
+            Assert.AreEqual(1, foreignKey.Columns.Count);
+            Assert.AreEqual("description", foreignKey.Columns.Single().Name);
         }
 
         [Test]
@@ -662,8 +662,8 @@ namespace Tests.SqlServer {
             Assert.AreEqual("testschema", foreignKey.Schema);
             Assert.AreEqual("TEST_TABLE", foreignKey.TableName);
             Assert.AreEqual("UQ_TEST_2_description", foreignKey.Name);
-            Assert.AreEqual(1, foreignKey.ColumnNames.Count);
-            Assert.AreEqual("description", foreignKey.ColumnNames.Single());
+            Assert.AreEqual(1, foreignKey.Columns.Count);
+            Assert.AreEqual("description", foreignKey.Columns.Single().Name);
         }
 
         [Test]

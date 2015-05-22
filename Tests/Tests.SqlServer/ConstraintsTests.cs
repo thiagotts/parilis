@@ -13,7 +13,7 @@ namespace Tests.SqlServer {
     public class ConstraintsTests : DatabaseTest {
         private IConstraint constraints;
         private SqlServerDatabase sqlServerDatabase;
-        private ColumnDescription column;
+        private ColumnDescription columnId, columnDescription;
 
         [TestFixtureSetUp]
         public override void InitializeClass() {
@@ -21,7 +21,8 @@ namespace Tests.SqlServer {
             constraints = Components.Instance.GetComponent<IConstraint>(ConnectionInfo);
             sqlServerDatabase = Components.Instance.GetComponent<IDatabase>(ConnectionInfo) as SqlServerDatabase;
             Database.ExecuteNonQuery(@"CREATE SCHEMA testschema");
-            column = CreateColumnDescription("id", "bigint", allowsNull: false);
+            columnId = CreateColumnDescription("id", "bigint", allowsNull: false);
+            columnDescription = CreateColumnDescription("description", "nvarchar", "400");
         }
 
         [SetUp]
@@ -50,7 +51,7 @@ namespace Tests.SqlServer {
                 Schema = "testschema",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE",
-                Columns = new List<ColumnDescription> {column}
+                Columns = new List<ColumnDescription> {columnId}
             };
 
             constraints.CreatePrimaryKey(primaryKey);
@@ -71,7 +72,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE",
-                Columns = new List<ColumnDescription> {column}
+                Columns = new List<ColumnDescription> {columnId}
             };
 
             Assert.Throws<MultiplePrimaryKeysException>(() => constraints.CreatePrimaryKey(primaryKey));
@@ -92,7 +93,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                Columns = new List<ColumnDescription> {column}
+                Columns = new List<ColumnDescription> {columnId}
             };
 
             Assert.Throws<InvalidConstraintNameException>(() => constraints.CreatePrimaryKey(primaryKey));
@@ -113,7 +114,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                Columns = new List<ColumnDescription> {column}
+                Columns = new List<ColumnDescription> {columnId}
             };
 
             constraints.CreatePrimaryKey(primaryKey);
@@ -135,7 +136,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_TEST",
-                Columns = new List<ColumnDescription> {column}
+                Columns = new List<ColumnDescription> {columnId}
             };
 
             Assert.Throws<ConstraintNotFoundException>(() => constraints.RemovePrimaryKey(primaryKey));
@@ -152,7 +153,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                Columns = new List<ColumnDescription> {column}
+                Columns = new List<ColumnDescription> {columnId}
             };
 
             constraints.RemovePrimaryKey(primaryKey);
@@ -178,7 +179,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                Columns = new List<ColumnDescription> {column}
+                Columns = new List<ColumnDescription> {columnId}
             };
 
             Assert.Throws<ReferencedConstraintException>(() => constraints.RemovePrimaryKey(primaryKey));
@@ -531,7 +532,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description"}
+                Columns = new List<ColumnDescription> {columnDescription}
             });
 
             var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
@@ -557,7 +558,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description"}
+                Columns = new List<ColumnDescription> {columnDescription}
             }));
         }
 
@@ -578,7 +579,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description"}
+                Columns = new List<ColumnDescription> {columnDescription}
             });
 
             var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
@@ -594,11 +595,13 @@ namespace Tests.SqlServer {
                 [description] [nvarchar](400) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
+            var column = CreateColumnDescription("description2", "nvarchar", "400");
+
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description2"}
+                Columns = new List<ColumnDescription> {column}
             }));
         }
 
@@ -610,20 +613,22 @@ namespace Tests.SqlServer {
                 [description2] [nvarchar](400) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
+            var columnDescription2 = CreateColumnDescription("description2", "nvarchar", "400");
+
             constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description", "description2"}
+                Columns = new List<ColumnDescription> {columnDescription, columnDescription2}
             });
 
             var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.AreEqual(1, uniqueKeys.Count);
             Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
-            Assert.AreEqual(2, uniqueKeys.Single().ColumnNames.Count);
-            Assert.AreEqual("description", uniqueKeys.Single().ColumnNames.First());
-            Assert.AreEqual("description2", uniqueKeys.Single().ColumnNames.Last());
+            Assert.AreEqual(2, uniqueKeys.Single().Columns.Count);
+            Assert.AreEqual("description", uniqueKeys.Single().Columns.First().Name);
+            Assert.AreEqual("description2", uniqueKeys.Single().Columns.Last().Name);
         }
 
         [Test]
@@ -637,7 +642,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description", "description"}
+                Columns = new List<ColumnDescription> {columnDescription, columnDescription}
             }));
         }
 
@@ -647,29 +652,32 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description"}
+                Columns = new List<ColumnDescription> {columnDescription}
             }));
         }
 
-        [TestCase("[text]")]
-        [TestCase("[ntext]")]
-        [TestCase("[image]")]
-        [TestCase("[xml]")]
-        [TestCase("[geography]")]
-        [TestCase("[geometry]")]
-        [TestCase("[nvarchar](401)")]
-        [TestCase("[varchar](901)")]
-        public void WhenDataTypeOfUniqueKeyIsInvalid_CreateMethodMustThrowException(string type) {
+        [TestCase("text", null)]
+        [TestCase("ntext", null)]
+        [TestCase("image", null)]
+        [TestCase("xml", null)]
+        [TestCase("geography", null)]
+        [TestCase("geometry", null)]
+        [TestCase("nvarchar", "401")]
+        [TestCase("varchar", "901")]
+        public void WhenDataTypeOfUniqueKeyIsInvalid_CreateMethodMustThrowException(string type, string length) {
             Database.ExecuteNonQuery(string.Format(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
-                [description] {0} NULL,
-                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))", type));
+                [description] [{0}]{1} NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))",
+                type, string.IsNullOrWhiteSpace(length) ? string.Empty : string.Format("({0})", length)));
+
+            var column = CreateColumnDescription("description", type, length);
 
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description"}
+                Columns = new List<ColumnDescription> {column}
             }));
         }
 
@@ -677,18 +685,20 @@ namespace Tests.SqlServer {
         public void IfTargetTableHasDuplicatedValuesForAColumnReferrencedByTheUniqueKey_CreateMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
-                [description1] [nvarchar](400) NULL,
+                [description] [nvarchar](400) NULL,
                 [description2] [nvarchar](400) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-            Database.ExecuteNonQuery(@"INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description1], [description2]) VALUES (1, 'test', 'test2');
-                                       INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description1], [description2]) VALUES (2, 'test', 'test2');");
+            Database.ExecuteNonQuery(@"INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description], [description2]) VALUES (1, 'test', 'test2');
+                                       INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description], [description2]) VALUES (2, 'test', 'test2');");
+
+            var columnDescription2 = CreateColumnDescription("description2", "nvarchar", "400");
 
             Assert.Throws<InvalidReferenceColumnException>(() => constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description1", "description2"}
+                Columns = new List<ColumnDescription> {columnDescription, columnDescription2}
             }));
         }
 
@@ -696,27 +706,29 @@ namespace Tests.SqlServer {
         public void IfTargetTableDoesNotHaveDuplicatedValuesForAColumnReferrencedByTheUniqueKey_CreateMethodMustCreateTheUniqueKey() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
-                [description1] [nvarchar](400) NULL,
+                [description] [nvarchar](400) NULL,
                 [description2] [nvarchar](400) NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-            Database.ExecuteNonQuery(@"INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description1], [description2]) VALUES (1, 'test', 'test2');
-                                       INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description1], [description2]) VALUES (2, 'test', 'test3');");
+            Database.ExecuteNonQuery(@"INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description], [description2]) VALUES (1, 'test', 'test2');
+                                       INSERT INTO [TESTS_PARILIS].[dbo].[TEST_TABLE] ([id], [description], [description2]) VALUES (2, 'test', 'test3');");
+
+            var columnDescription2 = CreateColumnDescription("description2", "nvarchar", "400");
 
             constraints.CreateUnique(new UniqueDescription {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description1", "description2"}
+                Columns = new List<ColumnDescription> {columnDescription, columnDescription2}
             });
 
             var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.AreEqual(1, uniqueKeys.Count);
             Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
-            Assert.AreEqual(2, uniqueKeys.Single().ColumnNames.Count);
-            Assert.AreEqual("description1", uniqueKeys.Single().ColumnNames.First());
-            Assert.AreEqual("description2", uniqueKeys.Single().ColumnNames.Last());
+            Assert.AreEqual(2, uniqueKeys.Single().Columns.Count);
+            Assert.AreEqual("description", uniqueKeys.Single().Columns.First().Name);
+            Assert.AreEqual("description2", uniqueKeys.Single().Columns.Last().Name);
         }
 
         [Test]
@@ -725,7 +737,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description"}
+                Columns = new List<ColumnDescription> {columnDescription}
             }));
         }
 
@@ -747,7 +759,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description"}
+                Columns = new List<ColumnDescription> {columnDescription}
             }));
         }
 
@@ -763,7 +775,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                ColumnNames = new List<string> {"description"}
+                Columns = new List<ColumnDescription> {columnDescription}
             });
 
             var uniqueKey = sqlServerDatabase.GetUniqueKey("UQ_TEST_description", "dbo");

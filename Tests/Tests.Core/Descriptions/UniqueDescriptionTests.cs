@@ -9,7 +9,8 @@ namespace Tests.Core.Descriptions {
 
         [TestFixtureSetUp]
         public void InitializeClass() {
-            column1 = column2 = CreateColumnDescription();
+            column1 = CreateColumnDescription("id1");
+            column2 = CreateColumnDescription("id2");
         }
 
         [Test]
@@ -18,14 +19,14 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique1",
-                ColumnNames = new List<string> {"column1", "column2"},
+                Columns = new List<ColumnDescription> {column1, column2}
             };
 
             var unique2 = new UniqueDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique2",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2}
             };
 
             var result = unique1.Equals(unique2);
@@ -34,19 +35,19 @@ namespace Tests.Core.Descriptions {
         }
 
         [Test]
-        public void WhenUniquesHaveADifferentAmountOfColumnNames_EqualsMustReturnFalse() {
+        public void WhenUniquesHaveADifferentAmountOfColumns_EqualsMustReturnFalse() {
             var unique1 = new UniqueDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2}
             };
 
             var unique2 = new UniqueDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                ColumnNames = new List<string> {"column1"},
+                Columns = new List<ColumnDescription> {column1}
             };
 
             var result = unique1.Equals(unique2);
@@ -55,19 +56,21 @@ namespace Tests.Core.Descriptions {
         }
 
         [Test]
-        public void WhenUniquesHaveDifferentColumnNames_EqualsMustReturnFalse() {
+        public void WhenUniquesHaveDifferentColumns_EqualsMustReturnFalse() {
+            var column3 = CreateColumnDescription("id2", allowsNull: false);
+
             var unique1 = new UniqueDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2}
             };
 
             var unique2 = new UniqueDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                ColumnNames = new List<string> { "column1", "column3" },
+                Columns = new List<ColumnDescription> {column1, column3}
             };
 
             var result = unique1.Equals(unique2);
@@ -76,19 +79,19 @@ namespace Tests.Core.Descriptions {
         }
 
         [Test]
-        public void WhenUniquesHaveTheSameFullNameAndColumnNames_EqualsMustReturnTrue() {
+        public void WhenUniquesHaveTheSameFullNameAndColumns_EqualsMustReturnTrue() {
             var unique1 = new UniqueDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2}
             };
 
             var unique2 = new UniqueDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2}
             };
 
             var result = unique1.Equals(unique2);
@@ -102,7 +105,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2}
             };
 
             var result = unique1.Equals(null);
@@ -116,7 +119,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                ColumnNames = new List<string> { "column1", "column2" },
+                Columns = new List<ColumnDescription> {column1, column2}
             };
 
             var index = new IndexDescription {

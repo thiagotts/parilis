@@ -302,12 +302,12 @@ namespace SqlServer {
                         Name = result[0],
                         TableName = tableDescription.Name,
                         Schema = tableDescription.Schema,
-                        ColumnNames = new List<string>()
+                        Columns = new List<ColumnDescription>()
                     };
                     uniqueKeys.Add(uniqueKey);
                 }
 
-                uniqueKey.ColumnNames.Add(result[1]);
+                uniqueKey.Columns.Add(GetColumn(tableDescription.Schema, tableDescription.Name, result[1]));
             }
 
             return uniqueKeys;
@@ -332,11 +332,11 @@ namespace SqlServer {
                 Name = uniqueKeyName,
                 Schema = schema,
                 TableName = results[0][0],
-                ColumnNames = new List<string>()
+                Columns = new List<ColumnDescription>()
             };
 
             foreach (var result in results) {
-                uniqueKey.ColumnNames.Add(result[1]);
+                uniqueKey.Columns.Add(GetColumn(schema, results[0][0], result[1]));
             }
 
             return uniqueKey;

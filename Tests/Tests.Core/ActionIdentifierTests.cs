@@ -75,12 +75,13 @@ namespace Tests.Core {
 
         [Test]
         public void WhenActualDatabaseHasAUniqueKeyThatReferenceDatabaseDoesNot_MustReturnAUniqueRemovalAction() {
-            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", ColumnNames = new List<string> {"column"}});
-            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", ColumnNames = new List<string> {"column"}});
-            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", ColumnNames = new List<string> {"column"}});
-            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", ColumnNames = new List<string> {"column"}});
+            var column = CreateColumnDescription();
+            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> {column}});
 
-            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique2", ColumnNames = new List<string> {"column"}});
+            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> {column}});
 
             var actions = actionIdentifier.GetActions();
 
@@ -433,12 +434,13 @@ namespace Tests.Core {
 
         [Test]
         public void WhenReferenceDatabaseHasAUniqueKeyThatActualDatabaseDoesNot_MustReturnAUniqueCreationAction() {
-            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", ColumnNames = new List<string> {"column"}});
-            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", ColumnNames = new List<string> {"column"}});
-            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", ColumnNames = new List<string> {"column"}});
-            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", ColumnNames = new List<string> {"column"}});
+            var column = CreateColumnDescription();
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> {column}});
 
-            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique2", ColumnNames = new List<string> {"column"}});
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> {column}});
 
             var actions = actionIdentifier.GetActions();
 

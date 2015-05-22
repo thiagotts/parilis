@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Core.Descriptions {
     public class UniqueDescription : ConstraintDescription {
-        public IList<string> ColumnNames { get; set; }
+        public IList<ColumnDescription> Columns { get; set; }
 
         public override string FullName {
             get { return string.IsNullOrWhiteSpace(Schema) ? Name : string.Format("{0}.{1}", Schema, Name); }
@@ -12,16 +12,17 @@ namespace Core.Descriptions {
         public override bool Equals(object other) {
             if (!(other is UniqueDescription)) return false;
             var uniqueDescription = other as UniqueDescription;
+
             return base.Equals(other) &&
-                   ColumnNames != null &&
-                   ColumnNames.Count > 0 &&
-                   ColumnNames.Count == uniqueDescription.ColumnNames.Count &&
-                   ColumnNames.All(c => uniqueDescription.ColumnNames.Any(f => f.Equals(c)));
+                   Columns != null &&
+                   Columns.Count > 0 &&
+                   Columns.Count == uniqueDescription.Columns.Count &&
+                   Columns.All(c => uniqueDescription.Columns.Any(f => f.Equals(c)));
         }
 
         public override int GetHashCode() {
             var hashCode = base.GetHashCode();
-            foreach (var columnName in ColumnNames) {
+            foreach (var columnName in Columns) {
                 hashCode ^= columnName.GetHashCode();
             }
 
