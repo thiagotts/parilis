@@ -115,6 +115,7 @@
     <Compile Include="Interfaces\ITable.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Parilis.cs" />
+    <Compile Include="ParilisResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

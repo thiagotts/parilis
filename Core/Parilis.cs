@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Descriptions;
@@ -16,24 +15,23 @@ namespace Core {
             logger = new Logger();
         }
 
-        public bool Run() {
+        public ParilisResult Run() {
             logger.Info("Parilis has started. Getting list of actions...");
             var actionQueue = actionIdentifier.GetActions();
             logger.Info(string.Format("{0} actions were initially identified.", actionQueue.Count));
 
             if (actionQueue.Count <= 0) {
                 logger.Info("Parilis has finished with no pending actions.");
-                return true;
+                return new ParilisResult {FinishedSuccessfully = true};
             }
 
-            var actionsSuccessfullyExecuted = ExecuteActions(actionQueue);
-            if (!actionsSuccessfullyExecuted) {
-                logger.Info("Parilis has finished with errors.");
-                return false;
-            }
+            var parilisResult = ExecuteActions(actionQueue);
 
-            logger.Info("Parilis has finished successfully with no pending actions.");
-            return true;
+            logger.Info(parilisResult.FinishedSuccessfully ?
+                "Parilis has finished successfully with no pending actions." :
+                "Parilis has finished with errors.");
+
+            return parilisResult;
         }
 
         public IList<Action> GetActions() {
@@ -41,7 +39,7 @@ namespace Core {
             return actionQueue.Queue.ToList();
         }
 
-        private bool ExecuteActions(ActionQueue actionQueue) {
+        private ParilisResult ExecuteActions(ActionQueue actionQueue) {
             try {
                 var actionCount = 0;
                 Action action;
@@ -52,17 +50,23 @@ namespace Core {
             }
             catch (ParilisException ex) {
                 logger.Error("Error while executing action.", ex);
-                return false;
+                return new ParilisResult {
+                    FinishedSuccessfully = false,
+                    Exception = ex
+                };
             }
             catch (Exception ex) {
                 logger.Error("Unexpected error while executing action.", ex);
-                return false;
+                return new ParilisResult {
+                    FinishedSuccessfully = false,
+                    Exception = ex
+                };
             }
 
-            return true;
+            return new ParilisResult {FinishedSuccessfully = true};
         }
 
-        public bool AreAlreadyEqual(){
+        public bool AreAlreadyEqual() {
             return actionIdentifier.GetActions().Count == 0;
         }
     }
