@@ -7,13 +7,15 @@ using Core.Interfaces;
 namespace Core.Descriptions {
     public class DatabaseDescription {
         internal readonly ConnectionInfo ConnectionInfo;
-        public IList<string> Schemas { get; private set; }
-        internal IList<TableDescription> Tables { get; private set; }
-        internal IList<IndexDescription> Indexes { get; private set; }
-        internal IList<PrimaryKeyDescription> PrimaryKeys { get; private set; }
-        internal IList<ForeignKeyDescription> ForeignKeys { get; private set; }
-        internal IList<UniqueDescription> UniqueKeys { get; private set; }
-        internal IList<DefaultDescription> Defaults { get; private set; }
+        public IList<string> Schemas { get; internal set; }
+        internal IList<TableDescription> Tables { get; set; }
+        internal IList<IndexDescription> Indexes { get; set; }
+        internal IList<PrimaryKeyDescription> PrimaryKeys { get; set; }
+        internal IList<ForeignKeyDescription> ForeignKeys { get; set; }
+        internal IList<UniqueDescription> UniqueKeys { get; set; }
+        internal IList<DefaultDescription> Defaults { get; set; }
+
+        private DatabaseDescription() {}
 
         public DatabaseDescription(ConnectionInfo connectionInfo) {
             var logger = new Logger();
@@ -23,19 +25,22 @@ namespace Core.Descriptions {
             LoadDescription();
         }
 
-        public DatabaseDescription FilterBySchema(params string[] schemas){
-            if (schemas.IsNullOrEmpty())
-                return this;
+        public DatabaseDescription FilterBySchema(params string[] schemas) {
+            if (schemas.IsNullOrEmpty()) return this;
 
-            return new DatabaseDescription(ConnectionInfo) {
-                Schemas = Schemas.Where(s => schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && schema.Equals(s, StringComparison.InvariantCultureIgnoreCase))).ToList(),
-                Tables = Tables.Where(t => !string.IsNullOrWhiteSpace(t.Schema) && schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && t.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList(),
-                Indexes = Indexes.Where(i => !string.IsNullOrWhiteSpace(i.Schema) && schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && i.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList(),
-                PrimaryKeys = PrimaryKeys.Where(p => !string.IsNullOrWhiteSpace(p.Schema) && schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && p.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList(),
-                ForeignKeys = ForeignKeys.Where(f => !string.IsNullOrWhiteSpace(f.Schema) && schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && f.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList(),
-                UniqueKeys = UniqueKeys.Where(u => !string.IsNullOrWhiteSpace(u.Schema) && schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && u.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList(),
-                Defaults = Defaults.Where(d => !string.IsNullOrWhiteSpace(d.Schema) && schemas.Any(schema => !string.IsNullOrWhiteSpace(schema) && d.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList()
-            };
+            var description = CreateEmptyDescription();
+
+            foreach (var schema in schemas) {
+                description.Schemas = description.Schemas.Concat(Schemas.Where(s => s.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                description.Tables = description.Tables.Concat(Tables.Where(t => t.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                description.Indexes = description.Indexes.Concat(Indexes.Where(i => i.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                description.PrimaryKeys = description.PrimaryKeys.Concat(PrimaryKeys.Where(pk => pk.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                description.ForeignKeys = description.ForeignKeys.Concat(ForeignKeys.Where(fk => fk.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                description.UniqueKeys = description.UniqueKeys.Concat(UniqueKeys.Where(uk => uk.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                description.Defaults = description.Defaults.Concat(Defaults.Where(d => d.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase))).ToList();
+            }
+
+            return description;
         }
 
         private void LoadDescription() {
@@ -49,8 +54,20 @@ namespace Core.Descriptions {
             Defaults = database.GetDefaults();
         }
 
-        public bool IsEmpty{
-            get{
+        private DatabaseDescription CreateEmptyDescription() {
+            return new DatabaseDescription {
+                Schemas = new List<string>(),
+                Tables = new List<TableDescription>(),
+                Indexes = new List<IndexDescription>(),
+                PrimaryKeys = new List<PrimaryKeyDescription>(),
+                ForeignKeys = new List<ForeignKeyDescription>(),
+                UniqueKeys = new List<UniqueDescription>(),
+                Defaults = new List<DefaultDescription>()
+            };
+        }
+
+        public bool IsEmpty {
+            get {
                 return Schemas.IsNullOrEmpty()
                        && Tables.IsNullOrEmpty()
                        && Indexes.IsNullOrEmpty()
