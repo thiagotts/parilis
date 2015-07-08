@@ -55,7 +55,7 @@ namespace Core.Descriptions {
         }
 
         private DatabaseDescription CreateEmptyDescription() {
-            return new DatabaseDescription {
+            return new DatabaseDescription(ConnectionInfo) {
                 Schemas = new List<string>(),
                 Tables = new List<TableDescription>(),
                 Indexes = new List<IndexDescription>(),
