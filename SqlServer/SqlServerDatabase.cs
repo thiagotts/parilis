@@ -297,7 +297,7 @@ namespace SqlServer {
                     Schema = result[0],
                     TableName = result[1],
                     Name = result[2],
-                    Columns = new Dictionary<string, ColumnDescription> {{columnDescription.Name, columnDescription}}
+                    Columns = new Dictionary<string, ColumnDescription> {{result[3], GetColumn(result[5], result[6], result[4])}}
                 });
             }
 
