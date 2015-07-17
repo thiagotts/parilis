@@ -15,6 +15,7 @@ namespace Tests.Core {
         public override void InitializeClass() {
             base.InitializeClass();
             Mock<IColumn>();
+            Mock<IConstraint>();
         }        
 
         [SetUp]
