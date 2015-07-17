@@ -190,6 +190,55 @@ namespace Tests.SqlServer {
             Assert.IsTrue(result.Any(key => key.Name.Equals("FK_TEST_2")));
         }
 
+
+        [Test]
+        public void WhenThereIsNoForeignKeysReferencingTheColumn_GetForeignKeysReferencingTheColumnMustReturnAnEmptyList() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                [id3] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST_1 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+
+            var result = sqlServerDatabase.GetForeignKeysReferencing(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "id3"
+            });
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Any());
+        }
+
+        [Test]
+        public void WhenThereAreForeignKeysReferencingTheColumn_GetForeignKeysReferencingTheColumnMustReturnAListWithTheCorrespondingItens() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST_1 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+            var result = sqlServerDatabase.GetForeignKeysReferencing(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE_2",
+                Name = "id2"
+            });
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+            Assert.IsTrue(result.Any(key => key.Name.Equals("FK_TEST_1")));
+        }
+
         [Test]
         public void WhenTableHasOneForeignKey_GetMethodMustReturnTheCorrespondingKey() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](

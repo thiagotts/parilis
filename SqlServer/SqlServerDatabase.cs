@@ -261,6 +261,49 @@ namespace SqlServer {
             return foreignKeys;
         }
 
+        public IList<ForeignKeyDescription> GetForeignKeysReferencing(ColumnDescription columnDescription) {
+            var dataSet = database.ExecuteWithResults(string.Format(@"
+                CREATE TABLE #TempTable (
+                 PKTABLE_QUALIFIER nvarchar(max),
+                 PKTABLE_OWNER nvarchar(max),
+                 PKTABLE_NAME nvarchar(max),
+                 PKCOLUMN_NAME nvarchar(max),
+                 FKTABLE_QUALIFIER nvarchar(max),
+                 FKTABLE_OWNER nvarchar(max),
+                 FKTABLE_NAME nvarchar(max),
+                 FKCOLUMN_NAME nvarchar(max),
+                 KEY_SEQ nvarchar(max),
+                 UPDATE_RULE nvarchar(max),
+                 DELETE_RULE nvarchar(max),  
+                 FK_NAME nvarchar(max),
+                 PK_NAME nvarchar(max),
+                 DEFERRABILITY nvarchar(max))                 
+                INSERT INTO #TempTable
+                EXEC sp_fkeys @fktable_name = N'{0}', @fktable_owner = N'{1}'                
+                SELECT FKTABLE_OWNER, FKTABLE_NAME, FK_NAME, FKCOLUMN_NAME, PKCOLUMN_NAME, PKTABLE_OWNER, PKTABLE_NAME
+                FROM #TempTable
+                WHERE FKCOLUMN_NAME = '{2}'
+                DROP TABLE #TempTable
+                ",
+                columnDescription.TableName, columnDescription.Schema, columnDescription.Name));
+
+            var foreignKeys = new List<ForeignKeyDescription>();
+
+            var results = GetResults(dataSet);
+            if (!results.Any()) return foreignKeys;
+
+            foreach (var result in results) {
+                foreignKeys.Add(new ForeignKeyDescription {
+                    Schema = result[0],
+                    TableName = result[1],
+                    Name = result[2],
+                    Columns = new Dictionary<string, ColumnDescription> {{columnDescription.Name, columnDescription}}
+                });
+            }
+
+            return foreignKeys;
+        }
+
         public IList<UniqueDescription> GetUniqueKeys() {
             database.Tables.Refresh();
             var uniqueKeys = new List<UniqueDescription>();
