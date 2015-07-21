@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Castle.Core;
@@ -15,7 +16,9 @@ using DataType = SqlServer.Enums.DataType;
 namespace SqlServer {
     [CastleComponent("SqlServer.SqlServerDatabase", typeof (IDatabase), Lifestyle = LifestyleType.Transient)]
     public class SqlServerDatabase : IDatabase {
+        private const string connectionStringPattern = @"Server={0};Database={1};User Id={2};Password={3};";
         private readonly Database database;
+        private readonly string connectionString;
 
         public SqlServerDatabase(ConnectionInfo connectionInfo) {
             var serverConnection = new ServerConnection(connectionInfo.HostName, connectionInfo.User, connectionInfo.Password);
@@ -23,6 +26,9 @@ namespace SqlServer {
 
             server.Databases.Refresh();
             database = server.Databases[connectionInfo.DatabaseName];
+
+            connectionString = string.Format(connectionStringPattern,
+                connectionInfo.HostName, connectionInfo.DatabaseName, connectionInfo.User, connectionInfo.Password);
         }
 
         public IList<string> GetSchemas() {
@@ -57,13 +63,25 @@ namespace SqlServer {
         public ColumnDescription GetColumn(string schema, string tableName, string columnName) {
             if (!ColumnExists(schema, tableName, columnName)) return null;
 
-            var query = string.Format(@"SELECT IS_NULLABLE, columnproperty(object_id('{1}.{0}'),'{2}','IsIdentity'), DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
-                                        FROM INFORMATION_SCHEMA.COLUMNS
-                                        WHERE TABLE_NAME = '{0}'
-                                        AND TABLE_SCHEMA = '{1}'
-                                        AND COLUMN_NAME = '{2}'", tableName, schema, columnName);
+            var command = new SqlCommand(@"SELECT IS_NULLABLE, columnproperty(object_id(@table_fullname), @column_name, 'IsIdentity'), DATA_TYPE, CHARACTER_MAXIMUM_LENGTH 
+                                           FROM INFORMATION_SCHEMA.COLUMNS
+                                           WHERE TABLE_NAME = @table_name 
+                                           AND TABLE_SCHEMA = @schema 
+                                           AND COLUMN_NAME = @column_name");
 
-            var dataSet = database.ExecuteWithResults(query);
+            var paramTableFullName = new SqlParameter {ParameterName = "@table_fullname", Value = string.Format("{0}.{1}", schema, tableName)};
+            command.Parameters.Add(paramTableFullName);
+
+            var paramSchema = new SqlParameter {ParameterName = "@schema", Value = schema};
+            command.Parameters.Add(paramSchema);
+
+            var paramTableName = new SqlParameter {ParameterName = "@table_name", Value = tableName};
+            command.Parameters.Add(paramTableName);
+
+            var paramColumnName = new SqlParameter {ParameterName = "@column_name", Value = columnName};
+            command.Parameters.Add(paramColumnName);
+
+            var dataSet = ExecuteWithResults(command);
             var results = GetResults(dataSet);
             if (!results.Any()) return null;
 
@@ -534,8 +552,22 @@ namespace SqlServer {
             return coluna != null;
         }
 
-        private List<List<string>> GetResults(DataSet dataSet) {
-            var rowCollection = dataSet.Tables["Table"].Rows;
+        private DataTable ExecuteWithResults(SqlCommand command) {
+            command.Connection = new SqlConnection {ConnectionString = connectionString};
+            var dataTable = new DataTable();
+
+            using (command) {
+                command.Connection.Open();
+                using (var reader = command.ExecuteReader()) {
+                    dataTable.Load(reader);
+                }
+            }
+
+            return dataTable;
+        }
+
+        private List<List<string>> GetResults(DataTable dataTable) {
+            var rowCollection = dataTable.Rows;
 
             var results = new List<List<string>>();
             if (rowCollection.Count == 0) return results;
@@ -554,6 +586,10 @@ namespace SqlServer {
             }
 
             return results;
+        }
+
+        private List<List<string>> GetResults(DataSet dataSet) {
+            return GetResults(dataSet.Tables["Table"]);
         }
 
         public bool SchemaExists(string schemaName) {

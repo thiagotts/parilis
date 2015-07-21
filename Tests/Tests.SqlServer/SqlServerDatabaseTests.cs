@@ -63,6 +63,18 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void WhenColumnHasQuotesInItsName_GetColumnMustReturnColumnDescription() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] IDENTITY(1,1) NOT NULL,
+                [description's] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "description's");
+
+            Assert.IsNotNull(column);
+        }
+
+        [Test]
         public void WhenTableHasAPrimaryKeyReferringASingleColumn_MustReturnThePrimaryKeyDescriptionWithTheColumn() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
