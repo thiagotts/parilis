@@ -16,7 +16,7 @@ using DataType = SqlServer.Enums.DataType;
 namespace SqlServer {
     [CastleComponent("SqlServer.SqlServerDatabase", typeof (IDatabase), Lifestyle = LifestyleType.Transient)]
     public class SqlServerDatabase : IDatabase {
-        private const string connectionStringPattern = @"Server={0};Database={1};User Id={2};Password={3};";
+        private const string ConnectionStringPattern = @"Server={0};Database={1};User Id={2};Password={3};";
         private readonly Database database;
         private readonly string connectionString;
 
@@ -27,7 +27,7 @@ namespace SqlServer {
             server.Databases.Refresh();
             database = server.Databases[connectionInfo.DatabaseName];
 
-            connectionString = string.Format(connectionStringPattern,
+            connectionString = string.Format(ConnectionStringPattern,
                 connectionInfo.HostName, connectionInfo.DatabaseName, connectionInfo.User, connectionInfo.Password);
         }
 
@@ -81,8 +81,8 @@ namespace SqlServer {
             var paramColumnName = new SqlParameter {ParameterName = "@column_name", Value = columnName};
             command.Parameters.Add(paramColumnName);
 
-            var dataSet = ExecuteWithResults(command);
-            var results = GetResults(dataSet);
+            var dataTable = ExecuteWithResults(command);
+            var results = GetResults(dataTable);
             if (!results.Any()) return null;
 
             return new ColumnDescription {
@@ -153,7 +153,7 @@ namespace SqlServer {
         }
 
         public PrimaryKeyDescription GetPrimaryKey(TableDescription table) {
-            var dataSet = database.ExecuteWithResults(string.Format(@"
+            var command = new SqlCommand(@"
                 SELECT Col.CONSTRAINT_NAME, Col.COLUMN_NAME FROM
                     INFORMATION_SCHEMA.TABLE_CONSTRAINTS Tab,
                     INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE Col
@@ -161,10 +161,17 @@ namespace SqlServer {
                     Col.Constraint_Name = Tab.Constraint_Name
                     AND Col.Table_Name = Tab.Table_Name
                     AND Constraint_Type = 'PRIMARY KEY'
-                    AND Col.Table_Schema = '{0}'
-                    AND Col.Table_Name = '{1}'", table.Schema, table.Name));
+                    AND Col.Table_Schema = @schema
+                    AND Col.Table_Name = @table_name");
 
-            var results = GetResults(dataSet);
+            var paramSchema = new SqlParameter {ParameterName = "@schema", Value = table.Schema};
+            command.Parameters.Add(paramSchema);
+
+            var paramTableName = new SqlParameter {ParameterName = "@table_name", Value = table.Name};
+            command.Parameters.Add(paramTableName);
+
+            var dataTable = ExecuteWithResults(command);
+            var results = GetResults(dataTable);
             if (!results.Any()) return null;
 
             var primaryKey = new PrimaryKeyDescription {Schema = table.Schema, TableName = table.Name, Name = results[0][0]};

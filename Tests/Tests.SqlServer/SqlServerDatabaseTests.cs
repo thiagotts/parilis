@@ -111,7 +111,7 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void WhenTableDowsNotHaveAPrimaryKey_MustReturnNull() {
+        public void WhenTableDoesNotHaveAPrimaryKey_MustReturnNull() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL)");
@@ -119,6 +119,18 @@ namespace Tests.SqlServer {
             var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
 
             Assert.IsNull(result);
+        }
+
+        [Test]
+        public void WhenTableNameHasQuotes_MustReturnThePrimaryKeyDescription() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TESTTABLE_id PRIMARY KEY (id))");
+
+            var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "dbo", Name = "TEST'TABLE"});
+
+            Assert.IsNotNull(result);
         }
 
         [Test]
