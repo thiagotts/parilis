@@ -533,16 +533,23 @@ namespace SqlServer {
         }
 
         public PrimaryKeyDescription GetPrimaryKey(string primaryKeyName, string schema = "dbo") {
-            var dataSet = database.ExecuteWithResults(string.Format(@"
+            var command = new SqlCommand(@"
                 SELECT Col.Table_Name, Col.COLUMN_NAME FROM
                     INFORMATION_SCHEMA.TABLE_CONSTRAINTS Tab,
                     INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE Col
                 WHERE
-                    Col.Constraint_Name = '{0}'
+                    Col.Constraint_Name = @pk_name
                     AND Constraint_Type = 'PRIMARY KEY'
-                    AND Col.Table_Schema = '{1}'", primaryKeyName, schema));
+                    AND Col.Table_Schema = @schema");
 
-            var results = GetResults(dataSet);
+            var paramSchema = new SqlParameter { ParameterName = "@schema", Value = schema };
+            command.Parameters.Add(paramSchema);
+
+            var paramPrimaryName = new SqlParameter { ParameterName = "@pk_name", Value = primaryKeyName };
+            command.Parameters.Add(paramPrimaryName);
+
+            var dataTable = ExecuteWithResults(command);
+            var results = GetResults(dataTable);
             if (!results.Any()) return null;
 
             var primaryKey = new PrimaryKeyDescription {Schema = schema, TableName = results[0][0], Name = primaryKeyName};
