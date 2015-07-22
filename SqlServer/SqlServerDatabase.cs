@@ -301,7 +301,7 @@ namespace SqlServer {
         }
 
         public IList<ForeignKeyDescription> GetForeignKeysReferencing(ColumnDescription columnDescription) {
-            var dataSet = database.ExecuteWithResults(string.Format(@"
+            var command = new SqlCommand(@"
                 CREATE TABLE #TempTable (
                  PKTABLE_QUALIFIER nvarchar(max),
                  PKTABLE_OWNER nvarchar(max),
@@ -318,17 +318,25 @@ namespace SqlServer {
                  PK_NAME nvarchar(max),
                  DEFERRABILITY nvarchar(max))                 
                 INSERT INTO #TempTable
-                EXEC sp_fkeys @fktable_name = N'{0}', @fktable_owner = N'{1}'                
+                EXEC sp_fkeys @fktable_name = @table_name, @fktable_owner = @schema 
                 SELECT FKTABLE_OWNER, FKTABLE_NAME, FK_NAME, FKCOLUMN_NAME, PKCOLUMN_NAME, PKTABLE_OWNER, PKTABLE_NAME
                 FROM #TempTable
-                WHERE FKCOLUMN_NAME = '{2}'
+                WHERE FKCOLUMN_NAME = @column_name
                 DROP TABLE #TempTable
-                ",
-                columnDescription.TableName, columnDescription.Schema, columnDescription.Name));
+                ");
+
+            var paramSchema = new SqlParameter { ParameterName = "@schema", Value = columnDescription.Schema };
+            command.Parameters.Add(paramSchema);
+
+            var paramTableName = new SqlParameter {ParameterName = "@table_name", Value = columnDescription.TableName};
+            command.Parameters.Add(paramTableName);
+
+            var paramColumnName = new SqlParameter {ParameterName = "@column_name", Value = columnDescription.Name};
+            command.Parameters.Add(paramColumnName);
 
             var foreignKeys = new List<ForeignKeyDescription>();
-
-            var results = GetResults(dataSet);
+            var dataTable = ExecuteWithResults(command);
+            var results = GetResults(dataTable);
             if (!results.Any()) return foreignKeys;
 
             foreach (var result in results) {

@@ -278,6 +278,27 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void WhenTheConstraintsTableHasQuotesInItsname_GetForeignKeysReferencingTheColumnMustReturnTheCorrespondingKeys() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST_1 FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+            var result = sqlServerDatabase.GetForeignKeysReferencing(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST'TABLE_2",
+                Name = "id2"
+            });
+
+            Assert.IsNotNull(result);
+        }
+
+        [Test]
         public void WhenTableHasOneForeignKey_GetMethodMustReturnTheCorrespondingKey() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
