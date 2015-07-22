@@ -199,7 +199,7 @@ namespace SqlServer {
         }
 
         public IList<ForeignKeyDescription> GetForeignKeys(TableDescription tableDescription) {
-            var dataSet = database.ExecuteWithResults(string.Format(@"
+            var command = new SqlCommand(@"
                 CREATE TABLE #TempTable (
                  PKTABLE_QUALIFIER nvarchar(max),
                  PKTABLE_OWNER nvarchar(max),
@@ -216,15 +216,21 @@ namespace SqlServer {
                  PK_NAME nvarchar(max),
                  DEFERRABILITY nvarchar(max))                 
                 INSERT INTO #TempTable
-                EXEC sp_fkeys @fktable_name = N'{0}', @fktable_owner = N'{1}'                
+                EXEC sp_fkeys @fktable_name = @table_name, @fktable_owner = @schema                
                 SELECT FK_NAME, FKCOLUMN_NAME, PKCOLUMN_NAME, FKTABLE_OWNER, FKTABLE_NAME, PKTABLE_NAME, PKTABLE_OWNER
                 FROM #TempTable
                 DROP TABLE #TempTable
-                ",
-                tableDescription.Name, tableDescription.Schema));
+                ");
+
+            var paramSchema = new SqlParameter { ParameterName = "@schema", Value = tableDescription.Schema };
+            command.Parameters.Add(paramSchema);
+
+            var paramTableName = new SqlParameter { ParameterName = "@table_name", Value = tableDescription.Name };
+            command.Parameters.Add(paramTableName);
 
             var foreignKeys = new List<ForeignKeyDescription>();
-            var results = GetResults(dataSet);
+            var dataTable = ExecuteWithResults(command);
+            var results = GetResults(dataTable);
             if (!results.Any()) return foreignKeys;
 
             foreach (var result in results) {

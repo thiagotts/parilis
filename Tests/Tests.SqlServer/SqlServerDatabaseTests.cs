@@ -34,6 +34,9 @@ namespace Tests.SqlServer {
             table = Database.Tables["TEST_TABLE", "testschema"];
             if (table != null) table.Drop();
 
+            table = Database.Tables["TEST'TABLE_2"];
+            if (table != null) table.Drop();
+
             table = Database.Tables["TEST_TABLE"];
             if (table != null) table.Drop();
         }
@@ -318,6 +321,24 @@ namespace Tests.SqlServer {
 
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
+        }
+
+        [Test]
+        public void WhenTableHasQuotesInItsName_GetMethodMustReturnTheCorrespondingKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_TEST_TABLE PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TESTTABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+
+            var result = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "dbo", Name = "TEST'TABLE_2" });
+
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual("FK_TEST", result.Single().Name);
         }
 
         [Test]
