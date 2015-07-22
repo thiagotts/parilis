@@ -893,6 +893,26 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void IfTargetTableHasQuotesInItsName_RemoveMethodRemoveTheUniqueKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [bigint] NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            constraints.RemoveUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST'TABLE",
+                Columns = new List<ColumnDescription> { columnDescription }
+            });
+
+            var uniqueKey = sqlServerDatabase.GetUniqueKey("UQ_TEST_description", "dbo");
+
+            Assert.IsNull(uniqueKey);
+        }
+
+        [Test]
         public void WhenDefaultValueDoesNotExist_CreateMethodMustCreateTheDefaultValue() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,

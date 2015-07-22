@@ -105,8 +105,10 @@ namespace SqlServer {
             var foreignKeys = SqlServerDatabase.GetForeignKeysReferencing(uniqueDescription);
             if (foreignKeys.Any()) throw new ReferencedConstraintException();
 
-            Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
+            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] DROP CONSTRAINT [{2}]",
                 uniqueDescription.Schema, uniqueDescription.TableName, uniqueDescription.Name));
+            
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         public void CreateDefault(DefaultDescription defaultDescription) {
