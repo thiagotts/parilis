@@ -560,6 +560,29 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void WhenTargetTableHasQuotesInItsName_RemoveMethodMustRemoveTheKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id),
+                CONSTRAINT FK_TEST FOREIGN KEY (id_fk) REFERENCES [TEST'TABLE](id))");
+
+            constraints.RemoveForeignKey(new ForeignKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST'TABLE_2",
+                Name = "FK_TEST"
+            });
+
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = "dbo", Name = "TEST'TABLE_2"});
+
+            Assert.AreEqual(0, foreignKeys.Count);
+        }
+
+        [Test]
         public void WhenForeignKeysTableDoesNotExist_RemoveMethodMustThrowException() {
             Assert.Throws<ConstraintNotFoundException>(() => constraints.RemoveForeignKey(new ForeignKeyDescription {
                 Schema = "dbo",

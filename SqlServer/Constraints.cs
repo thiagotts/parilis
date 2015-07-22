@@ -78,8 +78,10 @@ namespace SqlServer {
                                         key.Name.Equals(foreignKeyDescription.Name)))
                 throw new ConstraintNotFoundException();
 
-            Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
+            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] DROP CONSTRAINT [{2}]",
                 foreignKeyDescription.Schema, foreignKeyDescription.TableName, foreignKeyDescription.Name));
+
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         public void CreateUnique(UniqueDescription uniqueDescription) {
