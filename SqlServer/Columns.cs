@@ -39,10 +39,12 @@ namespace SqlServer {
             if (!LengthIsValid(column))
                 throw new InvalidDataTypeException();
 
-            Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD {2} {3}{4} {5} {6}",
+            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] ADD [{2}] {3}{4} {5} {6}",
                 column.Schema, column.TableName, column.Name, column.Type,
                 string.IsNullOrWhiteSpace(column.Length) ? string.Empty : string.Format("({0})", column.Length),
                 column.IsIdentity ? "IDENTITY(1,1)" : string.Empty, column.AllowsNull ? "NULL" : "NOT NULL"));
+
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         public void Remove(ColumnDescription column) {
@@ -56,8 +58,10 @@ namespace SqlServer {
             if (ColumnIsReferencedByAConstraint(column))
                 throw new ReferencedColumnException();
 
-            Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP COLUMN {2}",
+            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] DROP COLUMN [{2}]",
                 column.Schema, column.TableName, column.Name));
+
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         public void ChangeType(ColumnDescription column) {

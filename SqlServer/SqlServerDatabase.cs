@@ -589,7 +589,7 @@ namespace SqlServer {
             var firstCharacter = identifierName[0].ToString();
             if (!Regex.IsMatch(firstCharacter, @"[a-zA-Z_@#]")) return false;
 
-            if (!Regex.IsMatch(identifierName, @"^[a-zA-Z0-9_@#$]*$")) return false;
+            if (!Regex.IsMatch(identifierName, @"^[a-zA-Z0-9_@#$']*$")) return false;
 
             var keywords = Enums.Enums.GetDescriptions<Keyword>();
             if (keywords.Any(k => k.Equals(identifierName, StringComparison.InvariantCultureIgnoreCase))) return false;
@@ -619,6 +619,15 @@ namespace SqlServer {
             }
 
             return dataTable;
+        }
+
+        internal void ExecuteNonQuery(SqlCommand command) {
+            command.Connection = new SqlConnection { ConnectionString = connectionString };
+
+            using (command) {
+                command.Connection.Open();
+                command.ExecuteNonQuery();
+            }
         }
 
         private List<List<string>> GetResults(DataTable dataTable) {

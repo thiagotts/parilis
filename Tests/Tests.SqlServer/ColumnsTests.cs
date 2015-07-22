@@ -61,6 +61,26 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void WhenColumnHasQuotesInItsName_CreateMethodMustCreateTheColumn() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            columns.Create(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "id'2",
+                Type = "bigint"
+            });
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id'2");
+
+            Assert.IsNotNull(column);
+            Assert.AreEqual("id'2", column.Name);
+            Assert.AreEqual("bigint", column.Type);
+        }
+
+        [Test]
         public void WhenColumnWithTheSameNameAlreadyExists_CreateMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
@@ -302,7 +322,7 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void IfColumnExistsAndIsNotReferencedByAnyConstraint_RemoveMethosMustRemoveTheColumn() {
+        public void IfColumnExistsAndIsNotReferencedByAnyConstraint_RemoveMethodMustRemoveTheColumn() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL)");
@@ -314,6 +334,23 @@ namespace Tests.SqlServer {
             });
 
             var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "description");
+
+            Assert.IsNull(column);
+        }
+
+        [Test]
+        public void IfColumnhasQuotesInItsName_RemoveMethodMustRemoveTheColumn() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description's] [nvarchar](max) NULL)");
+
+            columns.Remove(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "description's"
+            });
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "description's");
 
             Assert.IsNull(column);
         }
