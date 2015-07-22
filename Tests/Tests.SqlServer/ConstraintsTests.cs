@@ -28,6 +28,7 @@ namespace Tests.SqlServer {
         public void InitializeTest() {
             Database.Tables.Refresh();
             RemoveTable("TEST_TABLE_2");
+            RemoveTable("TEST'TABLE_2");
             RemoveTable("TEST'TABLE");
             RemoveTable("TEST_TABLE");
             RemoveTable("TEST_TABLE_2", "testschema");
@@ -245,6 +246,39 @@ namespace Tests.SqlServer {
             });
 
             var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2"});
+
+            Assert.AreEqual(1, foreignKeys.Count);
+            Assert.AreEqual("FK_TEST", foreignKeys.Single().Name);
+        }
+
+        [Test]
+        public void WhenTargetTableHasQuotesInItsName_CreateMethodMustCreateTheForeignKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE](
+                [id] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE_2](
+                [id] [bigint] NOT NULL,
+                [id_fk] [bigint] NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_2_id PRIMARY KEY (id))");
+
+            constraints.CreateForeignKey(new ForeignKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST'TABLE_2",
+                Name = "FK_TEST",
+                Columns = new Dictionary<string, ColumnDescription> {
+                    {
+                        "id_fk",
+                        new ColumnDescription {
+                            Schema = "dbo",
+                            TableName = "TEST'TABLE",
+                            Name = "id"
+                        }
+                    }
+                }
+            });
+
+            var foreignKeys = sqlServerDatabase.GetForeignKeys(new TableDescription { Schema = "dbo", Name = "TEST'TABLE_2" });
 
             Assert.AreEqual(1, foreignKeys.Count);
             Assert.AreEqual("FK_TEST", foreignKeys.Single().Name);
