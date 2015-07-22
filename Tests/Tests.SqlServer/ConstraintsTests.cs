@@ -175,6 +175,25 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void WhenTargetTableHasQuotesInItsName_RemoveMethodMustRemoveThePrimaryKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            var primaryKey = new PrimaryKeyDescription {
+                Schema = "dbo",
+                TableName = "TEST'TABLE",
+                Name = "PK_dbo_TEST_TABLE_id",
+                Columns = new List<ColumnDescription> { columnId }
+            };
+
+            constraints.RemovePrimaryKey(primaryKey);
+
+            Assert.IsNull(sqlServerDatabase.GetPrimaryKey(primaryKey.Name, primaryKey.Schema));
+        }
+
+        [Test]
         public void WhenPrimaryKeyExistsAndOtherKeyReferencesIt_RemoveMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,

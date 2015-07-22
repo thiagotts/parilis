@@ -42,8 +42,10 @@ namespace SqlServer {
             var foreignKeys = SqlServerDatabase.GetForeignKeysReferencing(primaryKeyDescription);
             if (foreignKeys.Any()) throw new ReferencedConstraintException();
 
-            Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
+            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] DROP CONSTRAINT [{2}]",
                 primaryKeyDescription.Schema, primaryKeyDescription.TableName, primaryKeyDescription.Name));
+
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         public void CreateForeignKey(ForeignKeyDescription foreignKeyDescription) {
