@@ -91,9 +91,11 @@ namespace SqlServer {
             if (!ReferencedColumnsAreValid(uniqueDescription))
                 throw new InvalidReferenceColumnException();
 
-            Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD CONSTRAINT {2} UNIQUE ({3})",
+            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] ADD CONSTRAINT [{2}] UNIQUE ({3})",
                 uniqueDescription.Schema, uniqueDescription.TableName, uniqueDescription.Name,
-                string.Join(",", uniqueDescription.Columns.Select(c => c.Name))));
+                string.Join(",", uniqueDescription.Columns.Select(c => string.Format("[{0}]", c.Name)))));
+            
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         public void RemoveUnique(UniqueDescription uniqueDescription) {

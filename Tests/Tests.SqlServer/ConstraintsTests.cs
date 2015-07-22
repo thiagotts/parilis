@@ -631,6 +631,26 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void WhenTargetTableHasQuotesInItsName_CreateMethodMustCreateTheUniqueKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
+
+            constraints.CreateUnique(new UniqueDescription {
+                Name = "UQ_TEST_description",
+                Schema = "dbo",
+                TableName = "TEST'TABLE",
+                Columns = new List<ColumnDescription> { columnDescription }
+            });
+
+            var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST'TABLE" });
+
+            Assert.AreEqual(1, uniqueKeys.Count);
+            Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
+        }
+
+        [Test]
         public void WhenThereIsAnotherUniqueKeyWithTheSameNameInTheSameSchema_CreateMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
