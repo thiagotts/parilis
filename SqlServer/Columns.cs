@@ -81,16 +81,15 @@ namespace SqlServer {
                 throw new InvalidDataTypeException();
 
             try {
-                Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ALTER COLUMN {2} {3}{4} {5}",
+                var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] ALTER COLUMN [{2}] {3}{4} {5}",
                     column.Schema, column.TableName, column.Name, column.Type,
                     string.IsNullOrWhiteSpace(column.Length) ? string.Empty : string.Format("({0})", column.Length),
                     column.AllowsNull ? "NULL" : "NOT NULL"));
+
+                SqlServerDatabase.ExecuteNonQuery(command);
             }
-            catch (FailedOperationException ex) {
-                if (ex.InnerException != null &&
-                    ex.InnerException.InnerException != null &&
-                    ex.InnerException.InnerException is SqlException &&
-                    (ex.InnerException.InnerException as SqlException).Number == 8114)
+            catch (SqlException ex) {
+                if (ex.Number == 8114)
                     throw new InvalidDataTypeException("The existent values could not be converted to the new data type.");
 
                 else throw;

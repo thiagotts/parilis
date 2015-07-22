@@ -528,6 +528,27 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void WhenColumnsHasQuotesInItsName_ChangeTypeMethodMustChangeTheDataType() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description's] [nvarchar](max) NULL);
+                INSERT INTO [dbo].[TEST_TABLE] VALUES (1,'123');");
+
+            columns.ChangeType(new ColumnDescription {
+                Schema = "dbo",
+                TableName = "TEST_TABLE",
+                Name = "description's",
+                Type = "bigint"
+            });
+
+            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "description's");
+
+            Assert.IsNotNull(column);
+            Assert.AreEqual("description's", column.Name);
+            Assert.AreEqual("bigint", column.Type);
+        }
+
+        [Test]
         public void WhenColumnsExistsAndHasInvalidValuesInserted_ChangeTypeMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
