@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Data.SqlClient;
+using System.Linq;
 using Castle.Core;
 using Core;
 using Core.Exceptions;
@@ -15,7 +16,9 @@ namespace SqlServer {
             if (SqlServerDatabase.SchemaExists(schemaName) || !SqlServerDatabase.IdentifierNameIsValid(schemaName))
                 throw new InvalidSchemaNameException();
 
-            Database.ExecuteNonQuery(string.Format(@"CREATE SCHEMA {0}", schemaName));
+            var command = new SqlCommand(string.Format(@"CREATE SCHEMA [{0}]", schemaName));
+            
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         public void Remove(string schemaName) {

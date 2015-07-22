@@ -46,6 +46,15 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void IfTSchemahasQuotesInItsName_CreateMethodMustCreateSchema() {
+            schemas.Create("schema'1");
+
+            var result = sqlServerDatabase.SchemaExists("schema'1");
+
+            Assert.IsTrue(result);
+        }
+
+        [Test]
         public void IfThereIsAnotherSchemaWithTheSameName_CreateMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE SCHEMA schema1");
 
