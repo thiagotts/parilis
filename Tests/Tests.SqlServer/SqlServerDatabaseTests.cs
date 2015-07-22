@@ -826,5 +826,18 @@ namespace Tests.SqlServer {
             Assert.IsTrue(schemas.Any(s => s.Equals("dbo")));
             Assert.IsTrue(schemas.Any(s => s.Equals("testschema")));
         }
+
+        [Test]
+        public void WhenDefaultHasQuotesInItsName_GetDefaultMethodMustReturnTheDefaultDescription() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));
+                ALTER TABLE [dbo].[TEST_TABLE] ADD CONSTRAINT [DEFAULT'TEST_TABLE_description] DEFAULT 'test' FOR [description]");
+
+            var defaultValue = sqlServerDatabase.GetDefault("DEFAULT'TEST_TABLE_description", "dbo");
+
+            Assert.IsNotNull(defaultValue);
+        }
     }
 }

@@ -446,14 +446,14 @@ namespace SqlServer {
         }
 
         public IList<DefaultDescription> GetDefaults() {
-            const string query = @"SELECT schemas.name, tables.name, all_columns.name, default_constraints.name, default_constraints.definition
+            var command = new SqlCommand(@"SELECT schemas.name, tables.name, all_columns.name, default_constraints.name, default_constraints.definition
                                    FROM sys.all_columns
                                    INNER JOIN sys.tables ON all_columns.object_id = tables.object_id
                                    INNER JOIN sys.schemas ON tables.schema_id = schemas.schema_id
-                                   INNER JOIN sys.default_constraints ON all_columns.default_object_id = default_constraints.object_id";
+                                   INNER JOIN sys.default_constraints ON all_columns.default_object_id = default_constraints.object_id");
 
-            var dataSet = database.ExecuteWithResults(query);
-            var results = GetResults(dataSet);
+            var dataTable = ExecuteWithResults(command);
+            var results = GetResults(dataTable);
 
             var defaults = new List<DefaultDescription>();
             if (!results.Any()) return defaults;
@@ -472,16 +472,22 @@ namespace SqlServer {
         }
 
         public DefaultDescription GetDefault(string defaultName, string schema) {
-            var query = string.Format(@"SELECT tables.name, all_columns.name, default_constraints.definition
+            var command = new SqlCommand(@"SELECT tables.name, all_columns.name, default_constraints.definition
                                         FROM sys.all_columns
                                         INNER JOIN sys.tables ON all_columns.object_id = tables.object_id
                                         INNER JOIN sys.schemas ON tables.schema_id = schemas.schema_id
                                         INNER JOIN sys.default_constraints ON all_columns.default_object_id = default_constraints.object_id
-                                        WHERE default_constraints.name LIKE '{0}'
-                                        AND schemas.name LIKE '{1}'", defaultName, schema);
+                                        WHERE default_constraints.name LIKE @default_name
+                                        AND schemas.name LIKE @schema");
 
-            var dataSet = database.ExecuteWithResults(query);
-            var results = GetResults(dataSet);
+            var paramSchema = new SqlParameter {ParameterName = "@schema", Value = schema};
+            command.Parameters.Add(paramSchema);
+
+            var paramDefaultName = new SqlParameter {ParameterName = "@default_name", Value = defaultName};
+            command.Parameters.Add(paramDefaultName);
+
+            var dataTable = ExecuteWithResults(command);
+            var results = GetResults(dataTable);
             if (!results.Any()) return null;
 
             return new DefaultDescription {
