@@ -51,6 +51,10 @@ var actualDatabase = new DatabaseDescription(actualConnection).FilterBySchema("s
 
 Parilis is built in a generic way to enable developers to create solutions for specific database products. The current version provides an [implementation for MS SQL Server databases](https://github.com/thiagotts/parilis/tree/master/SqlServer). In order to create solutions to other types of databases, you must provide implementations for the [interfaces in the Core project](https://github.com/thiagotts/parilis/tree/master/Core/Interfaces). Please refer to the MS SQL Server solution for a real example.
 
+## Roadmap
+
+Check the [project's roadmap](https://trello.com/b/dfrQlizZ) to keep track of what is going on.
+
 ## License
 
 The MIT License (MIT)
