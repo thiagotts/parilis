@@ -92,7 +92,6 @@
     <Compile Include="DatabaseDescriptionFilteringTests.cs" />
     <Compile Include="DatabaseDescriptionEqualityTests.cs" />
     <Compile Include="DatabaseDescriptionIsEmptyTests.cs" />
-    <Compile Include="DatabaseTest.cs" />
     <Compile Include="Descriptions\UniqueDescriptionTests.cs" />
     <Compile Include="Descriptions\TableDescriptionTests.cs" />
     <Compile Include="Descriptions\PrimaryKeyDescriptionTests.cs" />

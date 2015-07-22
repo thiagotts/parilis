@@ -222,10 +222,10 @@ namespace SqlServer {
                 DROP TABLE #TempTable
                 ");
 
-            var paramSchema = new SqlParameter { ParameterName = "@schema", Value = tableDescription.Schema };
+            var paramSchema = new SqlParameter {ParameterName = "@schema", Value = tableDescription.Schema};
             command.Parameters.Add(paramSchema);
 
-            var paramTableName = new SqlParameter { ParameterName = "@table_name", Value = tableDescription.Name };
+            var paramTableName = new SqlParameter {ParameterName = "@table_name", Value = tableDescription.Name};
             command.Parameters.Add(paramTableName);
 
             var foreignKeys = new List<ForeignKeyDescription>();
@@ -250,7 +250,7 @@ namespace SqlServer {
         }
 
         public IList<ForeignKeyDescription> GetForeignKeysReferencing(ConstraintDescription constraintDescription) {
-            var dataSet = database.ExecuteWithResults(string.Format(@"
+            var command = new SqlCommand(@"
                 CREATE TABLE #TempTable (
                  PKTABLE_QUALIFIER nvarchar(max),
                  PKTABLE_OWNER nvarchar(max),
@@ -267,17 +267,25 @@ namespace SqlServer {
                  PK_NAME nvarchar(max),
                  DEFERRABILITY nvarchar(max))                 
                 INSERT INTO #TempTable
-                EXEC sp_fkeys @pktable_name = N'{0}', @pktable_owner = N'{1}'                
+                EXEC sp_fkeys @pktable_name = @table_name, @pktable_owner = @schema                
                 SELECT FKTABLE_OWNER, FKTABLE_NAME, FK_NAME, FKCOLUMN_NAME, PKCOLUMN_NAME, PKTABLE_OWNER, PKTABLE_NAME
                 FROM #TempTable
-                WHERE PK_NAME = '{2}'
+                WHERE PK_NAME = @constraint_name
                 DROP TABLE #TempTable
-                ",
-                constraintDescription.TableName, constraintDescription.Schema, constraintDescription.Name));
+                ");
+
+            var paramSchema = new SqlParameter {ParameterName = "@schema", Value = constraintDescription.Schema};
+            command.Parameters.Add(paramSchema);
+
+            var paramTableName = new SqlParameter {ParameterName = "@table_name", Value = constraintDescription.TableName};
+            command.Parameters.Add(paramTableName);
+
+            var paramConstraintName = new SqlParameter {ParameterName = "@constraint_name", Value = constraintDescription.Name};
+            command.Parameters.Add(paramConstraintName);
 
             var foreignKeys = new List<ForeignKeyDescription>();
-
-            var results = GetResults(dataSet);
+            var dataTable = ExecuteWithResults(command);
+            var results = GetResults(dataTable);
             if (!results.Any()) return foreignKeys;
 
             foreach (var result in results) {
