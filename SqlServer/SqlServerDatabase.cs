@@ -366,7 +366,7 @@ namespace SqlServer {
         }
 
         public IList<UniqueDescription> GetUniqueKeys(TableDescription tableDescription) {
-            var dataSet = database.ExecuteWithResults(string.Format(@"
+            var command = new SqlCommand(@"
                 SELECT Col.CONSTRAINT_NAME, Col.COLUMN_NAME FROM
                     INFORMATION_SCHEMA.TABLE_CONSTRAINTS Tab,
                     INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE Col
@@ -374,11 +374,17 @@ namespace SqlServer {
                     Col.Constraint_Name = Tab.Constraint_Name
                     AND Col.Table_Name = Tab.Table_Name
                     AND Constraint_Type = 'UNIQUE'
-                    AND Col.Table_Schema = '{0}'
-                    AND Col.Table_Name = '{1}'", tableDescription.Schema, tableDescription.Name));
+                    AND Col.Table_Schema = @schema
+                    AND Col.Table_Name = @table_name");
 
-            var results = GetResults(dataSet);
+            var paramSchema = new SqlParameter {ParameterName = "@schema", Value = tableDescription.Schema};
+            command.Parameters.Add(paramSchema);
 
+            var paramTableName = new SqlParameter {ParameterName = "@table_name", Value = tableDescription.Name};
+            command.Parameters.Add(paramTableName);
+
+            var dataTable = ExecuteWithResults(command);
+            var results = GetResults(dataTable);
             var uniqueKeys = new List<UniqueDescription>();
             if (!results.Any()) return uniqueKeys;
 
@@ -404,7 +410,7 @@ namespace SqlServer {
         }
 
         public UniqueDescription GetUniqueKey(string uniqueKeyName, string schema) {
-            var dataSet = database.ExecuteWithResults(string.Format(@"
+            var command = new SqlCommand(@"
                 SELECT Col.TABLE_NAME, Col.COLUMN_NAME FROM
                     INFORMATION_SCHEMA.TABLE_CONSTRAINTS Tab,
                     INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE Col
@@ -412,10 +418,17 @@ namespace SqlServer {
                     Col.Constraint_Name = Tab.Constraint_Name
                     AND Col.Table_Name = Tab.Table_Name
                     AND Constraint_Type = 'UNIQUE'
-                    AND Col.Constraint_Name = '{0}'
-                    AND Col.TABLE_SCHEMA = '{1}'", uniqueKeyName, schema));
+                    AND Col.Constraint_Name = @unique_name
+                    AND Col.TABLE_SCHEMA = @schema");
 
-            var results = GetResults(dataSet);
+            var paramSchema = new SqlParameter { ParameterName = "@schema", Value = schema };
+            command.Parameters.Add(paramSchema);
+
+            var paramUniqueName = new SqlParameter { ParameterName = "@unique_name", Value = uniqueKeyName };
+            command.Parameters.Add(paramUniqueName);
+
+            var dataTable = ExecuteWithResults(command);
+            var results = GetResults(dataTable);
             if (!results.Any()) return null;
 
             var uniqueKey = new UniqueDescription {

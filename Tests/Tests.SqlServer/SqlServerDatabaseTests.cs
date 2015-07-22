@@ -430,6 +430,20 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void WhenTableHasQuotesInItsName_GetMethodMustReturnTheCorrespondingUniquey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](400) NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id),
+                CONSTRAINT UQ_TEST_description UNIQUE (description))");
+
+            var result = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST'TABLE"});
+
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual("UQ_TEST_description", result.Single().Name);
+        }
+
+        [Test]
         public void WhenUniqueKeyExists_GetMethodMustReturnTheCorrespondingKey() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
