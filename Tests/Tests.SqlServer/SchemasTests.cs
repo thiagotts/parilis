@@ -77,6 +77,16 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void IfSchemaHasQuotesInItsName_RemoveMethodMustRemoveTheSchema() {
+            Database.ExecuteNonQuery(@"CREATE SCHEMA [schema'1]");
+
+            schemas.Remove("schema'1");
+
+            var result = sqlServerDatabase.SchemaExists("schema'1");
+            Assert.IsFalse(result);
+        }
+
+        [Test]
         public void IfSchemaExistsAndHasTables_RemoveMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE SCHEMA schema1");
             Database.ExecuteNonQuery(@"CREATE TABLE [schema1].[TEST_TABLE](

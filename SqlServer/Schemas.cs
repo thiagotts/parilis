@@ -28,7 +28,9 @@ namespace SqlServer {
             if (SchemaIsReferenced(schemaName))
                 throw new ReferencedSchemaException();
 
-            Database.ExecuteNonQuery(string.Format(@"DROP SCHEMA {0}", schemaName));
+            var command = new SqlCommand(string.Format(@"DROP SCHEMA [{0}]", schemaName));
+
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         private bool SchemaIsReferenced(string schemaName) {
