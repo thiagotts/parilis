@@ -41,7 +41,9 @@ namespace SqlServer {
                 if (foreignKeys.Any()) throw new ReferencedTableException();
             }
 
-            Database.ExecuteNonQuery(string.Format(@"DROP TABLE [{0}].[{1}]", schema, tableName));
+            var command = new SqlCommand(string.Format(@"DROP TABLE [{0}].[{1}]", schema, tableName));
+
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         private bool TableNameIsValid(TableDescription tableDescription) {

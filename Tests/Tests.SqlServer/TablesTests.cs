@@ -6,7 +6,6 @@ using Core.Exceptions;
 using Core.Interfaces;
 using NUnit.Framework;
 using SqlServer.Enums;
-using Tests.Core;
 
 namespace Tests.SqlServer {
     [TestFixture]
@@ -25,14 +24,10 @@ namespace Tests.SqlServer {
         [SetUp]
         public void InitializeTest() {
             Database.Tables.Refresh();
-            var table = Database.Tables["TEST_TABLE_2"];
-            if (table != null) table.Drop();
-
-            table = Database.Tables["TEST_TABLE"];
-            if (table != null) table.Drop();
-
-            table = Database.Tables["TEST_TABLE", "testschema"];
-            if (table != null) table.Drop();
+            RemoveTable("TEST_TABLE_2");
+            RemoveTable("TEST'TABLE");
+            RemoveTable("TEST_TABLE");
+            RemoveTable("TEST_TABLE", "testschema");
         }
 
         private readonly string[] InvalidTableNames = Enums.GetDescriptions<Keyword>().Concat(new List<string> {
@@ -180,6 +175,19 @@ namespace Tests.SqlServer {
             tables.Remove("dbo", "TEST_TABLE");
 
             var table = sqlServerDatabase.GetTable("dbo", "TEST_TABLE");
+
+            Assert.IsNull(table);
+        }
+
+        [Test]
+        public void IfTableHasQuotesInItsName_RemoveMethodMustRemoveTheTable() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            tables.Remove("dbo", "TEST'TABLE");
+
+            var table = sqlServerDatabase.GetTable("dbo", "TEST'TABLE");
 
             Assert.IsNull(table);
         }
