@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using Castle.Core;
 using Core;
@@ -25,11 +26,13 @@ namespace SqlServer {
             primaryKey = SqlServerDatabase.GetPrimaryKey(primaryKeyDescription.Name, primaryKeyDescription.Schema);
             if (primaryKey != null) throw new InvalidConstraintNameException();
 
-            Database.ExecuteNonQuery(string.Format(@"
-                ALTER TABLE {0}.{1}
-                ADD CONSTRAINT {2} PRIMARY KEY ({3})",
+            var command = new SqlCommand(string.Format(@"
+                ALTER TABLE [{0}].[{1}]
+                ADD CONSTRAINT [{2}] PRIMARY KEY ({3})",
                 primaryKeyDescription.Schema, primaryKeyDescription.TableName,
-                primaryKeyDescription.Name, string.Join(",", primaryKeyDescription.Columns.Select(c => c.Name))));
+                primaryKeyDescription.Name, string.Join(",", primaryKeyDescription.Columns.Select(c => string.Format("[{0}]", c.Name)))));
+
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         public void RemovePrimaryKey(PrimaryKeyDescription primaryKeyDescription) {

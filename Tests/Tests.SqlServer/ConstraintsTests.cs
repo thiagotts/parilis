@@ -6,7 +6,6 @@ using Core.Exceptions;
 using Core.Interfaces;
 using NUnit.Framework;
 using SqlServer;
-using Tests.Core;
 
 namespace Tests.SqlServer {
     [TestFixture]
@@ -28,17 +27,11 @@ namespace Tests.SqlServer {
         [SetUp]
         public void InitializeTest() {
             Database.Tables.Refresh();
-            var table = Database.Tables["TEST_TABLE_2"];
-            if (table != null) table.Drop();
-
-            table = Database.Tables["TEST_TABLE"];
-            if (table != null) table.Drop();
-
-            table = Database.Tables["TEST_TABLE_2", "testschema"];
-            if (table != null) table.Drop();
-
-            table = Database.Tables["TEST_TABLE", "testschema"];
-            if (table != null) table.Drop();
+            RemoveTable("TEST_TABLE_2");
+            RemoveTable("TEST'TABLE");
+            RemoveTable("TEST_TABLE");
+            RemoveTable("TEST_TABLE_2", "testschema");
+            RemoveTable("TEST_TABLE", "testschema");
         }
 
         [Test]
@@ -57,6 +50,26 @@ namespace Tests.SqlServer {
             constraints.CreatePrimaryKey(primaryKey);
 
             var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "testschema", Name = "TEST_TABLE"});
+            Assert.IsNotNull(result);
+            Assert.AreEqual("PK_dbo_TEST_TABLE", result.Name);
+        }
+
+        [Test]
+        public void WhenTargetTableHasQuotesInItsName_CreateMethodMustCreateThePrimaryKey() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST'TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            var primaryKey = new PrimaryKeyDescription {
+                Schema = "testschema",
+                TableName = "TEST'TABLE",
+                Name = "PK_dbo_TEST_TABLE",
+                Columns = new List<ColumnDescription> {columnId}
+            };
+
+            constraints.CreatePrimaryKey(primaryKey);
+
+            var result = sqlServerDatabase.GetPrimaryKey(new TableDescription {Schema = "testschema", Name = "TEST'TABLE"});
             Assert.IsNotNull(result);
             Assert.AreEqual("PK_dbo_TEST_TABLE", result.Name);
         }

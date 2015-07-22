@@ -33,11 +33,6 @@ namespace Tests.SqlServer {
             RemoveTable("TEST_TABLE");
         }
 
-        private void RemoveTable(string tableName, string schema = null) {
-            var table = string.IsNullOrWhiteSpace(schema) ? Database.Tables[tableName] : Database.Tables[tableName, schema];
-            if (table != null) table.Drop();
-        }
-
         [Test]
         public void WhenColumnIsNotIdentity_GetColumnMustReturnColumnWithIsIdentityPropertySetToFalse() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](

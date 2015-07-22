@@ -40,6 +40,11 @@ namespace Tests.SqlServer {
             }
         }
 
+        protected void RemoveTable(string tableName, string schema = null) {
+            var table = string.IsNullOrWhiteSpace(schema) ? Database.Tables[tableName] : Database.Tables[tableName, schema];
+            if (table != null) table.Drop();
+        }
+
         private void InitializeServer() {
             var serverConnection = new ServerConnection(ServerHostname, User, Password);
             server = new Server(serverConnection);
