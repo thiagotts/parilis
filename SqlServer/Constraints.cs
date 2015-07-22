@@ -123,9 +123,11 @@ namespace SqlServer {
                                   d.TableName.Equals(defaultDescription.TableName, StringComparison.InvariantCultureIgnoreCase)))
                 throw new InvalidReferenceColumnException();
 
-            Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} ADD CONSTRAINT {2} DEFAULT {3} FOR {4}",
+            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] ADD CONSTRAINT [{2}] DEFAULT {3} FOR [{4}]",
                 defaultDescription.Schema, defaultDescription.TableName, defaultDescription.Name,
                 defaultDescription.DefaultValue, defaultDescription.Column.Name));
+
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         public void RemoveDefault(DefaultDescription defaultDescription) {

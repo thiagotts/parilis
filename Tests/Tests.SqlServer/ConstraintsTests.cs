@@ -935,6 +935,28 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void WhenTargetTableHasQuotesInItsName_CreateMethodMustCreateTheDefaultValue() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE](
+                [id] [bigint] NOT NULL,
+                [description] [nvarchar](max) NOT NULL,
+                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id));");
+
+            var column = CreateColumnDescription("description");
+
+            constraints.CreateDefault(new DefaultDescription {
+                Schema = "dbo",
+                TableName = "TEST'TABLE",
+                Name = "DEFAULT_TEST_TABLE_description",
+                Column = column,
+                DefaultValue = "'test'"
+            });
+
+            var defaultValue = sqlServerDatabase.GetDefault("DEFAULT_TEST_TABLE_description", "dbo");
+
+            Assert.IsNotNull(defaultValue);
+        }
+
+        [Test]
         public void WhenTargetTableAlreadyHasADefaultValueSetForTheColumn_CreateMethodMustThrowException() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
