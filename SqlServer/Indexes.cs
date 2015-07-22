@@ -33,8 +33,10 @@ namespace SqlServer {
             var index = SqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
             if (index == null) throw new IndexNotFoundException();
 
-            Database.ExecuteNonQuery(string.Format(@"DROP INDEX [{0}].[{1}].[{2}]",
+            var command = new SqlCommand(string.Format(@"DROP INDEX [{0}].[{1}].[{2}]",
                 indexDescription.Schema, indexDescription.TableName, indexDescription.Name));
+
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         private bool ReferencedColumnsAreInvalid(IndexDescription indexDescription) {

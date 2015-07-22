@@ -299,5 +299,25 @@ namespace Tests.SqlServer {
             index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "idx_TEST_TABLE_id");
             Assert.IsNull(index);
         }
+
+        [Test]
+        public void WhenTargetTableHasQuotesInItsName_RemoveMethosMustRemoveTheCorrespondentIndex() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE](
+                        [id] [bigint] NOT NULL,
+                        [id2] [bigint] NOT NULL);
+                        CREATE INDEX idx_TEST_TABLE_id ON [dbo].[TEST'TABLE](id, id2)");
+
+            var index = sqlServerDatabase.GetIndex("dbo", "TEST'TABLE", "idx_TEST_TABLE_id");
+            Assert.IsNotNull(index);
+
+            indexes.Remove(new IndexDescription {
+                Schema = "dbo",
+                TableName = "TEST'TABLE",
+                Name = "idx_TEST_TABLE_id"
+            });
+
+            index = sqlServerDatabase.GetIndex("dbo", "TEST'TABLE", "idx_TEST_TABLE_id");
+            Assert.IsNull(index);
+        }
     }
 }
