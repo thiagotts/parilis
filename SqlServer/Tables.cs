@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using Castle.Core;
 using Core;
@@ -24,8 +25,10 @@ namespace SqlServer {
                     column.IsIdentity ? "IDENTITY(1,1)" : string.Empty, column.AllowsNull ? "NULL" : "NOT NULL"));
             }
 
-            Database.ExecuteNonQuery(string.Format(@"CREATE TABLE [{0}].[{1}]({2})",
+            var command = new SqlCommand(string.Format(@"CREATE TABLE [{0}].[{1}]({2})",
                 tableDescription.Schema, tableDescription.Name, string.Join(",", columns)));
+
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         public void Remove(string schema, string tableName) {

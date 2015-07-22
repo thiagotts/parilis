@@ -66,6 +66,27 @@ namespace Tests.SqlServer {
         }
 
         [Test]
+        public void IfTTableHasQuotesInItsName_CreateMethodMustCreateTheTable() {
+            tables.Create(new TableDescription {
+                Schema = "dbo",
+                Name = "TEST'TABLE",
+                Columns = new List<ColumnDescription> {
+                    new ColumnDescription {
+                        Name = "id",
+                        Type = "varchar",
+                        Length = "150",
+                        AllowsNull = true
+                    }
+                }
+            });
+
+            var table = sqlServerDatabase.GetTable("dbo", "TEST'TABLE");
+
+            Assert.IsNotNull(table);
+            Assert.AreEqual("TEST'TABLE", table.Name);
+        }
+
+        [Test]
         public void IfThereIsAnotherTableWithTheSameNameInAnotherSchema_CreateMethodMustCreateTheTable() {
             Database.ExecuteNonQuery(@"CREATE TABLE [testschema].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
