@@ -134,8 +134,10 @@ namespace SqlServer {
             var defaultValue = SqlServerDatabase.GetDefault(defaultDescription.Name, defaultDescription.Schema);
             if (defaultValue == null) throw new ConstraintNotFoundException();
 
-            Database.ExecuteNonQuery(string.Format(@"ALTER TABLE {0}.{1} DROP CONSTRAINT {2}",
+            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] DROP CONSTRAINT [{2}]",
                 defaultDescription.Schema, defaultDescription.TableName, defaultDescription.Name));
+
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         private bool DescriptionIsValid(ForeignKeyDescription foreignKeyDescription) {
