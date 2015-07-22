@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using Castle.Core;
 using Core;
@@ -21,9 +22,11 @@ namespace SqlServer {
             var index = SqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
             if (index != null) throw new InvalidIndexNameException();
 
-            Database.ExecuteNonQuery(string.Format(@"CREATE {0} INDEX {1} ON {2}.{3} ({4})",
+            var command = new SqlCommand(string.Format(@"CREATE {0} INDEX [{1}] ON [{2}].[{3}] ({4})",
                 indexDescription.Unique ? "UNIQUE" : string.Empty, indexDescription.Name, indexDescription.Schema,
-                indexDescription.TableName, string.Join(",", indexDescription.Columns.Select(c => c.Name))));
+                indexDescription.TableName, string.Join(",", indexDescription.Columns.Select(c => string.Format("[{0}]", c.Name)))));
+
+            SqlServerDatabase.ExecuteNonQuery(command);
         }
 
         public void Remove(IndexDescription indexDescription) {

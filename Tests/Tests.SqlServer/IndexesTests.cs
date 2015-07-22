@@ -4,7 +4,6 @@ using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
 using NUnit.Framework;
-using Tests.Core;
 
 namespace Tests.SqlServer {
     [TestFixture]
@@ -28,11 +27,9 @@ namespace Tests.SqlServer {
 
         [TearDown]
         public void FinishTest() {
-            var table = Database.Tables["TEST_TABLE_2"];
-            if (table != null) table.Drop();
-
-            table = Database.Tables["TEST_TABLE"];
-            if (table != null) table.Drop();
+            RemoveTable("TEST_TABLE_2");
+            RemoveTable("TEST_TABLE");
+            RemoveTable("TEST'TABLE");
         }
 
         [Test]
@@ -50,6 +47,27 @@ namespace Tests.SqlServer {
             });
 
             var index = sqlServerDatabase.GetIndex("dbo", "TEST_TABLE", "idx_TEST_TABLE_id_id2");
+
+            Assert.IsNotNull(index);
+            Assert.AreEqual("idx_TEST_TABLE_id_id2", index.Name);
+            Assert.IsFalse(index.Unique);
+        }
+
+        [Test]
+        public void WhenTargetTableHasQuotesInItsName_CreateMethodMustCreateTheIndex() {
+            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE](
+                [id] [bigint] NOT NULL,
+                [id2] [bigint] NOT NULL,
+                [description] [nvarchar](max) NULL)");
+
+            indexes.Create(new IndexDescription {
+                Schema = "dbo",
+                TableName = "TEST'TABLE",
+                Name = "idx_TEST_TABLE_id_id2",
+                Columns = new List<ColumnDescription> {column, column2}
+            });
+
+            var index = sqlServerDatabase.GetIndex("dbo", "TEST'TABLE", "idx_TEST_TABLE_id_id2");
 
             Assert.IsNotNull(index);
             Assert.AreEqual("idx_TEST_TABLE_id_id2", index.Name);
