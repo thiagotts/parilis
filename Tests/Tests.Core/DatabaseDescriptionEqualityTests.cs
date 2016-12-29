@@ -11,7 +11,6 @@ namespace Tests.Core{
 
         private DatabaseDescription actualDatabase;
         private DatabaseDescription referenceDatabase;
-        private ActionIdentifier actionIdentifier;
 
         [TestFixtureSetUp]
         public override void InitializeClass(){
