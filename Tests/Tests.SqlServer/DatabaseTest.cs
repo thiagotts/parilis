@@ -1,5 +1,4 @@
 ﻿using System.Configuration;
-using System.Data.SqlClient;
 using Core;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
