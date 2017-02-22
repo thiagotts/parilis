@@ -6,7 +6,6 @@ using Core.Interfaces;
 using NUnit.Framework;
 using SqlServer;
 using SqlServer.Enums;
-using Tests.Core;
 
 namespace Tests.SqlServer {
     [TestFixture]

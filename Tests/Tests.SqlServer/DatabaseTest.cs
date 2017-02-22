@@ -1,4 +1,4 @@
-﻿using System.Data.SqlClient;
+﻿using System.Configuration;
 using Core;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
@@ -8,10 +8,11 @@ using Tests.Core;
 namespace Tests.SqlServer {
     [TestFixture]
     public class DatabaseTest : Test {
-        private const string ServerHostname = @"localhost\sqlexpress";
-        private const string DatabaseName = "TESTS_PARILIS";
-        private const string User = "parilis";
-        private const string Password = "yourpassword";
+        private readonly string serverHostname = ConfigurationManager.AppSettings["ServerHostname"];
+        private readonly string databaseName = ConfigurationManager.AppSettings["DatabaseName"];
+        private readonly string user = ConfigurationManager.AppSettings["User"];
+        private readonly string password = ConfigurationManager.AppSettings["Password"];
+
         private Server server;
         protected Database Database;
         protected ConnectionInfo ConnectionInfo;
@@ -22,16 +23,16 @@ namespace Tests.SqlServer {
             Database = CreateDatabase();
 
             ConnectionInfo = new ConnectionInfo {
-                HostName = ServerHostname,
-                DatabaseName = DatabaseName,
-                User = User,
-                Password = Password
+                HostName = serverHostname,
+                DatabaseName = databaseName,
+                User = user,
+                Password = password
             };
         }
 
         [TestFixtureTearDown]
         public void FinishClass() {
-            if (Database != null && server.Databases.Contains(DatabaseName)) {
+            if (Database != null && server.Databases.Contains(databaseName)) {
                 string query = string.Format(@"USE master
                                            ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE
                                            DROP DATABASE {0};", Database.Name);
@@ -46,17 +47,17 @@ namespace Tests.SqlServer {
         }
 
         private void InitializeServer() {
-            var serverConnection = new ServerConnection(ServerHostname, User, Password);
+            var serverConnection = new ServerConnection(serverHostname, user, password);
             server = new Server(serverConnection);
         }
 
         private Database CreateDatabase() {
             server.Databases.Refresh();
-            if (server.Databases.Contains(DatabaseName)) {
-                server.Databases[DatabaseName].Drop();
+            if (server.Databases.Contains(databaseName)) {
+                server.Databases[databaseName].Drop();
             }
 
-            var database = new Database(server, DatabaseName);
+            var database = new Database(server, databaseName);
             server.Databases.Add(database);
             database.Create();
 
