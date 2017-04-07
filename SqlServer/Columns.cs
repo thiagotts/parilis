@@ -58,8 +58,7 @@ namespace SqlServer {
             if (ColumnIsReferencedByAConstraint(column))
                 throw new ReferencedColumnException();
 
-            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] DROP COLUMN [{2}]",
-                column.Schema, column.TableName, column.Name));
+            var command = new SqlCommand($@"ALTER TABLE [{column.Schema}].[{column.TableName}] DROP COLUMN [{column.Name}]");
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }

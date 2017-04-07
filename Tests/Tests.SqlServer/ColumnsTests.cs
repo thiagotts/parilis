@@ -479,7 +479,7 @@ namespace Tests.SqlServer {
         public void IfTheTableDoesNotExist_RemoveMethodMustThrowException() {
             Assert.Throws<TableNotFoundException>(() => columns.Remove(new ColumnDescription {
                 Schema = "dbo",
-                TableName = "TEST_TABLE",
+                TableName = "TEST_TABLE1",
                 Name = "description"
             }));
         }

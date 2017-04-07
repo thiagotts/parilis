@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Castle.Core;
 using Core;
 using Core.Descriptions;
@@ -44,18 +45,17 @@ namespace SqlServer {
         }
 
         public IList<TableDescription> GetTables() {
-            database.Tables.Refresh();
+            database.Tables.Refresh(true);
             var tables = new List<TableDescription>();
 
             foreach (Table table in database.Tables) {
                 tables.Add(GetDescription(table));
             }
-
+           
             return tables;
         }
 
         public TableDescription GetTable(string schema, string tableName) {
-            database.Tables.Refresh();
             var table = database.Tables[tableName, schema];
             return table == null ? null : GetDescription(table);
         }
@@ -68,7 +68,7 @@ namespace SqlServer {
                                            WHERE TABLE_NAME = @table_name 
                                            AND TABLE_SCHEMA = @schema 
                                            AND COLUMN_NAME = @column_name");
-
+            
             var paramTableFullName = new SqlParameter {ParameterName = "@table_fullname", Value = string.Format("{0}.{1}", schema, tableName)};
             command.Parameters.Add(paramTableFullName);
 
@@ -98,8 +98,51 @@ namespace SqlServer {
             };
         }
 
-        public IList<IndexDescription> GetIndexes() {
-            database.Tables.Refresh();
+        public IList<ColumnDescription> GetColumns(string schema, string tableName, params string[] columnNames) {
+            var databaseTable = database.Tables[tableName,schema];
+            if (databaseTable == null)
+                return new List<ColumnDescription>();
+
+            var cmdText = @"SELECT COLUMN_NAME, IS_NULLABLE, columnproperty(object_id(@table_fullname), column_name, 'IsIdentity'), DATA_TYPE, CHARACTER_MAXIMUM_LENGTH 
+                                           FROM INFORMATION_SCHEMA.COLUMNS
+                                           WHERE TABLE_NAME = @table_name 
+                                           AND TABLE_SCHEMA = @schema ";
+
+            if (columnNames.Any()) {
+                cmdText += $"AND COLUMN_NAME IN ({string.Join(",", columnNames.Select(columnName => $"'{columnName}'"))})";                                 
+            }
+
+            var command = new SqlCommand(cmdText);
+            
+            var paramTableFullName = new SqlParameter {ParameterName = "@table_fullname", Value =
+                $"{schema}.{tableName}"
+            };
+            command.Parameters.Add(paramTableFullName);
+
+            var paramSchema = new SqlParameter {ParameterName = "@schema", Value = schema};
+            command.Parameters.Add(paramSchema);
+
+            var paramTableName = new SqlParameter {ParameterName = "@table_name", Value = tableName};
+            command.Parameters.Add(paramTableName);
+
+            var dataTable = ExecuteWithResults(command);
+            var results = GetResults(dataTable);
+            if (!results.Any()) return new List<ColumnDescription>();
+            
+            return results.Select(result => new ColumnDescription {
+                Schema = schema,
+                TableName = tableName,
+                Name = result[0],
+                AllowsNull = result[1].Equals("YES", StringComparison.InvariantCultureIgnoreCase),
+                IsIdentity = result[2].Equals("1", StringComparison.InvariantCultureIgnoreCase),
+                Type = result[3],
+                Length = result.Count > 3 ?
+                    result[4].Equals("-1") ? "max" : result[4]
+                    : null
+            }).ToList();
+        }
+
+        public IList<IndexDescription> GetIndexes() {            
             var indexes = new List<IndexDescription>();
 
             foreach (Table table in database.Tables) {
@@ -175,8 +218,7 @@ namespace SqlServer {
             if (!results.Any()) return null;
 
             var primaryKey = new PrimaryKeyDescription {Schema = table.Schema, TableName = table.Name, Name = results[0][0]};
-            primaryKey.Columns = new List<ColumnDescription>();
-
+            
             foreach (var result in results) {
                 primaryKey.Columns.Add(GetColumn(table.Schema, table.Name, result[1]));
             }
@@ -388,22 +430,29 @@ namespace SqlServer {
             var uniqueKeys = new List<UniqueDescription>();
             if (!results.Any()) return uniqueKeys;
 
-            foreach (var result in results) {
+            var uniques = results.GroupBy(result => result[0], (name, groups) => new {Name = name, Columns = groups.Select(group => group.ElementAt(1))});
+
+            foreach (var unique in uniques) {
                 UniqueDescription uniqueKey;
-                if (uniqueKeys.Any(f => f.Name.Equals(result[0]))) {
-                    uniqueKey = uniqueKeys.Single(f => f.Name.Equals(result[0]));
+                if (uniqueKeys.Any(f => f.Name.Equals(unique.Name)))
+                {
+                    uniqueKey = uniqueKeys.Single(f => f.Name.Equals(unique.Name));
                 }
-                else {
-                    uniqueKey = new UniqueDescription {
-                        Name = result[0],
+                else
+                {
+                    uniqueKey = new UniqueDescription
+                    {
+                        Name = unique.Name,
                         TableName = tableDescription.Name,
-                        Schema = tableDescription.Schema,
-                        Columns = new List<ColumnDescription>()
+                        Schema = tableDescription.Schema
                     };
                     uniqueKeys.Add(uniqueKey);
                 }
+                uniqueKey.Columns.AddRange(GetColumns(tableDescription.Schema, tableDescription.Name, unique.Columns.ToArray()));
+            }
 
-                uniqueKey.Columns.Add(GetColumn(tableDescription.Schema, tableDescription.Name, result[1]));
+            foreach (var result in results) {
+                
             }
 
             return uniqueKeys;
@@ -431,16 +480,15 @@ namespace SqlServer {
             var results = GetResults(dataTable);
             if (!results.Any()) return null;
 
+            var tableName = results[0][0];
             var uniqueKey = new UniqueDescription {
                 Name = uniqueKeyName,
                 Schema = schema,
-                TableName = results[0][0],
-                Columns = new List<ColumnDescription>()
+                TableName = tableName
             };
 
-            foreach (var result in results) {
-                uniqueKey.Columns.Add(GetColumn(schema, results[0][0], result[1]));
-            }
+            var columnNames = results.Select(tuple => tuple[1]).ToArray();
+            uniqueKey.Columns.AddRange(GetColumns(schema, tableName, columnNames));            
 
             return uniqueKey;
         }
@@ -502,15 +550,12 @@ namespace SqlServer {
         private TableDescription GetDescription(Table table) {
             var tableDescription = new TableDescription {
                 Name = table.Name,
-                Schema = table.Schema,
-                Columns = new List<ColumnDescription>()
+                Schema = table.Schema
             };
 
-            table.Columns.Refresh();
-            foreach (Column column in table.Columns) {
-                tableDescription.Columns.Add(GetColumn(table.Schema, table.Name, column.Name));
-            }
-
+            var tableColumnDescriptions = GetColumns(table.Schema, table.Name);
+            tableDescription.Columns.AddRange(tableColumnDescriptions);
+            
             return tableDescription;
         }
 
@@ -519,15 +564,13 @@ namespace SqlServer {
                 Schema = schema,
                 TableName = tableName,
                 Name = index.Name,
-                Unique = index.IsUnique,
-                Columns = new List<ColumnDescription>()
+                Unique = index.IsUnique
             };
 
             index.IndexedColumns.Refresh();
-            foreach (IndexedColumn indexedColumn in index.IndexedColumns) {
-                var columnDescription = GetColumn(schema, tableName, indexedColumn.Name);
-                indexDescription.Columns.Add(columnDescription);
-            }
+
+            var columnDescriptions = GetColumns(schema, tableName, index.IndexedColumns.Cast<IndexedColumn>().Select(col => col.Name).ToArray());
+            indexDescription.Columns.AddRange(columnDescriptions);
 
             return indexDescription;
         }
@@ -552,13 +595,12 @@ namespace SqlServer {
             var results = GetResults(dataTable);
             if (!results.Any()) return null;
 
-            var primaryKey = new PrimaryKeyDescription {Schema = schema, TableName = results[0][0], Name = primaryKeyName};
-            primaryKey.Columns = new List<ColumnDescription>();
+            var tableName = results[0][0];
+            var primaryKey = new PrimaryKeyDescription {Schema = schema, TableName = tableName, Name = primaryKeyName};
+            var columnNames = results.Select(tuple => tuple[1]).ToArray();
 
-            foreach (var result in results) {
-                primaryKey.Columns.Add(GetColumn(schema, results[0][0], result[1]));
-            }
-
+            primaryKey.Columns.AddRange(GetColumns(schema, tableName, columnNames));
+            
             return primaryKey;
         }
 
@@ -597,24 +639,25 @@ namespace SqlServer {
             return true;
         }
 
-        private bool ColumnExists(string schema, string tableName, string columnName) {
-            database.Tables.Refresh();
+        private bool ColumnExists(string schema, string tableName, string columnName) {            
             var table = database.Tables[tableName, schema];
-            if (table == null) return false;
-
-            table.Columns.Refresh(true);
-            var coluna = table.Columns[columnName];
+            if(string.IsNullOrWhiteSpace(columnName))
+                return false;
+            var coluna = table?.Columns[columnName];
             return coluna != null;
         }
 
         private DataTable ExecuteWithResults(SqlCommand command) {
-            command.Connection = new SqlConnection {ConnectionString = connectionString};
+            command.Connection = new SqlConnection {ConnectionString = $"{connectionString}; Connection Timeout=60"};
             var dataTable = new DataTable();
 
-            using (command) {
-                command.Connection.Open();
-                using (var reader = command.ExecuteReader()) {
-                    dataTable.Load(reader);
+            using (command.Connection) {
+                using (command) {
+                    command.Connection.Open();
+
+                    using (var reader = command.ExecuteReader()) {
+                        dataTable.Load(reader);
+                    }
                 }
             }
 
@@ -624,10 +667,11 @@ namespace SqlServer {
         internal void ExecuteNonQuery(SqlCommand command) {
             command.Connection = new SqlConnection { ConnectionString = connectionString };
 
-            using (command) {
-                command.Connection.Open();
-                command.ExecuteNonQuery();
-            }
+            using (command.Connection)
+                using (command) {
+                    command.Connection.Open();
+                    command.ExecuteNonQuery();
+                }
         }
 
         private List<List<string>> GetResults(DataTable dataTable) {

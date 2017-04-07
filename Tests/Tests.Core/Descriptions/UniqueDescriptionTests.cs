@@ -19,14 +19,14 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique1",
-                Columns = new List<ColumnDescription> {column1, column2}
+                Columns =  {column1, column2}
             };
 
             var unique2 = new UniqueDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique2",
-                Columns = new List<ColumnDescription> {column1, column2}
+                Columns =  {column1, column2}
             };
 
             var result = unique1.Equals(unique2);
@@ -40,14 +40,14 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                Columns = new List<ColumnDescription> {column1, column2}
+                Columns =  {column1, column2}
             };
 
             var unique2 = new UniqueDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                Columns = new List<ColumnDescription> {column1}
+                Columns =  {column1}
             };
 
             var result = unique1.Equals(unique2);
@@ -63,14 +63,14 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                Columns = new List<ColumnDescription> {column1, column2}
+                Columns =  {column1, column2}
             };
 
             var unique2 = new UniqueDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                Columns = new List<ColumnDescription> {column1, column3}
+                Columns =  {column1, column3}
             };
 
             var result = unique1.Equals(unique2);
@@ -84,14 +84,14 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                Columns = new List<ColumnDescription> {column1, column2}
+                Columns =  {column1, column2}
             };
 
             var unique2 = new UniqueDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                Columns = new List<ColumnDescription> {column1, column2}
+                Columns =  {column1, column2}
             };
 
             var result = unique1.Equals(unique2);
@@ -105,7 +105,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                Columns = new List<ColumnDescription> {column1, column2}
+                Columns =  {column1, column2}
             };
 
             var result = unique1.Equals(null);
@@ -119,14 +119,14 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "unique",
-                Columns = new List<ColumnDescription> {column1, column2}
+                Columns =  {column1, column2}
             };
 
             var index = new IndexDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                Columns = new List<ColumnDescription> {column1, column2},
+                Columns =  {column1, column2},
                 Unique = true
             };
 

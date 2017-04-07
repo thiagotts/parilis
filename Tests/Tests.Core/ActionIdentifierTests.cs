@@ -76,12 +76,12 @@ namespace Tests.Core {
         [Test]
         public void WhenActualDatabaseHasAUniqueKeyThatReferenceDatabaseDoesNot_MustReturnAUniqueRemovalAction() {
             var column = CreateColumnDescription();
-            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns = new List<ColumnDescription> {column}});
-            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> {column}});
-            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns = new List<ColumnDescription> {column}});
-            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns =  {column}});
+            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns =  {column}});
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns =  {column}});
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns =  {column}});
 
-            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique2", Columns =  {column}});
 
             var actions = actionIdentifier.GetActions();
 
@@ -98,10 +98,10 @@ namespace Tests.Core {
         public void WhenActualDatabaseHasAUniqueKeyWithTheSameNameButDifferentColumnDescription_MustReturnAUniqueRemovalAndAUniqueCreationAction() {
             var column1 = CreateColumnDescription();
             var column2 = CreateColumnDescription(allowsNull: false);
-            actualDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns = new List<ColumnDescription> { column1 } });
-            actualDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> { column1 } });
-            referenceDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns = new List<ColumnDescription> { column2 } });
-            referenceDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> { column1 } });
+            actualDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns =  { column1 } });
+            actualDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns =  { column1 } });
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns =  { column2 } });
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription { Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns =  { column1 } });
 
             var actions = actionIdentifier.GetActions();
 
@@ -144,12 +144,12 @@ namespace Tests.Core {
         [Test]
         public void WhenActualDatabaseHasAPrimaryKeyThatReferenceDatabaseDoesNot_MustReturnAPrimaryKeyRemovalAction() {
             var column = CreateColumnDescription();
-            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", Columns = new List<ColumnDescription> {column}});
-            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", Columns = new List<ColumnDescription> {column}});
-            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", Columns = new List<ColumnDescription> {column}});
-            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", Columns =  {column}});
+            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", Columns =  {column}});
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", Columns =  {column}});
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", Columns =  {column}});
 
-            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary2", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary2", Columns =  {column}});
 
             var actions = actionIdentifier.GetActions();
 
@@ -165,13 +165,13 @@ namespace Tests.Core {
         [Test]
         public void WhenActualDatabaseHasAnIndexThatReferenceDatabaseDoesNot_MustReturnAnIndexRemovalAction() {
             var column = CreateColumnDescription();
-            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", Columns = new List<ColumnDescription> {column}});
-            actualDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", Columns = new List<ColumnDescription> {column}});
-            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", Columns = new List<ColumnDescription> {column}});
-            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", Columns =  {column}});
+            actualDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", Columns =  {column}});
+            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", Columns =  {column}});
+            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", Columns =  {column}});
 
-            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE_2", Name = "index1", Columns = new List<ColumnDescription> {column}});
-            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index2", Columns = new List<ColumnDescription> {column}});
+            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE_2", Name = "index1", Columns =  {column}});
+            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index2", Columns =  {column}});
 
             var actions = actionIdentifier.GetActions();
 
@@ -189,16 +189,16 @@ namespace Tests.Core {
         [Test]
         public void WhenActualDatabaseHasAColumnThatReferenceDatabaseDoesNot_MustReturnAColumnRemovalAction() {
             actualDatabase.Tables.Add(new TableDescription {
-                Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
+                Schema = "dbo", Name = "TEST_TABLE", Columns = {
                     new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE", Type = "int"},
                     new ColumnDescription {Name = "column2", Schema = "dbo", TableName = "TEST_TABLE", Type = "int"}
                 }
             });
-            actualDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column2", Schema = "testschema", TableName = "TEST_TABLE", Type = "int"}}});
-            referenceDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE", Type = "int"}}});
-            referenceDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column2", Schema = "testschema", TableName = "TEST_TABLE", Type = "int"}}});
+            actualDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE", Columns =  {new ColumnDescription {Name = "column2", Schema = "testschema", TableName = "TEST_TABLE", Type = "int"}}});
+            referenceDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE", Columns =  {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE", Type = "int"}}});
+            referenceDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE", Columns =  {new ColumnDescription {Name = "column2", Schema = "testschema", TableName = "TEST_TABLE", Type = "int"}}});
 
-            actualDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE_2", Type = "int"}}});
+            actualDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2", Columns =  {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE_2", Type = "int"}}});
 
             var actions = actionIdentifier.GetActions();
 
@@ -249,7 +249,7 @@ namespace Tests.Core {
         public void WhenActualDatabaseHasAColumnWithDifferentDataTypeWhenComparedToReferenceDatabase_MustReturnAColumnModificationAction() {
             var actualColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "int"};
             actualDatabase.Tables.Add(new TableDescription {
-                Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
+                Schema = "dbo", Name = "TEST_TABLE", Columns =  {
                     actualColumn,
                     new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
                 }
@@ -257,7 +257,7 @@ namespace Tests.Core {
 
             var referenceColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "bigint"};
             referenceDatabase.Tables.Add(new TableDescription {
-                Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
+                Schema = "dbo", Name = "TEST_TABLE", Columns =  {
                     referenceColumn,
                     new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
                 }
@@ -276,7 +276,7 @@ namespace Tests.Core {
         public void WhenActualDatabaseHasAColumnWithDifferentMaximumSizeWhenComparedToReferenceDatabase_MustReturnAColumnModificationAction() {
             var actualColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", Length = "100"};
             actualDatabase.Tables.Add(new TableDescription {
-                Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
+                Schema = "dbo", Name = "TEST_TABLE", Columns =  {
                     actualColumn,
                     new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
                 }
@@ -284,7 +284,7 @@ namespace Tests.Core {
 
             var referenceColumn = new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column1", Type = "varchar", Length = "255"};
             referenceDatabase.Tables.Add(new TableDescription {
-                Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
+                Schema = "dbo", Name = "TEST_TABLE", Columns =  {
                     referenceColumn,
                     new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
                 }
@@ -305,7 +305,7 @@ namespace Tests.Core {
             actualDatabase.Tables.Add(new TableDescription {
                 Schema = "dbo",
                 Name = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     actualColumn,
                     new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
                 }
@@ -315,7 +315,7 @@ namespace Tests.Core {
             referenceDatabase.Tables.Add(new TableDescription {
                 Schema = "dbo",
                 Name = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     referenceColumn,
                     new ColumnDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "column2", Type = "int"}
                 }
@@ -369,16 +369,16 @@ namespace Tests.Core {
         [Test]
         public void WhenReferenceDatabaseHasAColumnThatActualDatabaseDoesNot_MustReturnAColumnCreationAction() {
             referenceDatabase.Tables.Add(new TableDescription {
-                Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {
+                Schema = "dbo", Name = "TEST_TABLE", Columns =  {
                     new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE", Type = "int"},
                     new ColumnDescription {Name = "column2", Schema = "dbo", TableName = "TEST_TABLE", Type = "int"}
                 }
             });
-            referenceDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column2", Schema = "testschema", TableName = "TEST_TABLE", Type = "int"}}});
-            actualDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE", Type = "int"}}});
-            actualDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column2", Schema = "testschema", TableName = "TEST_TABLE", Type = "int"}}});
+            referenceDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE", Columns =  {new ColumnDescription {Name = "column2", Schema = "testschema", TableName = "TEST_TABLE", Type = "int"}}});
+            actualDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE", Columns =  {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE", Type = "int"}}});
+            actualDatabase.Tables.Add(new TableDescription {Schema = "testschema", Name = "TEST_TABLE", Columns =  {new ColumnDescription {Name = "column2", Schema = "testschema", TableName = "TEST_TABLE", Type = "int"}}});
 
-            referenceDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2", Columns = new List<ColumnDescription> {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE_2", Type = "int"}}});
+            referenceDatabase.Tables.Add(new TableDescription {Schema = "dbo", Name = "TEST_TABLE_2", Columns =  {new ColumnDescription {Name = "column1", Schema = "dbo", TableName = "TEST_TABLE_2", Type = "int"}}});
 
             var actions = actionIdentifier.GetActions();
 
@@ -395,13 +395,13 @@ namespace Tests.Core {
         [Test]
         public void WhenReferenceDatabaseHasAnIndexThatActualDatabaseDoesNot_MustReturnAnIndexCreationAction() {
             var column = CreateColumnDescription();
-            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", Columns = new List<ColumnDescription> {column}});
-            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", Columns = new List<ColumnDescription> {column}});
-            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", Columns = new List<ColumnDescription> {column}});
-            actualDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", Columns =  {column}});
+            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", Columns =  {column}});
+            actualDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index1", Columns =  {column}});
+            actualDatabase.Indexes.Add(new IndexDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "index2", Columns =  {column}});
 
-            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE_2", Name = "index1", Columns = new List<ColumnDescription> {column}});
-            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index2", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE_2", Name = "index1", Columns =  {column}});
+            referenceDatabase.Indexes.Add(new IndexDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "index2", Columns =  {column}});
 
             var actions = actionIdentifier.GetActions();
 
@@ -419,12 +419,12 @@ namespace Tests.Core {
         [Test]
         public void WhenReferenceDatabaseHasAPrimaryKeyThatActualDatabaseDoesNot_MustReturnAPrimaryKeyCreationAction() {
             var column = CreateColumnDescription();
-            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", Columns = new List<ColumnDescription> {column}});
-            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", Columns = new List<ColumnDescription> {column}});
-            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", Columns = new List<ColumnDescription> {column}});
-            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", Columns =  {column}});
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", Columns =  {column}});
+            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary1", Columns =  {column}});
+            actualDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "primary2", Columns =  {column}});
 
-            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary2", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.PrimaryKeys.Add(new PrimaryKeyDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "primary2", Columns =  {column}});
 
             var actions = actionIdentifier.GetActions();
 
@@ -461,12 +461,12 @@ namespace Tests.Core {
         [Test]
         public void WhenReferenceDatabaseHasAUniqueKeyThatActualDatabaseDoesNot_MustReturnAUniqueCreationAction() {
             var column = CreateColumnDescription();
-            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns = new List<ColumnDescription> {column}});
-            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> {column}});
-            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns = new List<ColumnDescription> {column}});
-            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns =  {column}});
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns =  {column}});
+            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique1", Columns =  {column}});
+            actualDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "testschema", TableName = "TEST_TABLE", Name = "unique2", Columns =  {column}});
 
-            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique2", Columns = new List<ColumnDescription> {column}});
+            referenceDatabase.UniqueKeys.Add(new UniqueDescription {Schema = "dbo", TableName = "TEST_TABLE", Name = "unique2", Columns =  {column}});
 
             var actions = actionIdentifier.GetActions();
 
