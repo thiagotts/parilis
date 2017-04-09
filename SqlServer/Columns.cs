@@ -7,13 +7,12 @@ using Core;
 using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
-using Microsoft.SqlServer.Management.Smo;
 using SqlServer.Attributes;
 
 namespace SqlServer {
     [CastleComponent("SqlServer.Columns", typeof (IColumn), Lifestyle = LifestyleType.Transient)]
     public class Columns : SqlServerEntity, IColumn {
-        private IDictionary<string, AllowsLengthAttribute> dataTypeLengthProperties;
+        private readonly IDictionary<string, AllowsLengthAttribute> dataTypeLengthProperties;
 
         public Columns(ConnectionInfo database) {
             Initialize(database);
@@ -39,10 +38,13 @@ namespace SqlServer {
             if (!LengthIsValid(column))
                 throw new InvalidDataTypeException();
 
-            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] ADD [{2}] {3}{4} {5} {6}",
-                column.Schema, column.TableName, column.Name, column.Type,
-                string.IsNullOrWhiteSpace(column.Length) ? string.Empty : string.Format("({0})", column.Length),
-                column.IsIdentity ? "IDENTITY(1,1)" : string.Empty, column.AllowsNull ? "NULL" : "NOT NULL"));
+            var createColumnCommandText = $"ALTER TABLE [{column.Schema}].[{column.TableName}] " +
+                                          $"ADD [{column.Name}] " +
+                                          $"{column.Type}{(string.IsNullOrWhiteSpace(column.Length) ? string.Empty : $"({column.Length})")} " +
+                                          $"{(column.IsIdentity ? "IDENTITY(1,1)" : string.Empty)} " +
+                                          $"{(column.AllowsNull ? "NULL" : "NOT NULL")}";
+
+            var command = new SqlCommand(createColumnCommandText);
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }
@@ -58,7 +60,10 @@ namespace SqlServer {
             if (ColumnIsReferencedByAConstraint(column))
                 throw new ReferencedColumnException();
 
-            var command = new SqlCommand($@"ALTER TABLE [{column.Schema}].[{column.TableName}] DROP COLUMN [{column.Name}]");
+            var dropColumnCommandText = $"ALTER TABLE [{column.Schema}].[{column.TableName}] " +
+                                        $"DROP COLUMN [{column.Name}]";
+
+            var command = new SqlCommand(dropColumnCommandText);
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }
@@ -80,10 +85,12 @@ namespace SqlServer {
                 throw new InvalidDataTypeException();
 
             try {
-                var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] ALTER COLUMN [{2}] {3}{4} {5}",
-                    column.Schema, column.TableName, column.Name, column.Type,
-                    string.IsNullOrWhiteSpace(column.Length) ? string.Empty : string.Format("({0})", column.Length),
-                    column.AllowsNull ? "NULL" : "NOT NULL"));
+                var alterColumnCommandText = $"ALTER TABLE [{column.Schema}].[{column.TableName}] " +
+                                             $"ALTER COLUMN [{column.Name}] " +
+                                             $"{column.Type}{(string.IsNullOrWhiteSpace(column.Length) ? string.Empty : $"({column.Length})")} " +
+                                             $"{(column.AllowsNull ? "NULL" : "NOT NULL")}";
+
+                var command = new SqlCommand(alterColumnCommandText);
 
                 SqlServerDatabase.ExecuteNonQuery(command);
             }
@@ -91,7 +98,7 @@ namespace SqlServer {
                 if (ex.Number == 8114)
                     throw new InvalidDataTypeException("The existent values could not be converted to the new data type.");
 
-                else throw;
+                throw;
             }
         }
 

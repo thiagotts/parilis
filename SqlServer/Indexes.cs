@@ -22,9 +22,11 @@ namespace SqlServer {
             var index = SqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
             if (index != null) throw new InvalidIndexNameException();
 
-            var command = new SqlCommand(string.Format(@"CREATE {0} INDEX [{1}] ON [{2}].[{3}] ({4})",
-                indexDescription.Unique ? "UNIQUE" : string.Empty, indexDescription.Name, indexDescription.Schema,
-                indexDescription.TableName, string.Join(",", indexDescription.Columns.Select(c => string.Format("[{0}]", c.Name)))));
+            var createUniqueOrIndexCommandText = $@"CREATE {(indexDescription.Unique ? "UNIQUE" : string.Empty)} 
+                                                    INDEX [{indexDescription.Name}] ON [{indexDescription.Schema}].[{indexDescription.TableName}] 
+                                                    ({string.Join(",", indexDescription.Columns.Select(c => $"[{c.Name}]"))})";
+
+            var command = new SqlCommand(createUniqueOrIndexCommandText);
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }
@@ -33,8 +35,8 @@ namespace SqlServer {
             var index = SqlServerDatabase.GetIndex(indexDescription.Schema, indexDescription.TableName, indexDescription.Name);
             if (index == null) throw new IndexNotFoundException();
 
-            var command = new SqlCommand(string.Format(@"DROP INDEX [{0}].[{1}].[{2}]",
-                indexDescription.Schema, indexDescription.TableName, indexDescription.Name));
+            var dropIndexCommandText = $@"DROP INDEX [{indexDescription.Schema}].[{indexDescription.TableName}].[{indexDescription.Name}]";
+            var command = new SqlCommand(dropIndexCommandText);
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }

@@ -61,6 +61,7 @@
     <Compile Include="Schemas.cs" />
     <Compile Include="SqlServerDatabase.cs" />
     <Compile Include="SqlServerEntity.cs" />
+    <Compile Include="StringExtensions.cs" />
     <Compile Include="Tables.cs" />
   </ItemGroup>
   <ItemGroup>

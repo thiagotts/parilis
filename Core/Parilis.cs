@@ -18,7 +18,7 @@ namespace Core {
         public ParilisResult Run() {
             logger.Info("Parilis has started. Getting list of actions...");
             var actionQueue = actionIdentifier.GetActions();
-            logger.Info(string.Format("{0} actions were initially identified.", actionQueue.Count));
+            logger.Info($"{actionQueue.Count} actions were initially identified.");
 
             if (actionQueue.Count <= 0) {
                 logger.Info("Parilis has finished with no pending actions.");
@@ -44,7 +44,7 @@ namespace Core {
                 var actionCount = 0;
                 Action action;
                 while ((action = actionQueue.Pop()) != null) {
-                    logger.Info(string.Format("Action {0} of {1}: {2}", ++actionCount, actionQueue.TotalCount, action.Description));
+                    logger.Info($"Action {++actionCount} of {actionQueue.TotalCount}: {action.Description}");
                     action.Execute();
                 }
             }

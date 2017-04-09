@@ -15,9 +15,7 @@ namespace Core {
             TotalCount = 0;
         }
 
-        public int Count {
-            get { return Queue.Count; }
-        }
+        public int Count => Queue.Count;
 
         public virtual void Push(Action action) {
             if (action == null) throw new InvalidActionException();

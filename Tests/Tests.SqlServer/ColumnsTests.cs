@@ -339,7 +339,7 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void IfColumnhasQuotesInItsName_RemoveMethodMustRemoveTheColumn() {
+        public void IfColumnHasQuotesInItsName_RemoveMethodMustRemoveTheColumn() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description's] [nvarchar](max) NULL)");

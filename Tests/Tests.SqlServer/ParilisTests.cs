@@ -8,7 +8,7 @@ namespace Tests.SqlServer {
     [TestFixture]
     public class ParilisTests {
         
-        [Test]
+        [Ignore,Test]
         public void TestParilis() {
             var actual = new DatabaseDescription(new ConnectionInfo {
                 DatabaseName = "actual",
@@ -28,7 +28,7 @@ namespace Tests.SqlServer {
             parilis.Run();
         }
         
-        [Test] 
+        [Ignore, Test] 
         public void TestParilisBySchema() {
             var serverName = @"localhost\sqlserver";
             var userName = "parilis";

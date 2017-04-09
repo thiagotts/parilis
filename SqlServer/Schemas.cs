@@ -16,7 +16,7 @@ namespace SqlServer {
             if (SqlServerDatabase.SchemaExists(schemaName) || !SqlServerDatabase.IdentifierNameIsValid(schemaName))
                 throw new InvalidSchemaNameException();
 
-            var command = new SqlCommand(string.Format(@"CREATE SCHEMA [{0}]", schemaName));
+            var command = new SqlCommand($@"CREATE SCHEMA [{schemaName}]");
             
             SqlServerDatabase.ExecuteNonQuery(command);
         }
@@ -28,7 +28,7 @@ namespace SqlServer {
             if (SchemaIsReferenced(schemaName))
                 throw new ReferencedSchemaException();
 
-            var command = new SqlCommand(string.Format(@"DROP SCHEMA [{0}]", schemaName));
+            var command = new SqlCommand($@"DROP SCHEMA [{schemaName}]");
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }
