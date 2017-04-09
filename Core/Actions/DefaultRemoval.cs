@@ -8,12 +8,8 @@ namespace Core.Actions {
             this.DefaultDescription = defaultDescription;
         }
 
-        public override string Description {
-            get {
-                return string.Format("Removing default value constraint {0} in table {1}.",
-                    DefaultDescription.FullName, DefaultDescription.TableName);
-            }
-        }
+        public override string Description =>
+            $"Removing default value constraint {DefaultDescription.FullName} in table {DefaultDescription.TableName}.";
 
         internal override void Execute() {
             Constraints.RemoveDefault(DefaultDescription);

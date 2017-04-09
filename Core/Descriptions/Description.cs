@@ -9,7 +9,7 @@ namespace Core.Descriptions {
             if (!GetType().FullName.Equals(other.GetType().FullName)) return false;
             if (ReferenceEquals(this, other)) return true;
             var description = other as Description;
-            return FullName.Equals(description.FullName, StringComparison.InvariantCultureIgnoreCase);
+            return description != null && FullName.Equals(description.FullName, StringComparison.InvariantCultureIgnoreCase);
         }
 
         public override int GetHashCode() {

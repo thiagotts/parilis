@@ -10,12 +10,7 @@ namespace Core.Actions {
             this.connectionInfo = connectionInfo;
         }
 
-        public override string Description {
-            get {
-                return string.Format("Removing unique key {0} in table {1}.",
-                    UniqueDescription.FullName, UniqueDescription.TableName);
-            }
-        }
+        public override string Description => $"Removing unique key {UniqueDescription.FullName} in table {UniqueDescription.TableName}.";
 
         internal override void Execute() {
             var foreignKeys = Database.GetForeignKeysReferencing(UniqueDescription);

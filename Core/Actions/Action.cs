@@ -4,7 +4,7 @@
         internal abstract void Execute();
 
         public override string ToString() {
-            return string.Format("{0}: {1}", GetType().Name, Description);
+            return $"{GetType().Name}: {Description}";
         }
     }
 }

@@ -8,17 +8,13 @@
         public bool AllowsNull { get; set; }
         public bool IsIdentity { get; set; }
 
-        public override string FullName {
-            get {
-                return string.IsNullOrWhiteSpace(Schema) ?
-                    string.Format("{0}.{1}", TableName, Name) :
-                    string.Format("{0}.{1}.{2}", Schema, TableName, Name);
-            }
-        }
+        public override string FullName => string.IsNullOrWhiteSpace(Schema) 
+            ? $"{TableName}.{Name}"
+            : $"{Schema}.{TableName}.{Name}";
 
         public override bool Equals(object other) {
             if (!(other is ColumnDescription)) return false;
-            var columnDescription = other as ColumnDescription;
+            var columnDescription = (ColumnDescription) other;
             return base.Equals(other) &&
                    !string.IsNullOrWhiteSpace(Type) &&
                    Type.Equals(columnDescription.Type) &&
@@ -29,10 +25,10 @@
         }
 
         public override int GetHashCode() {
-            return base.GetHashCode() ^
-                   Type.GetHashCode() ^
-                   Length.GetHashCode() ^
-                   AllowsNull.GetHashCode();
+            return (base.GetHashCode() ^
+                   Type?.GetHashCode() ^
+                   Length?.GetHashCode() ^
+                   AllowsNull.GetHashCode()).Value;
         }
     }
 }

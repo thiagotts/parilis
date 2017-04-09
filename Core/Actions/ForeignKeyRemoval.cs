@@ -5,15 +5,11 @@ namespace Core.Actions {
         internal readonly ForeignKeyDescription ForeignKeyDescription;
 
         public ForeignKeyRemoval(ConnectionInfo connectionInfo, ForeignKeyDescription foreignKeyDescription) : base(connectionInfo) {
-            this.ForeignKeyDescription = foreignKeyDescription;
+            ForeignKeyDescription = foreignKeyDescription;
         }
 
-        public override string Description {
-            get {
-                return string.Format("Removing foreign key {0} in table {1}.",
-                    ForeignKeyDescription.FullName, ForeignKeyDescription.TableName);
-            }
-        }
+        public override string Description =>
+            $"Removing foreign key {ForeignKeyDescription.FullName} in table {ForeignKeyDescription.TableName}.";
 
         internal override void Execute() {
             Constraints.RemoveForeignKey(ForeignKeyDescription);

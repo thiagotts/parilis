@@ -4,6 +4,7 @@ using System.Linq;
 namespace Core.Descriptions {
     public class IndexDescription : Description {
         private List<ColumnDescription> columns;
+
         public string Schema { get; set; }
         public string TableName { get; set; }
         public string Name { get; set; }
@@ -26,7 +27,7 @@ namespace Core.Descriptions {
         }
 
         public override int GetHashCode() {
-            int hashCode = base.GetHashCode() ^ Unique.GetHashCode();
+            var hashCode = base.GetHashCode() ^ Unique.GetHashCode();
             foreach (var columnName in Columns) {
                 hashCode ^= columnName.GetHashCode();
             }

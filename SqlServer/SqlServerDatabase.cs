@@ -4,7 +4,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Castle.Core;
 using Core;
 using Core.Descriptions;
@@ -61,61 +60,28 @@ namespace SqlServer {
         }
 
         public ColumnDescription GetColumn(string schema, string tableName, string columnName) {
-            if (!ColumnExists(schema, tableName, columnName)) return null;
-
-            var command = new SqlCommand(@"SELECT IS_NULLABLE, columnproperty(object_id(@table_fullname), @column_name, 'IsIdentity'), DATA_TYPE, CHARACTER_MAXIMUM_LENGTH 
-                                           FROM INFORMATION_SCHEMA.COLUMNS
-                                           WHERE TABLE_NAME = @table_name 
-                                           AND TABLE_SCHEMA = @schema 
-                                           AND COLUMN_NAME = @column_name");
-            
-            var paramTableFullName = new SqlParameter {ParameterName = "@table_fullname", Value = string.Format("{0}.{1}", schema, tableName)};
-            command.Parameters.Add(paramTableFullName);
-
-            var paramSchema = new SqlParameter {ParameterName = "@schema", Value = schema};
-            command.Parameters.Add(paramSchema);
-
-            var paramTableName = new SqlParameter {ParameterName = "@table_name", Value = tableName};
-            command.Parameters.Add(paramTableName);
-
-            var paramColumnName = new SqlParameter {ParameterName = "@column_name", Value = columnName};
-            command.Parameters.Add(paramColumnName);
-
-            var dataTable = ExecuteWithResults(command);
-            var results = GetResults(dataTable);
-            if (!results.Any()) return null;
-
-            return new ColumnDescription {
-                Schema = schema,
-                TableName = tableName,
-                Name = columnName,
-                AllowsNull = results[0][0].Equals("YES", StringComparison.InvariantCultureIgnoreCase),
-                IsIdentity = results[0][1].Equals("1", StringComparison.InvariantCultureIgnoreCase),
-                Type = results[0][2],
-                Length = results[0].Count > 3 ?
-                    results[0][3].Equals("-1") ? "max" : results[0][3]
-                    : null,
-            };
+            return GetColumns(schema, tableName, columnName).FirstOrDefault();
         }
 
-        public IList<ColumnDescription> GetColumns(string schema, string tableName, params string[] columnNames) {
+        public IEnumerable<ColumnDescription> GetColumns(string schema, string tableName, params string[] columnNames) {
             var databaseTable = database.Tables[tableName,schema];
             if (databaseTable == null)
                 return new List<ColumnDescription>();
 
-            var cmdText = @"SELECT COLUMN_NAME, IS_NULLABLE, columnproperty(object_id(@table_fullname), column_name, 'IsIdentity'), DATA_TYPE, CHARACTER_MAXIMUM_LENGTH 
-                                           FROM INFORMATION_SCHEMA.COLUMNS
-                                           WHERE TABLE_NAME = @table_name 
-                                           AND TABLE_SCHEMA = @schema ";
+            var sqlQuery = @"SELECT COLUMN_NAME, IS_NULLABLE, columnproperty(object_id(@table_fullname), column_name, 'IsIdentity'), DATA_TYPE, CHARACTER_MAXIMUM_LENGTH 
+                          FROM INFORMATION_SCHEMA.COLUMNS
+                          WHERE TABLE_NAME = @table_name 
+                          AND TABLE_SCHEMA = @schema ";
 
             if (columnNames.Any()) {
-                cmdText += $"AND COLUMN_NAME IN ({string.Join(",", columnNames.Select(columnName => $"'{columnName}'"))})";                                 
+                sqlQuery += $"AND COLUMN_NAME IN ({string.Join(",", columnNames.Select(columnName => $"'{columnName}'"))})";                                 
             }
 
-            var command = new SqlCommand(cmdText);
+            var command = new SqlCommand(sqlQuery);
             
-            var paramTableFullName = new SqlParameter {ParameterName = "@table_fullname", Value =
-                $"{schema}.{tableName}"
+            var paramTableFullName = new SqlParameter {
+                ParameterName = "@table_fullname",
+                Value = $"{schema}.{tableName}"
             };
             command.Parameters.Add(paramTableFullName);
 
@@ -451,10 +417,6 @@ namespace SqlServer {
                 uniqueKey.Columns.AddRange(GetColumns(tableDescription.Schema, tableDescription.Name, unique.Columns.ToArray()));
             }
 
-            foreach (var result in results) {
-                
-            }
-
             return uniqueKeys;
         }
 
@@ -560,7 +522,7 @@ namespace SqlServer {
         }
 
         private IndexDescription GetDescription(Index index, string schema, string tableName) {
-            var indexDescription = new IndexDescription {
+            var indexDescription = new IndexDescription() {
                 Schema = schema,
                 TableName = tableName,
                 Name = index.Name,
@@ -615,10 +577,10 @@ namespace SqlServer {
                     throw new ArgumentException();
             }
 
-            var query = string.Format(@"SELECT COUNT(*)
-                                        FROM [{0}].[{1}]
-                                        GROUP BY {2}
-                                        HAVING COUNT(*) > 1", schema, tableName, string.Join(",", columnNames));
+            var query = $@"SELECT COUNT(*)
+                                        FROM [{schema}].[{tableName}]
+                                        GROUP BY {string.Join(",", columnNames)}
+                                        HAVING COUNT(*) > 1";
 
             var dataSet = database.ExecuteWithResults(query);
             var results = GetResults(dataSet);

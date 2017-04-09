@@ -5,15 +5,11 @@ namespace Core.Actions {
         internal readonly ForeignKeyDescription ForeignKeyDescription;
 
         public ForeignKeyCreation(ConnectionInfo connectionInfo, ForeignKeyDescription foreignKeyDescription) : base(connectionInfo) {
-            this.ForeignKeyDescription = foreignKeyDescription;
+            ForeignKeyDescription = foreignKeyDescription;
         }
 
-        public override string Description {
-            get {
-                return string.Format("Creating foreign key {0} in table {1}.",
-                    ForeignKeyDescription.FullName, ForeignKeyDescription.TableName);
-            }
-        }
+        public override string Description =>
+            $"Creating foreign key {ForeignKeyDescription.FullName} in table {ForeignKeyDescription.TableName}.";
 
         internal override void Execute() {
             Constraints.CreateForeignKey(ForeignKeyDescription);

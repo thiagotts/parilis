@@ -7,7 +7,7 @@ namespace Core.Actions {
         internal readonly IndexDescription IndexDescription;
 
         protected IndexAction(ConnectionInfo connectionInfo, IndexDescription indexDescription) {
-            this.IndexDescription = indexDescription;
+            IndexDescription = indexDescription;
             Indexes = Components.Instance.GetComponent<IIndex>(connectionInfo);
         }
     }
