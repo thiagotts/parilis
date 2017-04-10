@@ -1,5 +1,7 @@
-﻿using Core;
+﻿using System.Diagnostics;
+using Core;
 using Core.Descriptions;
+using log4net.Appender;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using NUnit.Framework;
@@ -28,7 +30,7 @@ namespace Tests.SqlServer {
             parilis.Run();
         }
         
-        [Test] 
+        [Ignore, Test] 
         public void TestParilisBySchema() {
             var serverName = @"localhost\sqlserver";
             var userName = "parilis";
@@ -58,6 +60,7 @@ namespace Tests.SqlServer {
             var referenceDescription = new DatabaseDescription(referenceConnectionInfo).FilterBySchema("dbo");
 
             var parilis = new Parilis(actualDescription, referenceDescription);
+            parilis.OnProgress += (progress, message) => { Debug.Write($"{progress}% - {message}");};
             parilis.Run();
         }
     }

@@ -6,9 +6,13 @@ using Core.Exceptions;
 using Action = Core.Actions.Action;
 
 namespace Core {
-    public class Parilis {
-        private readonly ActionIdentifier actionIdentifier;
-        private readonly Logger logger;
+
+    public delegate void ParilisProgressNotifier(double percentualProgress, string message);
+
+    public class Parilis : IDisposable {
+        private ActionIdentifier actionIdentifier;
+        private Logger logger;
+        public event ParilisProgressNotifier OnProgress;
 
         public Parilis(DatabaseDescription actualDatabase, DatabaseDescription referenceDatabase) {
             actionIdentifier = new ActionIdentifier(actualDatabase, referenceDatabase);
@@ -43,9 +47,12 @@ namespace Core {
             try {
                 var actionCount = 0;
                 Action action;
+                
                 while ((action = actionQueue.Pop()) != null) {
                     logger.Info($"Action {++actionCount} of {actionQueue.TotalCount}: {action.Description}");
                     action.Execute();
+                        
+                    Progress(Math.Round(actionCount/(double)actionQueue.TotalCount*100, 2), action.Description);
                 }
             }
             catch (ParilisException ex) {
@@ -68,6 +75,16 @@ namespace Core {
 
         public bool AreAlreadyEqual() {
             return actionIdentifier.GetActions().Count == 0;
+        }
+
+        protected virtual void Progress(double percentualprogress, string message) {
+            OnProgress?.Invoke(percentualprogress, message);
+        }
+
+        public void Dispose() {
+            OnProgress = null;
+            actionIdentifier = null;
+            logger = null;
         }
     }
 }
