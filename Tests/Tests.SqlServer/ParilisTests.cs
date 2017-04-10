@@ -28,7 +28,7 @@ namespace Tests.SqlServer {
             parilis.Run();
         }
         
-        [Ignore, Test] 
+        [Test] 
         public void TestParilisBySchema() {
             var serverName = @"localhost\sqlserver";
             var userName = "parilis";

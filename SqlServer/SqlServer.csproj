@@ -42,6 +42,7 @@
     <Reference Include="Microsoft.SqlServer.SqlEnum, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -50,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\AllowsLengthAttribute.cs" />
+    <Compile Include="Cache.cs" />
     <Compile Include="Columns.cs" />
     <Compile Include="Constraints.cs" />
     <Compile Include="Enums\Keyword.cs" />

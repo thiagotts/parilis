@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Text.RegularExpressions;
 using Castle.Core;
 using Core;
@@ -19,8 +20,9 @@ namespace SqlServer {
         private const string ConnectionStringPattern = @"Server={0};Database={1};User Id={2};Password={3};";
         private readonly string connectionString;
         private readonly Database database;
+        private Cache<ColumnDescription> memoryCache;
 
-        public SqlServerDatabase(ConnectionInfo connectionInfo) {
+        public SqlServerDatabase(ConnectionInfo connectionInfo, Cache<ColumnDescription> cache = null) {
             var serverConnection = new ServerConnection(connectionInfo.HostName, connectionInfo.User,
                 connectionInfo.Password);
             var server = new Server(serverConnection);
@@ -30,6 +32,8 @@ namespace SqlServer {
 
             connectionString = string.Format(ConnectionStringPattern,
                 connectionInfo.HostName, connectionInfo.DatabaseName, connectionInfo.User, connectionInfo.Password);
+
+            memoryCache = cache??new Cache<ColumnDescription>();
         }
 
         public IList<string> GetSchemas() {
@@ -67,6 +71,14 @@ namespace SqlServer {
             if (databaseTable == null)
                 return new List<ColumnDescription>();
 
+            var tableFullName = $"{schema}.{tableName}";
+            var cachedWithTableFullName = memoryCache.GetKeysStartedWith(tableFullName)                                                
+                                                     .ToList();
+
+            if (cachedWithTableFullName.Any()) {                
+                return cachedWithTableFullName.Where(column => columnNames.Contains(column.Name));
+            }
+
             var sqlQuery =
                 "SELECT COLUMN_NAME, IS_NULLABLE, columnproperty(object_id(@table_fullname), column_name, 'IsIdentity'), DATA_TYPE, CHARACTER_MAXIMUM_LENGTH " +
                 "FROM INFORMATION_SCHEMA.COLUMNS " +
@@ -81,7 +93,7 @@ namespace SqlServer {
 
             var paramTableFullName = new SqlParameter {
                 ParameterName = "@table_fullname",
-                Value = $"{schema}.{tableName}"
+                Value = tableFullName
             };
             command.Parameters.Add(paramTableFullName);
 
@@ -95,20 +107,25 @@ namespace SqlServer {
             var results = GetResults(dataTable);
             if (!results.Any()) return new List<ColumnDescription>();
 
-            return results.Select(result => new ColumnDescription {
-                    Schema = schema,
-                    TableName = tableName,
-                    Name = result[0],
-                    AllowsNull = result[1].Equals("YES", StringComparison.InvariantCultureIgnoreCase),
-                    IsIdentity = result[2].Equals("1", StringComparison.InvariantCultureIgnoreCase),
-                    Type = result[3],
-                    Length = result.Count > 3
-                        ? result[4].Equals("-1")
-                            ? "max"
-                            : result[4]
-                        : null
-                })
-                .ToList();
+            var columnDescriptions = results.Select(result => new ColumnDescription {
+                Schema = schema,
+                TableName = tableName,
+                Name = result[0],
+                AllowsNull = result[1].Equals("YES", StringComparison.InvariantCultureIgnoreCase),
+                IsIdentity = result[2].Equals("1", StringComparison.InvariantCultureIgnoreCase),
+                Type = result[3],
+                Length = result.Count > 3
+                    ? result[4].Equals("-1")
+                        ? "max"
+                        : result[4]
+                    : null
+            }).ToList();
+
+            foreach (var columnDescription in columnDescriptions) {
+                memoryCache.Add($"{tableFullName}.{columnDescription.Name}", columnDescription);
+            }
+
+            return columnDescriptions;
         }
 
         public IList<IndexDescription> GetIndexes() {

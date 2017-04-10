@@ -7,7 +7,7 @@ using Tests.Core;
 
 namespace Tests.SqlServer {
     [TestFixture]
-    public class DatabaseTest : Test {
+    public abstract class DatabaseTest : Test {
         private readonly string serverHostname = ConfigurationManager.AppSettings["ServerHostname"];
         private readonly string databaseName = ConfigurationManager.AppSettings["DatabaseName"];
         private readonly string user = ConfigurationManager.AppSettings["User"];
