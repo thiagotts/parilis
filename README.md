@@ -40,6 +40,16 @@ You can just get a list of modifications that need to be performed without actua
 ```csharp
 var actionsToBePerformed = parilis.GetActions();
 ```
+You can be notified when a modification is made. To do this, before call the Run method, simply register a lambda or delegate on the OnProgress event of the Parilis object to get the current runnning percentage and a message that describes the last executed action.
+
+```csharp
+var parilis = new Parilis(actualDescription, referenceDescription);
+parilis.OnProgress += (percentualProgress, message) => {
+   //percentualProgress is a double
+   view.UpdateProgress(percentualProgress, message);
+ };
+parilis.Run();
+```
 
 Finally, if your database has multiple schemas and you just want to make modifications to a single one, you can filter the database description like so:
 
