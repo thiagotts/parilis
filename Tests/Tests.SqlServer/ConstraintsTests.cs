@@ -45,7 +45,7 @@ namespace Tests.SqlServer {
                 Schema = "testschema",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnId}
+                Columns =  {columnId}
             };
 
             constraints.CreatePrimaryKey(primaryKey);
@@ -65,7 +65,7 @@ namespace Tests.SqlServer {
                 Schema = "testschema",
                 TableName = "TEST'TABLE",
                 Name = "PK_dbo_TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnId}
+                Columns =  {columnId}
             };
 
             constraints.CreatePrimaryKey(primaryKey);
@@ -86,7 +86,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnId}
+                Columns =  {columnId}
             };
 
             Assert.Throws<MultiplePrimaryKeysException>(() => constraints.CreatePrimaryKey(primaryKey));
@@ -107,7 +107,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                Columns = new List<ColumnDescription> {columnId}
+                Columns =  {columnId}
             };
 
             Assert.Throws<InvalidConstraintNameException>(() => constraints.CreatePrimaryKey(primaryKey));
@@ -128,7 +128,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                Columns = new List<ColumnDescription> {columnId}
+                Columns =  {columnId}
             };
 
             constraints.CreatePrimaryKey(primaryKey);
@@ -150,7 +150,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_TEST",
-                Columns = new List<ColumnDescription> {columnId}
+                Columns =  {columnId}
             };
 
             Assert.Throws<ConstraintNotFoundException>(() => constraints.RemovePrimaryKey(primaryKey));
@@ -167,7 +167,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                Columns = new List<ColumnDescription> {columnId}
+                Columns =  {columnId}
             };
 
             constraints.RemovePrimaryKey(primaryKey);
@@ -186,7 +186,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST'TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                Columns = new List<ColumnDescription> { columnId }
+                Columns =  { columnId }
             };
 
             constraints.RemovePrimaryKey(primaryKey);
@@ -212,7 +212,7 @@ namespace Tests.SqlServer {
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
                 Name = "PK_dbo_TEST_TABLE_id",
-                Columns = new List<ColumnDescription> {columnId}
+                Columns =  {columnId}
             };
 
             Assert.Throws<ReferencedConstraintException>(() => constraints.RemovePrimaryKey(primaryKey));
@@ -621,7 +621,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnDescription}
+                Columns =  {columnDescription}
             });
 
             var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
@@ -641,7 +641,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST'TABLE",
-                Columns = new List<ColumnDescription> { columnDescription }
+                Columns =  { columnDescription }
             });
 
             var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription { Schema = "dbo", Name = "TEST'TABLE" });
@@ -667,7 +667,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnDescription}
+                Columns =  {columnDescription}
             }));
         }
 
@@ -688,7 +688,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnDescription}
+                Columns =  {columnDescription}
             });
 
             var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
@@ -710,7 +710,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {column}
+                Columns =  {column}
             }));
         }
 
@@ -728,7 +728,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnDescription, columnDescription2}
+                Columns =  {columnDescription, columnDescription2}
             });
 
             var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
@@ -736,8 +736,8 @@ namespace Tests.SqlServer {
             Assert.AreEqual(1, uniqueKeys.Count);
             Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
             Assert.AreEqual(2, uniqueKeys.Single().Columns.Count);
-            Assert.AreEqual("description", uniqueKeys.Single().Columns.First().Name);
-            Assert.AreEqual("description2", uniqueKeys.Single().Columns.Last().Name);
+            Assert.IsTrue(uniqueKeys.Single().Columns.Any(col => col.Name == "description"));
+            Assert.IsTrue(uniqueKeys.Single().Columns.Any(col => col.Name == "description2"));
         }
 
         [Test]
@@ -751,7 +751,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnDescription, columnDescription}
+                Columns =  {columnDescription, columnDescription}
             }));
         }
 
@@ -761,7 +761,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnDescription}
+                Columns =  {columnDescription}
             }));
         }
 
@@ -786,7 +786,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {column}
+                Columns =  {column}
             }));
         }
 
@@ -807,7 +807,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnDescription, columnDescription2}
+                Columns =  {columnDescription, columnDescription2}
             }));
         }
 
@@ -828,7 +828,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnDescription, columnDescription2}
+                Columns =  {columnDescription, columnDescription2}
             });
 
             var uniqueKeys = sqlServerDatabase.GetUniqueKeys(new TableDescription {Schema = "dbo", Name = "TEST_TABLE"});
@@ -836,8 +836,8 @@ namespace Tests.SqlServer {
             Assert.AreEqual(1, uniqueKeys.Count);
             Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
             Assert.AreEqual(2, uniqueKeys.Single().Columns.Count);
-            Assert.AreEqual("description", uniqueKeys.Single().Columns.First().Name);
-            Assert.AreEqual("description2", uniqueKeys.Single().Columns.Last().Name);
+            Assert.IsTrue(uniqueKeys.Single().Columns.Any(col => col.Name == "description"));
+            Assert.IsTrue(uniqueKeys.Single().Columns.Any(col => col.Name == "description2"));
         }
 
         [Test]
@@ -846,7 +846,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnDescription}
+                Columns =  {columnDescription}
             }));
         }
 
@@ -868,7 +868,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnDescription}
+                Columns =  {columnDescription}
             }));
         }
 
@@ -884,7 +884,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {columnDescription}
+                Columns =  {columnDescription}
             });
 
             var uniqueKey = sqlServerDatabase.GetUniqueKey("UQ_TEST_description", "dbo");
@@ -904,7 +904,7 @@ namespace Tests.SqlServer {
                 Name = "UQ_TEST_description",
                 Schema = "dbo",
                 TableName = "TEST'TABLE",
-                Columns = new List<ColumnDescription> { columnDescription }
+                Columns =  { columnDescription }
             });
 
             var uniqueKey = sqlServerDatabase.GetUniqueKey("UQ_TEST_description", "dbo");

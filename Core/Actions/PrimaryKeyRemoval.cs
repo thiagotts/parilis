@@ -10,12 +10,7 @@ namespace Core.Actions {
             this.connectionInfo = connectionInfo;
         }
 
-        public override string Description {
-            get {
-                return string.Format("Removing primary key {0} in table {1}.",
-                    PrimaryKeyDescription.FullName, PrimaryKeyDescription.TableName);
-            }
-        }
+        public override string Description => $"Removing primary key {PrimaryKeyDescription.FullName} in table {PrimaryKeyDescription.TableName}.";
 
         internal override void Execute() {
             var foreignKeys = Database.GetForeignKeysReferencing(PrimaryKeyDescription);

@@ -25,9 +25,7 @@ namespace Core {
             internal set { instance = value; }
         }
 
-        public static IKernel Kernel {
-            get { return Instance.container.Kernel; }
-        }
+        public static IKernel Kernel => Instance.container.Kernel;
 
         public virtual T GetComponent<T>() {
             return Instance.container.Kernel.Resolve<T>();

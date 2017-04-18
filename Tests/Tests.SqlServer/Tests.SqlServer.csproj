@@ -58,6 +58,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <Choose>
@@ -74,15 +75,19 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ColumnsTests.cs" />
+    <Compile Include="DatabaseOperations.cs" />
     <Compile Include="DatabaseTest.cs" />
     <Compile Include="EnumsTests.cs" />
     <Compile Include="Facility.cs" />
     <Compile Include="IndexesTests.cs" />
     <Compile Include="ParilisTests.cs" />
+    <Compile Include="ParilisTestsBySchema.cs" />
+    <Compile Include="ProgressNotificationTest.cs" />
     <Compile Include="SchemasTests.cs" />
     <Compile Include="SqlServerDatabaseTests.cs" />
     <Compile Include="ConstraintsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringExtensionsTests.cs" />
     <Compile Include="TablesTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +107,11 @@
       <Project>{adfe312c-3aae-4c4d-aa2b-4e112f6128d4}</Project>
       <Name>Tests.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="reference\install-adventureworks.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

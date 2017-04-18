@@ -19,7 +19,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                Columns = new List<ColumnDescription> {column1, column2},
+                Columns =  {column1, column2},
                 Unique = true
             };
 
@@ -27,7 +27,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index2",
-                Columns = new List<ColumnDescription> {column1, column2},
+                Columns =  {column1, column2},
                 Unique = true
             };
 
@@ -42,7 +42,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                Columns = new List<ColumnDescription> {column1, column2},
+                Columns =  {column1, column2},
                 Unique = true
             };
 
@@ -50,7 +50,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                Columns = new List<ColumnDescription> {column1},
+                Columns =  {column1},
                 Unique = true
             };
 
@@ -65,7 +65,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                Columns = new List<ColumnDescription> {column1, column2},
+                Columns =  {column1, column2},
                 Unique = true
             };
 
@@ -74,7 +74,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                Columns = new List<ColumnDescription> {column1, column3},
+                Columns =  {column1, column3},
                 Unique = true
             };
 
@@ -89,7 +89,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                Columns = new List<ColumnDescription> {column1, column2},
+                Columns =  {column1, column2},
                 Unique = true
             };
 
@@ -97,7 +97,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                Columns = new List<ColumnDescription> {column1, column2},
+                Columns =  {column1, column2},
                 Unique = false
             };
 
@@ -112,7 +112,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                Columns = new List<ColumnDescription> {column1, column2},
+                Columns =  {column1, column2},
                 Unique = true
             };
 
@@ -120,7 +120,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                Columns = new List<ColumnDescription> {column1, column2},
+                Columns =  {column1, column2},
                 Unique = true
             };
 
@@ -135,7 +135,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                Columns = new List<ColumnDescription> {column1, column2},
+                Columns =  {column1, column2},
                 Unique = true
             };
 
@@ -150,7 +150,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "index1",
-                Columns = new List<ColumnDescription> {column1, column2},
+                Columns =  {column1, column2},
                 Unique = true
             };
 

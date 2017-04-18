@@ -15,11 +15,9 @@ namespace Core.Descriptions {
         internal IList<UniqueDescription> UniqueKeys { get; set; }
         internal IList<DefaultDescription> Defaults { get; set; }
 
-        private DatabaseDescription() {}
-
         public DatabaseDescription(ConnectionInfo connectionInfo) {
             var logger = new Logger();
-            logger.Info(string.Format("Getting description of database {0} on {1}", connectionInfo.DatabaseName, connectionInfo.HostName));
+            logger.Info($"Getting description of database {connectionInfo.DatabaseName} on {connectionInfo.HostName}");
 
             ConnectionInfo = connectionInfo;
             LoadDescription();
@@ -66,16 +64,12 @@ namespace Core.Descriptions {
             };
         }
 
-        public bool IsEmpty {
-            get {
-                return Schemas.IsNullOrEmpty()
-                       && Tables.IsNullOrEmpty()
-                       && Indexes.IsNullOrEmpty()
-                       && PrimaryKeys.IsNullOrEmpty()
-                       && ForeignKeys.IsNullOrEmpty()
-                       && UniqueKeys.IsNullOrEmpty()
-                       && Defaults.IsNullOrEmpty();
-            }
-        }
+        public bool IsEmpty => Schemas.IsNullOrEmpty()
+                               && Tables.IsNullOrEmpty()
+                               && Indexes.IsNullOrEmpty()
+                               && PrimaryKeys.IsNullOrEmpty()
+                               && ForeignKeys.IsNullOrEmpty()
+                               && UniqueKeys.IsNullOrEmpty()
+                               && Defaults.IsNullOrEmpty();
     }
 }

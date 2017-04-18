@@ -2,9 +2,7 @@
     internal class SchemaRemoval : SchemaAction {
         public SchemaRemoval(ConnectionInfo connectionInfo, string schemaName) : base(connectionInfo, schemaName) { }
 
-        public override string Description {
-            get { return string.Format("Removing schema {0}.", SchemaName); }
-        }
+        public override string Description => $"Removing schema {SchemaName}.";
 
         internal override void Execute() {
             Schemas.Remove(SchemaName);

@@ -3,11 +3,12 @@ using Core;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using NUnit.Framework;
+using SqlServer;
 using Tests.Core;
 
 namespace Tests.SqlServer {
     [TestFixture]
-    public class DatabaseTest : Test {
+    public abstract class DatabaseTest : Test {
         private readonly string serverHostname = ConfigurationManager.AppSettings["ServerHostname"];
         private readonly string databaseName = ConfigurationManager.AppSettings["DatabaseName"];
         private readonly string user = ConfigurationManager.AppSettings["User"];
@@ -43,7 +44,7 @@ namespace Tests.SqlServer {
 
         protected void RemoveTable(string tableName, string schema = null) {
             var table = string.IsNullOrWhiteSpace(schema) ? Database.Tables[tableName] : Database.Tables[tableName, schema];
-            if (table != null) table.Drop();
+            table?.Drop();
         }
 
         private void InitializeServer() {

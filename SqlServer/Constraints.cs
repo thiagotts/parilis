@@ -26,11 +26,11 @@ namespace SqlServer {
             primaryKey = SqlServerDatabase.GetPrimaryKey(primaryKeyDescription.Name, primaryKeyDescription.Schema);
             if (primaryKey != null) throw new InvalidConstraintNameException();
 
-            var command = new SqlCommand(string.Format(@"
-                ALTER TABLE [{0}].[{1}]
-                ADD CONSTRAINT [{2}] PRIMARY KEY ({3})",
-                primaryKeyDescription.Schema, primaryKeyDescription.TableName,
-                primaryKeyDescription.Name, string.Join(",", primaryKeyDescription.Columns.Select(c => string.Format("[{0}]", c.Name)))));
+            var createPkCommandText = $"ALTER TABLE [{primaryKeyDescription.Schema}].[{primaryKeyDescription.TableName}] " +
+                                      $"ADD CONSTRAINT [{primaryKeyDescription.Name}] " + 
+                                      $"PRIMARY KEY ({string.Join(",", primaryKeyDescription.Columns.Select(column => $"[{column.Name}]"))})";
+
+            var command = new SqlCommand(createPkCommandText);
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }
@@ -42,8 +42,10 @@ namespace SqlServer {
             var foreignKeys = SqlServerDatabase.GetForeignKeysReferencing(primaryKeyDescription);
             if (foreignKeys.Any()) throw new ReferencedConstraintException();
 
-            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] DROP CONSTRAINT [{2}]",
-                primaryKeyDescription.Schema, primaryKeyDescription.TableName, primaryKeyDescription.Name));
+            var dropPkCommandText = $"ALTER TABLE [{primaryKeyDescription.Schema}].[{primaryKeyDescription.TableName}] " +
+                                    $"DROP CONSTRAINT [{primaryKeyDescription.Name}]";
+
+            var command = new SqlCommand(dropPkCommandText);
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }
@@ -58,11 +60,13 @@ namespace SqlServer {
             if (!ReferencedColumnsAreValid(foreignKeyDescription))
                 throw new InvalidReferenceColumnException();
 
-            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] ADD CONSTRAINT [{2}] FOREIGN KEY ({3}) REFERENCES [{4}].[{5}]({6})",
-                foreignKeyDescription.Schema, foreignKeyDescription.TableName, foreignKeyDescription.Name,
-                string.Join(",", foreignKeyDescription.Columns.Select(c => string.Format("[{0}]", c.Key))),
-                foreignKeyDescription.Columns.Values.First().Schema, foreignKeyDescription.Columns.Values.First().TableName,
-                string.Join(",", foreignKeyDescription.Columns.Values.Select(v => string.Format("[{0}]", v.Name)))));
+            var createFkCommandText = $"ALTER TABLE [{foreignKeyDescription.Schema}].[{foreignKeyDescription.TableName}] "+
+                                      $"ADD CONSTRAINT [{foreignKeyDescription.Name}] " +
+                                      $"FOREIGN KEY ({string.Join(",", foreignKeyDescription.Columns.Select(column => $"[{column.Key}]"))}) " +
+                                      $"REFERENCES [{foreignKeyDescription.Columns.Values.First().Schema}].[{foreignKeyDescription.Columns.Values.First().TableName}] " +
+                                      $"({string.Join(",", foreignKeyDescription.Columns.Values.Select(column => $"[{column.Name}]"))})";
+
+            var command = new SqlCommand(createFkCommandText);
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }
@@ -78,8 +82,10 @@ namespace SqlServer {
                                         key.Name.Equals(foreignKeyDescription.Name)))
                 throw new ConstraintNotFoundException();
 
-            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] DROP CONSTRAINT [{2}]",
-                foreignKeyDescription.Schema, foreignKeyDescription.TableName, foreignKeyDescription.Name));
+            var dropFkCommandText = $"ALTER TABLE [{foreignKeyDescription.Schema}].[{foreignKeyDescription.TableName}] " +
+                                    $"DROP CONSTRAINT [{foreignKeyDescription.Name}]";
+
+            var command = new SqlCommand(dropFkCommandText);
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }
@@ -91,9 +97,11 @@ namespace SqlServer {
             if (!ReferencedColumnsAreValid(uniqueDescription))
                 throw new InvalidReferenceColumnException();
 
-            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] ADD CONSTRAINT [{2}] UNIQUE ({3})",
-                uniqueDescription.Schema, uniqueDescription.TableName, uniqueDescription.Name,
-                string.Join(",", uniqueDescription.Columns.Select(c => string.Format("[{0}]", c.Name)))));
+            var createUniqueCommnadText = $@"ALTER TABLE [{uniqueDescription.Schema}].[{uniqueDescription.TableName}] " +
+                                          $"ADD CONSTRAINT [{uniqueDescription.Name}] " +
+                                          $"UNIQUE ({string.Join(",", uniqueDescription.Columns.Select(column => $"[{column.Name}]"))})";
+
+            var command = new SqlCommand(createUniqueCommnadText);
             
             SqlServerDatabase.ExecuteNonQuery(command);
         }
@@ -105,8 +113,10 @@ namespace SqlServer {
             var foreignKeys = SqlServerDatabase.GetForeignKeysReferencing(uniqueDescription);
             if (foreignKeys.Any()) throw new ReferencedConstraintException();
 
-            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] DROP CONSTRAINT [{2}]",
-                uniqueDescription.Schema, uniqueDescription.TableName, uniqueDescription.Name));
+            var gropUniqueCommandText = $"ALTER TABLE [{uniqueDescription.Schema}].[{uniqueDescription.TableName}] " +
+                                        $"DROP CONSTRAINT [{uniqueDescription.Name}]";
+
+            var command = new SqlCommand(gropUniqueCommandText);
             
             SqlServerDatabase.ExecuteNonQuery(command);
         }
@@ -123,9 +133,12 @@ namespace SqlServer {
                                   d.TableName.Equals(defaultDescription.TableName, StringComparison.InvariantCultureIgnoreCase)))
                 throw new InvalidReferenceColumnException();
 
-            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] ADD CONSTRAINT [{2}] DEFAULT {3} FOR [{4}]",
-                defaultDescription.Schema, defaultDescription.TableName, defaultDescription.Name,
-                defaultDescription.DefaultValue, defaultDescription.Column.Name));
+            var crateDefaultCommandText = $"ALTER TABLE [{defaultDescription.Schema}].[{defaultDescription.TableName}] " +
+                                          $"ADD CONSTRAINT [{defaultDescription.Name}] "+
+                                          $"DEFAULT {defaultDescription.DefaultValue} " +
+                                          $"FOR [{defaultDescription.Column.Name}]";
+
+            var command = new SqlCommand(crateDefaultCommandText);
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }
@@ -134,8 +147,10 @@ namespace SqlServer {
             var defaultValue = SqlServerDatabase.GetDefault(defaultDescription.Name, defaultDescription.Schema);
             if (defaultValue == null) throw new ConstraintNotFoundException();
 
-            var command = new SqlCommand(string.Format(@"ALTER TABLE [{0}].[{1}] DROP CONSTRAINT [{2}]",
-                defaultDescription.Schema, defaultDescription.TableName, defaultDescription.Name));
+            var dropDefaultCommandText = $"ALTER TABLE [{defaultDescription.Schema}].[{defaultDescription.TableName}] " +
+                                         $"DROP CONSTRAINT [{defaultDescription.Name}]";
+
+            var command = new SqlCommand(dropDefaultCommandText);
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }

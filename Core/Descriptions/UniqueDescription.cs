@@ -3,15 +3,15 @@ using System.Linq;
 
 namespace Core.Descriptions {
     public class UniqueDescription : ConstraintDescription {
-        public IList<ColumnDescription> Columns { get; set; }
+        private List<ColumnDescription> columns;
 
-        public override string FullName {
-            get { return string.IsNullOrWhiteSpace(Schema) ? Name : string.Format("{0}.{1}", Schema, Name); }
-        }
+        public List<ColumnDescription> Columns => columns??(columns = new List<ColumnDescription>());
+
+        public override string FullName => string.IsNullOrWhiteSpace(Schema) ? Name : $"{Schema}.{Name}";
 
         public override bool Equals(object other) {
             if (!(other is UniqueDescription)) return false;
-            var uniqueDescription = other as UniqueDescription;
+            var uniqueDescription = (UniqueDescription) other;
 
             return base.Equals(other) &&
                    Columns != null &&

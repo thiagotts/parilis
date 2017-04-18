@@ -6,7 +6,7 @@ using Core.Descriptions;
 using Action = Core.Actions.Action;
 
 namespace Core {
-    internal class ActionIdentifier {
+    public class ActionIdentifier {
         private readonly DatabaseDescription actualDatabase;
         private readonly DatabaseDescription referenceDatabase;
         private readonly ConnectionInfo connectionInfo;
@@ -17,7 +17,7 @@ namespace Core {
             connectionInfo = actualDatabase.ConnectionInfo;
         }
 
-        internal ActionQueue GetActions() {
+        public virtual ActionQueue GetActions() {
             var actionQueue = Components.Instance.GetComponent<ActionQueue>();
             actionQueue.Clear();
             GetRemovals(actionQueue);

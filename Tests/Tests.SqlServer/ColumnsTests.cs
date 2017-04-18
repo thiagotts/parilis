@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Core;
 using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
 using NUnit.Framework;
+using SqlServer;
 using SqlServer.Enums;
 using Tests.Core;
 
@@ -26,6 +28,7 @@ namespace Tests.SqlServer {
             Database.Tables.Refresh();
             DropTable("TEST_TABLE_2");
             DropTable("TEST_TABLE");
+            ((SqlServerDatabase)sqlServerDatabase).ResetCache();
         }
 
         private void DropTable(string tableName) {
@@ -98,7 +101,7 @@ namespace Tests.SqlServer {
         public void WhenTargetTableDoesNotExist_CreateMethodMustThrowException() {
             Assert.Throws<TableNotFoundException>(() => columns.Create(new ColumnDescription {
                 Schema = "dbo",
-                TableName = "TEST_TABLE",
+                TableName = "NON_EXISTENT_TABLE",
                 Name = "id",
                 Type = "bigint"
             }));
@@ -339,7 +342,7 @@ namespace Tests.SqlServer {
         }
 
         [Test]
-        public void IfColumnhasQuotesInItsName_RemoveMethodMustRemoveTheColumn() {
+        public void IfColumnHasQuotesInItsName_RemoveMethodMustRemoveTheColumn() {
             Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
                 [id] [bigint] NOT NULL,
                 [description's] [nvarchar](max) NULL)");
@@ -479,7 +482,7 @@ namespace Tests.SqlServer {
         public void IfTheTableDoesNotExist_RemoveMethodMustThrowException() {
             Assert.Throws<TableNotFoundException>(() => columns.Remove(new ColumnDescription {
                 Schema = "dbo",
-                TableName = "TEST_TABLE",
+                TableName = "TEST_TABLE1",
                 Name = "description"
             }));
         }
@@ -580,18 +583,23 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenColumnsExistsAndIsReferencedByAForeignKey_ChangeTypeMethodMustThrowException() {
-            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
+            var random = new Random(1000);
+            var table1Name = $"TEST_TABLE_{random.Next()}";
+
+            Database.ExecuteNonQuery($@"CREATE TABLE [dbo].[{table1Name}](
                 [id] [int] NOT NULL,
                 CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
 
-            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE_2](
+            var table2Name = $"TEST_TABLE_{random.Next()}";
+
+            Database.ExecuteNonQuery($@"CREATE TABLE [dbo].[{table2Name}](
                 [id] [bigint] NOT NULL,
                 [id2] [int] NOT NULL,
-                CONSTRAINT FK_TEST FOREIGN KEY (id2) REFERENCES TEST_TABLE(id))");
+                CONSTRAINT FK_TEST FOREIGN KEY (id2) REFERENCES {table1Name}(id))");
 
             Assert.Throws<ReferencedColumnException>(() => columns.ChangeType(new ColumnDescription {
                 Schema = "dbo",
-                TableName = "TEST_TABLE_2",
+                TableName = table2Name,
                 Name = "id2",
                 Type = "bigint"
             }));
@@ -664,7 +672,7 @@ namespace Tests.SqlServer {
         public void WhenTableDoesNotExist_ChangeTypeMethodMustThrowException() {
             Assert.Throws<TableNotFoundException>(() => columns.ChangeType(new ColumnDescription {
                 Schema = "dbo",
-                TableName = "TEST_TABLE",
+                TableName = "TEST_TABLE_NOT_EXIST",
                 Name = "id",
                 Type = "bigint"
             }));

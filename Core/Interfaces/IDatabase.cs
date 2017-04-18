@@ -7,6 +7,7 @@ namespace Core.Interfaces {
         IList<TableDescription> GetTables();
         TableDescription GetTable(string schema, string tableName);
         ColumnDescription GetColumn(string schema, string tableName, string columnName);
+        IEnumerable<ColumnDescription> GetColumns(string schema, string tableName, params string[] columnNames);
         IList<IndexDescription> GetIndexes();
         IndexDescription GetIndex(string schema, string tableName, string indexName);
         IList<PrimaryKeyDescription> GetPrimaryKeys();
@@ -14,6 +15,6 @@ namespace Core.Interfaces {
         IList<ForeignKeyDescription> GetForeignKeysReferencing(ConstraintDescription constraintDescription);
         IList<ForeignKeyDescription> GetForeignKeysReferencing(ColumnDescription columnDescription);
         IList<UniqueDescription> GetUniqueKeys();
-        IList<DefaultDescription> GetDefaults();
+        IList<DefaultDescription> GetDefaults();        
     }
 }

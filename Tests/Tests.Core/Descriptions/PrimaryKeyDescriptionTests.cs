@@ -20,14 +20,14 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                Columns = new List<ColumnDescription> {column1, column2a}
+                Columns =  {column1, column2a}
             };
 
             var primaryKey2 = new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary2",
-                Columns = new List<ColumnDescription> {column1, column2a}
+                Columns =  {column1, column2a}
             };
 
             var result = primaryKey1.Equals(primaryKey2);
@@ -41,14 +41,14 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                Columns = new List<ColumnDescription> {column1, column2a}
+                Columns =  {column1, column2a}
             };
 
             var primaryKey2 = new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                Columns = new List<ColumnDescription> {column1}
+                Columns =  {column1}
             };
 
             var result = primaryKey1.Equals(primaryKey2);
@@ -62,14 +62,14 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                Columns = new List<ColumnDescription> {column1, column2a}
+                Columns =  {column1, column2a}
             };
 
             var primaryKey2 = new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                Columns = new List<ColumnDescription> {column1, column2b}
+                Columns =  {column1, column2b}
             };
 
             var result = primaryKey1.Equals(primaryKey2);
@@ -83,14 +83,14 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                Columns = new List<ColumnDescription> {column1, column2a}
+                Columns =  {column1, column2a}
             };
 
             var primaryKey2 = new PrimaryKeyDescription {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                Columns = new List<ColumnDescription> {column1, column2a}
+                Columns =  {column1, column2a}
             };
 
             var result = primaryKey1.Equals(primaryKey2);
@@ -104,7 +104,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                Columns = new List<ColumnDescription> {column1, column2a}
+                Columns =  {column1, column2a}
             };
 
             var result = primaryKey1.Equals(null);
@@ -118,7 +118,7 @@ namespace Tests.Core.Descriptions {
                 Schema = "dbo",
                 TableName = "Table1",
                 Name = "primary1",
-                Columns = new List<ColumnDescription> {column1, column2a}
+                Columns =  {column1, column2a}
             };
 
             var unique = new UniqueDescription {

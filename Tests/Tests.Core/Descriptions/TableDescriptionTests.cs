@@ -10,7 +10,7 @@ namespace Tests.Core.Descriptions {
             var table1 = new TableDescription {
                 Schema = "dbo",
                 Name = "Table1",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1"},
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column2"}
                 }
@@ -19,7 +19,7 @@ namespace Tests.Core.Descriptions {
             var table2 = new TableDescription {
                 Schema = "dbo",
                 Name = "Table2",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1"},
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column2"}
                 }
@@ -35,7 +35,7 @@ namespace Tests.Core.Descriptions {
             var table1 = new TableDescription {
                 Schema = "dbo",
                 Name = "Table1",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1"},
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column2"}
                 }
@@ -44,7 +44,7 @@ namespace Tests.Core.Descriptions {
             var table2 = new TableDescription {
                 Schema = "dbo",
                 Name = "Table1",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1"}
                 }
             };
@@ -59,7 +59,7 @@ namespace Tests.Core.Descriptions {
             var table1 = new TableDescription {
                 Schema = "dbo",
                 Name = "Table1",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1"},
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column2"}
                 }
@@ -68,7 +68,7 @@ namespace Tests.Core.Descriptions {
             var table2 = new TableDescription {
                 Schema = "dbo",
                 Name = "Table1",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1"},
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column3"}
                 }
@@ -84,7 +84,7 @@ namespace Tests.Core.Descriptions {
             var table1 = new TableDescription {
                 Schema = "dbo",
                 Name = "Table1",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1", Type = "int"},
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column2", Type = "int"}
                 }
@@ -93,7 +93,7 @@ namespace Tests.Core.Descriptions {
             var table2 = new TableDescription {
                 Schema = "dbo",
                 Name = "Table1",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1", Type = "int"},
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column2", Type = "int"}
                 }
@@ -109,7 +109,7 @@ namespace Tests.Core.Descriptions {
             var table1 = new TableDescription {
                 Schema = "dbo",
                 Name = "Table1",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1"},
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column2"}
                 }
@@ -125,7 +125,7 @@ namespace Tests.Core.Descriptions {
             var table1 = new TableDescription {
                 Schema = "dbo",
                 Name = "Table1",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column1"},
                     new ColumnDescription{Schema = "dbo", TableName = "Table1", Name = "column2"}
                 }

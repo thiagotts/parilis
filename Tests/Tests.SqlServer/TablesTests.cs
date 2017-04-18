@@ -39,7 +39,7 @@ namespace Tests.SqlServer {
             tables.Create(new TableDescription {
                 Schema = "dbo",
                 Name = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription {
                         Name = "id",
                         Type = "varchar",
@@ -65,7 +65,7 @@ namespace Tests.SqlServer {
             tables.Create(new TableDescription {
                 Schema = "dbo",
                 Name = "TEST'TABLE",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription {
                         Name = "id",
                         Type = "varchar",
@@ -90,7 +90,7 @@ namespace Tests.SqlServer {
             tables.Create(new TableDescription {
                 Schema = "dbo",
                 Name = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription {
                         Name = "id",
                         Type = "bigint"
@@ -113,7 +113,7 @@ namespace Tests.SqlServer {
             tables.Create(new TableDescription {
                 Schema = "dbo",
                 Name = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription {
                         Name = "id",
                         Type = "bigint",
@@ -143,7 +143,7 @@ namespace Tests.SqlServer {
             Assert.Throws<InvalidTableNameException>(() => tables.Create(new TableDescription {
                 Schema = "dbo",
                 Name = "TEST_TABLE",
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription {
                         Name = "id",
                         Type = "bigint"
@@ -157,7 +157,7 @@ namespace Tests.SqlServer {
             Assert.Throws<InvalidTableNameException>(() => tables.Create(new TableDescription {
                 Schema = "dbo",
                 Name = tableName,
-                Columns = new List<ColumnDescription> {
+                Columns =  {
                     new ColumnDescription {
                         Name = "id",
                         Type = "bigint"

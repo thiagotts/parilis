@@ -20,13 +20,11 @@ namespace SqlServer {
 
             var columns = new List<string>();
             foreach (var column in tableDescription.Columns ?? new List<ColumnDescription>()) {
-                columns.Add(string.Format("[{0}] [{1}]{2} {3} {4}", column.Name, column.Type,
-                    string.IsNullOrWhiteSpace(column.Length) ? string.Empty : string.Format("({0})", column.Length),
-                    column.IsIdentity ? "IDENTITY(1,1)" : string.Empty, column.AllowsNull ? "NULL" : "NOT NULL"));
+                var columnString = $"[{column.Name}] [{column.Type}]{(string.IsNullOrWhiteSpace(column.Length) ? string.Empty : $"({column.Length})")} {(column.IsIdentity ? "IDENTITY(1,1)" : string.Empty)} {(column.AllowsNull ? "NULL" : "NOT NULL")}";
+                columns.Add(columnString);
             }
 
-            var command = new SqlCommand(string.Format(@"CREATE TABLE [{0}].[{1}]({2})",
-                tableDescription.Schema, tableDescription.Name, string.Join(",", columns)));
+            var command = new SqlCommand($@"CREATE TABLE [{tableDescription.Schema}].[{tableDescription.Name}]({string.Join(",", columns)})");
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }
@@ -41,7 +39,7 @@ namespace SqlServer {
                 if (foreignKeys.Any()) throw new ReferencedTableException();
             }
 
-            var command = new SqlCommand(string.Format(@"DROP TABLE [{0}].[{1}]", schema, tableName));
+            var command = new SqlCommand($@"DROP TABLE [{schema}].[{tableName}]");
 
             SqlServerDatabase.ExecuteNonQuery(command);
         }

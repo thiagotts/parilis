@@ -4,7 +4,6 @@ using Core.Descriptions;
 using Core.Interfaces;
 using NUnit.Framework;
 using SqlServer;
-using Tests.Core;
 
 namespace Tests.SqlServer {
     [TestFixture]
@@ -30,20 +29,9 @@ namespace Tests.SqlServer {
             RemoveTable("TEST'TABLE");
             RemoveTable("TEST_TABLE", "testschema");
             RemoveTable("TEST'TABLE_2");
-            RemoveTable("TEST_TABLE");
+            RemoveTable("TEST_TABLE");            
         }
 
-        [Test]
-        public void WhenColumnIsNotIdentity_GetColumnMustReturnColumnWithIsIdentityPropertySetToFalse() {
-            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST_TABLE](
-                [id] [bigint] NOT NULL,
-                [description] [nvarchar](max) NULL,
-                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
-
-            var column = sqlServerDatabase.GetColumn("dbo", "TEST_TABLE", "id");
-
-            Assert.IsFalse(column.IsIdentity);
-        }
 
         [Test]
         public void WhenColumnIsIdentity_GetColumnMustReturnColumnWithIsIdentityPropertySetToTrue() {

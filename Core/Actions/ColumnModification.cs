@@ -8,16 +8,10 @@ namespace Core.Actions {
             this.connectionInfo = connectionInfo;
         }
 
-        public override string Description {
-            get {
-                return string.Format("Modifying column {0} to type {1}.",
-                    ColumnDescription.FullName,
-                    string.Format("{0}{1} ({2})",
-                        ColumnDescription.Type,
-                        string.IsNullOrWhiteSpace(ColumnDescription.Length) ? string.Empty : string.Format("({0})", ColumnDescription.Length),
-                        ColumnDescription.AllowsNull ? "Allows null values" : "Does not allow null values"));
-            }
-        }
+        public override string Description =>
+            $"Modifying column {ColumnDescription.FullName} to type {ColumnDescription.Type}" +
+            $"{(string.IsNullOrWhiteSpace(ColumnDescription.Length) ? string.Empty : $" ({ColumnDescription.Length})")}" +
+            $" ({(ColumnDescription.AllowsNull ? "Allows null values" : "Does not allow null values")}).";
 
         internal override void Execute() {
             var foreignKeys = Database.GetForeignKeysReferencing(ColumnDescription);

@@ -3,15 +3,15 @@ using System.Linq;
 
 namespace Core.Descriptions {
     public class PrimaryKeyDescription : ConstraintDescription {
-        public IList<ColumnDescription> Columns { get; set; }
+        private List<ColumnDescription> columns;
 
-        public override string FullName {
-            get { return string.IsNullOrWhiteSpace(Schema) ? Name : string.Format("{0}.{1}", Schema, Name); }
-        }
+        public List<ColumnDescription> Columns => columns ?? (columns = new List<ColumnDescription>());
+
+        public override string FullName => string.IsNullOrWhiteSpace(Schema) ? Name : $"{Schema}.{Name}";
 
         public override bool Equals(object other) {
             if (!(other is PrimaryKeyDescription)) return false;
-            var indexDescription = other as PrimaryKeyDescription;
+            var indexDescription = (PrimaryKeyDescription) other;
             return base.Equals(other) &&
                    Columns != null &&
                    Columns.Count > 0 &&
