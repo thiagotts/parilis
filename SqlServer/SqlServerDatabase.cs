@@ -19,9 +19,9 @@ namespace SqlServer {
         private const string ConnectionStringPattern = @"Server={0};Database={1};User Id={2};Password={3};";
         private readonly string connectionString;
         private readonly Database database;
-        private Cache<ColumnDescription> memoryCache;
+        //private ColumnCache memoryCache;
 
-        public SqlServerDatabase(ConnectionInfo connectionInfo, Cache<ColumnDescription> cache = null) {
+        public SqlServerDatabase(ConnectionInfo connectionInfo/*, ColumnCache cache = null*/) {
             var serverConnection = new ServerConnection(connectionInfo.HostName, connectionInfo.User,
                 connectionInfo.Password);
             var server = new Server(serverConnection);
@@ -32,7 +32,7 @@ namespace SqlServer {
             connectionString = string.Format(ConnectionStringPattern,
                 connectionInfo.HostName, connectionInfo.DatabaseName, connectionInfo.User, connectionInfo.Password);
 
-            memoryCache = cache??new Cache<ColumnDescription>();
+            //memoryCache = cache ?? Components.Instance.GetComponent<ColumnCache>();
         }
 
         public IList<string> GetSchemas() {
@@ -71,12 +71,12 @@ namespace SqlServer {
                 return new List<ColumnDescription>();
 
             var tableFullName = $"{schema}.{tableName}";
-            var cachedWithTableFullName = memoryCache.GetKeysStartedWith(tableFullName)                                                
-                                                     .ToList();
+            //var cachedWithTableFullName = memoryCache.Get(columnNames.Select(colName => $"{tableFullName}.{colName}").ToArray())                                                                                                     
+            //                                         .ToList();
 
-            if (cachedWithTableFullName.Any()) {                
-                return cachedWithTableFullName.Where(column => columnNames.Contains(column.Name));
-            }
+            //if (cachedWithTableFullName.Any()) {                
+            //    return cachedWithTableFullName;
+            //}
 
             var sqlQuery =
                 "SELECT COLUMN_NAME, IS_NULLABLE, columnproperty(object_id(@table_fullname), column_name, 'IsIdentity'), DATA_TYPE, CHARACTER_MAXIMUM_LENGTH " +
@@ -120,9 +120,9 @@ namespace SqlServer {
                     : null
             }).ToList();
 
-            foreach (var columnDescription in columnDescriptions) {
-                memoryCache.Add($"{tableFullName}.{columnDescription.Name}", columnDescription);
-            }
+            //foreach (var columnDescription in columnDescriptions) {
+            //    memoryCache.Add($"{tableFullName}.{columnDescription.Name}", columnDescription);
+            //}
 
             return columnDescriptions;
         }
@@ -737,6 +737,10 @@ namespace SqlServer {
             database.Schemas.Refresh();
             var schema = database.Schemas[schemaName];
             return schema != null;
+        }
+
+        internal void ResetCache() {
+            //memoryCache.Reset();
         }
     }
 }

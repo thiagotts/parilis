@@ -3,6 +3,7 @@ using Core;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using NUnit.Framework;
+using SqlServer;
 using Tests.Core;
 
 namespace Tests.SqlServer {
@@ -43,7 +44,7 @@ namespace Tests.SqlServer {
 
         protected void RemoveTable(string tableName, string schema = null) {
             var table = string.IsNullOrWhiteSpace(schema) ? Database.Tables[tableName] : Database.Tables[tableName, schema];
-            if (table != null) table.Drop();
+            table?.Drop();
         }
 
         private void InitializeServer() {

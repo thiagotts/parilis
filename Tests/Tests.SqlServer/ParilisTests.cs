@@ -1,53 +1,43 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using Core;
 using Core.Descriptions;
-using log4net.Appender;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using NUnit.Framework;
+using Tests.Core.Actions;
 
 namespace Tests.SqlServer {
     [TestFixture]
     public class ParilisTests {
-        
-        [Ignore,Test]
-        public void TestParilis() {
-            var actual = new DatabaseDescription(new ConnectionInfo {
-                DatabaseName = "actual",
-                HostName = @"localhost\sqlserver",
-                User = "parilis",
-                Password = "yourpassword"
-            });
+        string referenceDatabaseName = "reference";
+        string actualDatabaseName = "actual";
+        private SqlConnectionInfo sqlconnectionInfo;
+        private Server server;
+        string serverName = @"localhost\sqlserver";
+        string userName = "parilis";
+        string password = "yourpassword";
 
-            var reference = new DatabaseDescription(new ConnectionInfo {
-                DatabaseName = "reference",
-                HostName = @"localhost\sqlserver",
-                User = "parilis",
-                Password = "yourpassword"
-            });
+        [TestFixtureSetUp]
+        public void FixtureSetUp() {
+            sqlconnectionInfo = new SqlConnectionInfo(serverName, userName, password);
+            server = new Server(new ServerConnection(sqlconnectionInfo));
 
-            var parilis = new Parilis(actual, reference);
-            parilis.Run();
+            DatabaseOperations.Drop(server, referenceDatabaseName);
+            DatabaseOperations.Drop(server, actualDatabaseName);
         }
-        
-        [Ignore, Test] 
-        public void TestParilisBySchema() {
-            var serverName = @"localhost\sqlserver";
-            var userName = "parilis";
-            var password = "yourpassword";
 
-            var sqlconnectionInfo = new SqlConnectionInfo(serverName, userName, password);
-            var server = new Server(new ServerConnection(sqlconnectionInfo));
-            var actualDatabaseName = "actual";
+        [Ignore, Test]
+        public void WhenRunPassingAnEmptyActualDbAgainstAdventureWorksAsReferenceDb_ShouldCreate68TableOnActualDb() {
             DatabaseOperations.Create(server, actualDatabaseName);
             var actualDescription = new DatabaseDescription(new ConnectionInfo {
                 DatabaseName = actualDatabaseName,
                 HostName = serverName,
                 User = userName,
                 Password = password
-            }).FilterBySchema("dbo");
+            });
 
-            var referenceDatabaseName = "reference";
             var referenceConnectionInfo = new ConnectionInfo {
                 DatabaseName = referenceDatabaseName,
                 HostName = serverName,
@@ -55,13 +45,20 @@ namespace Tests.SqlServer {
                 Password = password
             };
             var referenceDatabase = DatabaseOperations.Create(server, referenceDatabaseName);
-            new DatabaseOperations(referenceDatabase).CreateSchemaTablesFrom("dbo", "reference");
+            new DatabaseOperations(referenceDatabase).CreateFromFile(@"reference\install-adventureworks.sql");
 
-            var referenceDescription = new DatabaseDescription(referenceConnectionInfo).FilterBySchema("dbo");
+            var referenceDescription = new DatabaseDescription(referenceConnectionInfo);
 
             var parilis = new Parilis(actualDescription, referenceDescription);
-            parilis.OnProgress += (progress, message) => { Debug.Write($"{progress}% - {message}");};
             parilis.Run();
-        }
+
+            server.Refresh();
+            var database = server.Databases[actualDatabaseName];
+            database.Refresh();
+            database.Tables.Refresh();
+            var qtySchemaTables = database.Tables.Count;
+
+            Assert.That(qtySchemaTables, Is.EqualTo(68));
+        }        
     }
 }

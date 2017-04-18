@@ -15,6 +15,6 @@ namespace Core.Interfaces {
         IList<ForeignKeyDescription> GetForeignKeysReferencing(ConstraintDescription constraintDescription);
         IList<ForeignKeyDescription> GetForeignKeysReferencing(ColumnDescription columnDescription);
         IList<UniqueDescription> GetUniqueKeys();
-        IList<DefaultDescription> GetDefaults();
+        IList<DefaultDescription> GetDefaults();        
     }
 }

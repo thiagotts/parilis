@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Core;
+﻿using Core;
 using Core.Descriptions;
 using Core.Exceptions;
 using Core.Interfaces;
@@ -55,19 +54,21 @@ namespace Tests.SqlServer {
 
         [Test]
         public void WhenTargetTableHasQuotesInItsName_CreateMethodMustCreateTheIndex() {
-            Database.ExecuteNonQuery(@"CREATE TABLE [dbo].[TEST'TABLE](
+            var testTable1 = "TEST'TABLE1";
+
+            Database.ExecuteNonQuery($@"CREATE TABLE [dbo].[{testTable1}](
                 [id] [bigint] NOT NULL,
                 [id2] [bigint] NOT NULL,
                 [description] [nvarchar](max) NULL)");
-
+            
             indexes.Create(new IndexDescription {
                 Schema = "dbo",
-                TableName = "TEST'TABLE",
+                TableName = testTable1,
                 Name = "idx_TEST_TABLE_id_id2",
                 Columns =  {column, column2}
             });
 
-            var index = sqlServerDatabase.GetIndex("dbo", "TEST'TABLE", "idx_TEST_TABLE_id_id2");
+            var index = sqlServerDatabase.GetIndex("dbo", testTable1, "idx_TEST_TABLE_id_id2");
 
             Assert.IsNotNull(index);
             Assert.AreEqual("idx_TEST_TABLE_id_id2", index.Name);

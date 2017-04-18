@@ -14,8 +14,8 @@ namespace Core {
         private Logger logger;
         public event ParilisProgressNotifier OnProgress;
 
-        public Parilis(DatabaseDescription actualDatabase, DatabaseDescription referenceDatabase) {
-            actionIdentifier = new ActionIdentifier(actualDatabase, referenceDatabase);
+        public Parilis(DatabaseDescription actualDatabase, DatabaseDescription referenceDatabase, ActionIdentifier actionIdentifier = null) {
+            this.actionIdentifier = actionIdentifier ?? new ActionIdentifier(actualDatabase, referenceDatabase);
             logger = new Logger();
         }
 

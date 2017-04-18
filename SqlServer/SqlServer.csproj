@@ -51,7 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\AllowsLengthAttribute.cs" />
-    <Compile Include="Cache.cs" />
     <Compile Include="Columns.cs" />
     <Compile Include="Constraints.cs" />
     <Compile Include="Enums\Keyword.cs" />

@@ -58,6 +58,11 @@ namespace Tests.SqlServer {
             }
         }
 
+        public void CreateFromFile(string scriptFilePath) {                       
+            var script = File.ReadAllText(scriptFilePath);
+            database.ExecuteNonQuery(script);
+        }
+
         internal Table FindTable(string schemaName, string tableName) {            
             return database.Tables[tableName, schemaName];
         }
@@ -91,6 +96,12 @@ namespace Tests.SqlServer {
             database.Create();
             new DatabaseOperations(database).CreateSchema(@"dbo");
             return database;            
+        }
+
+        public static void Drop(Server server, string databaseName) {
+            var exists = server?.Databases[databaseName] != null;
+            if(exists)
+                server.KillDatabase(databaseName);
         }
     }
 }

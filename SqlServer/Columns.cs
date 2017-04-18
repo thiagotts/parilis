@@ -54,7 +54,7 @@ namespace SqlServer {
             if (table == null) throw new TableNotFoundException();
             if (table.Columns.Count == 1) throw new SingleColumnException();
 
-            if (!table.Columns.Any(c => c.Name.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
+            if (!table.Columns.Any(col => col.Name.Equals(column.Name, StringComparison.InvariantCultureIgnoreCase)))
                 throw new ColumnNotFoundException();
 
             if (ColumnIsReferencedByAConstraint(column))
@@ -66,6 +66,7 @@ namespace SqlServer {
             var command = new SqlCommand(dropColumnCommandText);
 
             SqlServerDatabase.ExecuteNonQuery(command);
+
         }
 
         public void ChangeType(ColumnDescription column) {

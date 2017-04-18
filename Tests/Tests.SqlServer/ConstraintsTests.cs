@@ -736,8 +736,8 @@ namespace Tests.SqlServer {
             Assert.AreEqual(1, uniqueKeys.Count);
             Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
             Assert.AreEqual(2, uniqueKeys.Single().Columns.Count);
-            Assert.AreEqual("description", uniqueKeys.Single().Columns.First().Name);
-            Assert.AreEqual("description2", uniqueKeys.Single().Columns.Last().Name);
+            Assert.IsTrue(uniqueKeys.Single().Columns.Any(col => col.Name == "description"));
+            Assert.IsTrue(uniqueKeys.Single().Columns.Any(col => col.Name == "description2"));
         }
 
         [Test]
@@ -836,8 +836,8 @@ namespace Tests.SqlServer {
             Assert.AreEqual(1, uniqueKeys.Count);
             Assert.AreEqual("UQ_TEST_description", uniqueKeys.Single().Name);
             Assert.AreEqual(2, uniqueKeys.Single().Columns.Count);
-            Assert.AreEqual("description", uniqueKeys.Single().Columns.First().Name);
-            Assert.AreEqual("description2", uniqueKeys.Single().Columns.Last().Name);
+            Assert.IsTrue(uniqueKeys.Single().Columns.Any(col => col.Name == "description"));
+            Assert.IsTrue(uniqueKeys.Single().Columns.Any(col => col.Name == "description2"));
         }
 
         [Test]

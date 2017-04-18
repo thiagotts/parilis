@@ -2,10 +2,8 @@
 using Core;
 using Core.Descriptions;
 using Core.Interfaces;
-using NSubstitute;
 using NUnit.Framework;
 using SqlServer;
-using Tests.Core;
 
 namespace Tests.SqlServer {
     [TestFixture]
@@ -31,51 +29,9 @@ namespace Tests.SqlServer {
             RemoveTable("TEST'TABLE");
             RemoveTable("TEST_TABLE", "testschema");
             RemoveTable("TEST'TABLE_2");
-            RemoveTable("TEST_TABLE");
+            RemoveTable("TEST_TABLE");            
         }
 
-        [Test]
-        public void WhenColumnDescriptionWereRetrievedFromDatabase_TheyShouldBeAddedInMemoryCache() {
-            var schema = "dbo";
-            var tableName = "TEST_TABLE";
-            Database.ExecuteNonQuery($@"CREATE TABLE [{schema}].[{tableName}](
-                [id] [bigint] IDENTITY(1,1) NOT NULL,
-                [description] [nvarchar](max) NULL,
-                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
-
-            var cacheMock = Substitute.For<Cache<ColumnDescription>>();
-
-            var database = new SqlServerDatabase(ConnectionInfo, cacheMock);
-
-            database.GetColumns(schema, tableName, "id", "description");
-            
-            cacheMock.Received(1).Add($"{schema}.{tableName}.id", Arg.Any<ColumnDescription>());
-            cacheMock.Received(1).Add($"{schema}.{tableName}.description", Arg.Any<ColumnDescription>());
-        }
-
-        [Test]
-        public void WhenColumnDescriptionAlreadyInCache_TheyShouldRetrievedFromThere() {
-            var schema = "dbo";
-            var tableName = "TEST_TABLE";
-            Database.ExecuteNonQuery($@"CREATE TABLE [{schema}].[{tableName}](
-                [id] [bigint] IDENTITY(1,1) NOT NULL,
-                [description] [nvarchar](max) NULL,
-                CONSTRAINT PK_dbo_TEST_TABLE_id PRIMARY KEY (id))");
-
-            var cacheMock = Substitute.ForPartsOf<Cache<ColumnDescription>>();
-            
-            var database = new SqlServerDatabase(ConnectionInfo, cacheMock);
-
-            database.GetColumns(schema, tableName, "id", "description");
-            database.GetColumns(schema, tableName, "id", "description");
-            
-            cacheMock.Received(1).Add($"{schema}.{tableName}.id", Arg.Any<ColumnDescription>());
-            cacheMock.Received(1).Add($"{schema}.{tableName}.description", Arg.Any<ColumnDescription>());
-            var cachedItems = cacheMock.GetKeysStartedWith($"{schema}.{tableName}");
-
-            Assert.That(cachedItems.First().Name, Is.EqualTo("id"));
-            Assert.That(cachedItems.Last().Name, Is.EqualTo("description"));
-        }
 
         [Test]
         public void WhenColumnIsIdentity_GetColumnMustReturnColumnWithIsIdentityPropertySetToTrue() {
