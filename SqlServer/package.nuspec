@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata>
+    <id>Parilis.SqlServer</id>
+    <version>0.4.0.0</version>
+    <title>Parilis.SqlServer</title>
+    <authors>Thiago Sá (https://github.com/thiagotts), Thiago Rebouças (https://github.com/reboucaslinhares), Samuel Pereira (https://github.com/samukce)</authors>
+    <owners>Thiago Sá (https://github.com/thiagotts)</owners>
+    <description>A class library that allows two different SQL Server databases to have identical structures.</description>
+    <licenseUrl>https://github.com/thiagotts/parilis/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/thiagotts/parilis</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
+    <releaseNotes>https://github.com/thiagotts/parilis/releases/tag/0.4</releaseNotes>
+    <copyright>Copyright © 2015-2017</copyright>
+    <tags>Database, SqlServer, Schema, Structure, Equality</tags>
+    <frameworkAssemblies />
+    <dependencies>
+      <group targetFramework="net45">
+        <dependency id="Castle.Core" version="3.3.3" />
+        <dependency id="Castle.Windsor" version="3.3.0" />
+        <dependency id="Parilis.Core" version="0.4.0" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="C:\Git\Github\parilis\SqlServer\bin\Release\Parilis.SqlServer.dll" target="lib\net45" />
+  </files>
+</package>
