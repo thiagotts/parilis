@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -7,11 +7,11 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 
 [assembly: AssemblyTitle("SqlServer")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A class library that allows make two different SQL Server databases equal.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Parilis")]
 [assembly: AssemblyProduct("SqlServer")]
-[assembly: AssemblyCopyright("Copyright ©  2015-2017")]
+[assembly: AssemblyCopyright("Copyright © 2015-2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
