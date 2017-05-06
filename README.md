@@ -6,6 +6,14 @@ Parilis compares two different databases and performs a series of actions to mak
 
 Parilis only understands structure. I **does not perform** any semantic modification. For instance, if you want to rename a column on a specific table, you must do so before running Parilis. Likewise, if you need to modify data before performing any modification, you also need to do it before running Parilis.
 
+## Instalation
+
+To install the Nuget package with the implementation for **MS SQL Server** databases and your dependencies, run the following command in the [Package Manager Console](https://docs.nuget.org/docs/start-here/using-the-package-manager-console) on **Visual Studio**:
+
+```
+PM> Install-Package Parilis.SqlServer
+```
+
 ## Usage
 
 First of all, create the description of each database:
@@ -45,10 +53,22 @@ You can be notified when a modification is made. To do this, before call the Run
 ```csharp
 var parilis = new Parilis(actualDescription, referenceDescription);
 parilis.OnProgress += (percentualProgress, message) => {
-   //percentualProgress is a double
    view.UpdateProgress(percentualProgress, message);
  };
 parilis.Run();
+```
+or 
+
+```csharp
+var parilis = new Parilis(actualDescription, referenceDescription);
+parilis.OnProgress += UpdateProgress;
+parilis.Run();
+
+[...]
+
+private void UpdateProgress(double percentualProgress, string message) {
+   view.UpdateProgress(percentualProgress, message);
+ };
 ```
 
 Finally, if your database has multiple schemas and you just want to make modifications to a single one, you can filter the database description like so:
