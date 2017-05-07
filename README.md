@@ -8,7 +8,7 @@ Parilis only understands structure. I **does not perform** any semantic modifica
 
 ## Instalation
 
-To install the Nuget package with the implementation for **MS SQL Server** databases and your dependencies, run the following command in the [Package Manager Console](https://docs.nuget.org/docs/start-here/using-the-package-manager-console) on **Visual Studio**:
+To install the Nuget package with the implementation for **MS SQL Server** databases and their dependencies, run the following command in the [Package Manager Console](https://docs.nuget.org/docs/start-here/using-the-package-manager-console) on **Visual Studio**:
 
 ```
 PM> Install-Package Parilis.SqlServer
